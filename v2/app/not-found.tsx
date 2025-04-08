@@ -5,7 +5,7 @@ import { motion } from "motion/react"
 import Link from "next/link"
 import { Button } from "ui"
 import { useRouter } from "next/navigation"
-import { Home, ArrowLeft, RefreshCw } from "lucide-react"
+import { Home, ArrowLeft } from "lucide-react"
 
 export default function NotFound() {
   const router = useRouter()
@@ -28,15 +28,15 @@ export default function NotFound() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-background to-slate-50 dark:from-background dark:to-slate-950 flex flex-col items-center justify-center">
-      <div className="max-w-3xl w-full text-center space-y-4 px-4">
+    <div className="fixed inset-0 bg-gradient-to-b from-background to-slate-50 dark:from-background dark:to-slate-950 flex items-center justify-center">
+      <div className="max-w-[90vw] w-full max-h-[90vh] text-center flex flex-col items-center justify-center gap-4">
         <motion.div
-          initial={{ opacity: 0, y: -50 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="space-y-2"
         >
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-7xl">
+          <h1 className="text-4xl font-extrabold tracking-tight lg:text-6xl">
             <motion.span
               initial={{ scale: 1 }}
               animate={isSpinning ? { rotate: 360 } : { rotate: 0 }}
@@ -81,31 +81,22 @@ export default function NotFound() {
               {getReaction()}
             </motion.p>
           )}
-
-          <motion.h2
-            className="text-2xl font-bold mt-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            Página não encontrada
-          </motion.h2>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="relative"
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="relative w-32 h-32"
         >
           <motion.div
-            className="w-64 h-64 mx-auto relative"
+            className="w-full h-full"
             animate={{
-              y: [0, -10, 0],
+              y: [0, -5, 0],
             }}
             transition={{
               repeat: Number.POSITIVE_INFINITY,
-              duration: 3,
+              duration: 2,
               ease: "easeInOut",
             }}
           >
@@ -135,25 +126,38 @@ export default function NotFound() {
                     : "M70,80 Q100,120 130,80 M70,120 Q85,140 100,120 Q115,140 130,120",
                 }}
                 transition={{ duration: 1, ease: "easeInOut" }}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
               />
             </svg>
           </motion.div>
         </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="text-muted-foreground max-w-md mx-auto text-sm"
-        >
-          A página que você está procurando não existe ou foi movida para outro endereço.
-        </motion.p>
+        <div className="space-y-2">
+          <motion.h2
+            className="text-xl font-bold"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            Página não encontrada
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-muted-foreground text-sm max-w-md mx-auto"
+          >
+            A página que você está procurando não existe ou foi movida.
+          </motion.p>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="flex flex-wrap gap-3 justify-center"
+          transition={{ delay: 0.6 }}
+          className="flex gap-3 justify-center"
         >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button onClick={() => router.back()} variant="outline" size="sm" className="gap-2">
@@ -174,7 +178,7 @@ export default function NotFound() {
       </div>
 
       <motion.div
-        className="absolute bottom-0 left-0 right-0 h-1"
+        className="absolute bottom-0 left-0 right-0 h-0.5"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 2, ease: "easeInOut" }}
