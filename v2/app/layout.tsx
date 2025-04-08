@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "comp"
 import { MouseMoveEffect } from "ui"
-import { Navbar } from "./_lib"
+import { Navbar } from "comp"
 import type React from "react"
 import './globals.css'
 

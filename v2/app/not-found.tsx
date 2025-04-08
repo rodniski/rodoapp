@@ -6,25 +6,16 @@ import Link from "next/link"
 import { Button } from "ui"
 import { useRouter } from "next/navigation"
 import { Home, ArrowLeft } from "lucide-react"
+import Image from "next/image"
 
 export default function NotFound() {
   const router = useRouter()
   const [isHovering, setIsHovering] = useState(false)
-  const [clickCount, setClickCount] = useState(0)
   const [isSpinning, setIsSpinning] = useState(false)
 
   const handleNumberClick = () => {
-    setClickCount((prev) => prev + 1)
     setIsSpinning(true)
     setTimeout(() => setIsSpinning(false), 500)
-  }
-
-  const getReaction = () => {
-    if (clickCount === 0) return null
-    if (clickCount < 3) return "Ops, página não encontrada!"
-    if (clickCount < 6) return "Continua procurando... mas não aqui!"
-    if (clickCount < 10) return "Talvez você deveria tentar outro lugar?"
-    return "Ok, você realmente gosta de clicar nesses números, né?"
   }
 
   return (
@@ -36,14 +27,15 @@ export default function NotFound() {
           transition={{ duration: 0.6 }}
           className="space-y-2"
         >
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-6xl">
+          <h1 className="text-4xl font-extrabold tracking-tight lg:text-[100pt] select-none relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 dark:from-slate-600 dark:via-slate-300 dark:to-slate-600 opacity-20 blur-xl" />
             <motion.span
               initial={{ scale: 1 }}
               animate={isSpinning ? { rotate: 360 } : { rotate: 0 }}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleNumberClick}
-              className="inline-block cursor-pointer"
+              className="inline-block cursor-pointer bg-gradient-to-r from-slate-400 via-slate-200 to-slate-300 dark:from-slate-600 dark:via-slate-400 dark:to-slate-500 bg-clip-text text-transparent"
               transition={{ duration: 0.5 }}
             >
               4
@@ -54,7 +46,7 @@ export default function NotFound() {
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleNumberClick}
-              className="inline-block cursor-pointer"
+              className="inline-block cursor-pointer bg-gradient-to-r from-slate-300 via-slate-100 to-slate-300 dark:from-slate-500 dark:via-slate-300 dark:to-slate-500 bg-clip-text text-transparent"
               transition={{ duration: 0.5 }}
             >
               0
@@ -65,29 +57,19 @@ export default function NotFound() {
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleNumberClick}
-              className="inline-block cursor-pointer"
+              className="inline-block cursor-pointer bg-gradient-to-r from-slate-300 via-slate-200 to-slate-400 dark:from-slate-500 dark:via-slate-400 dark:to-slate-600 bg-clip-text text-transparent"
               transition={{ duration: 0.5 }}
             >
               4
             </motion.span>
           </h1>
-
-          {getReaction() && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-sm text-muted-foreground italic"
-            >
-              {getReaction()}
-            </motion.p>
-          )}
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative w-32 h-32"
+          className="relative size-64"
         >
           <motion.div
             className="w-full h-full"
@@ -100,36 +82,7 @@ export default function NotFound() {
               ease: "easeInOut",
             }}
           >
-            <svg viewBox="0 0 200 200" className="w-full h-full">
-              <motion.circle
-                cx="100"
-                cy="100"
-                r="70"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 2, ease: "easeInOut" }}
-              />
-              <motion.path
-                d="M70,80 Q100,120 130,80 M70,120 Q85,140 100,120 Q115,140 130,120"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeLinecap="round"
-                initial={{ pathLength: 0 }}
-                animate={{
-                  pathLength: 1,
-                  d: isHovering
-                    ? "M70,70 Q100,110 130,70 M70,130 Q85,100 100,130 Q115,100 130,130"
-                    : "M70,80 Q100,120 130,80 M70,120 Q85,140 100,120 Q115,140 130,120",
-                }}
-                transition={{ duration: 1, ease: "easeInOut" }}
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
-              />
-            </svg>
+            <Image src="/logo/logo.svg" alt="Logo" width={200} height={200} className="w-full h-full object-contain dark:invert select-none"/>
           </motion.div>
         </motion.div>
 

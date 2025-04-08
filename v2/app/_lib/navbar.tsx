@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Button, ThemeSwitcher } from "ui";
+import { Button } from "ui";
+import { ThemeSwitcher } from "ui/theme-toggle";
 import { cn } from "utils";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
+import { NavSelects } from "@/_lib/components/theme/nav-selects";
 
 export function Navbar() {
   const [showThemeSwitcher, setShowThemeSwitcher] = useState(false);
@@ -51,35 +53,10 @@ export function Navbar() {
               RodoApp
             </span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link
-              href="/pre-notas"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                "text-foreground/60"
-              )}
-            >
-              Pre Notas
-            </Link>
-            <Link
-              href="/controle-de-saidas"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                "text-foreground/60"
-              )}
-            >
-              Controle de Saídas
-            </Link>
-            <Link
-              href="/documentacao"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                "text-foreground/60"
-              )}
-            >
-              Documentação
-            </Link>
-          </nav>
+          
+          <div className="hidden md:block ml-4">
+            <NavSelects />
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative flex items-center">
@@ -92,9 +69,9 @@ export function Navbar() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={theme || "light"}
-                  initial={{ x: 20, opacity: 0 }}
+                  initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -20, opacity: 0 }}
+                  exit={{ x: 20, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
                   {getThemeIcon()}
@@ -122,6 +99,11 @@ export function Navbar() {
           </Button>
         </div>
       </div>
+      
+      {/* Menu mobile */}
+      <div className="container mx-auto md:hidden px-4 pb-3">
+        <NavSelects />
+      </div>
     </header>
   );
-}
+} 
