@@ -27,9 +27,23 @@ export function NavMenu({ items }: NavMenuProps) {
       <NavigationMenuList>
         {items.map((item) => (
           <NavigationMenuItem key={item.href}>
-            <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
+            <NavigationMenuTrigger>
+              <motion.div 
+                className="flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                {item.label}
+              </motion.div>
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
-              <div className="w-[400px] flex gap-2 p-0">
+              <motion.div 
+                className="w-[400px] flex gap-2 p-0"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
                 <div className="p-3 bg-muted flex flex-col justify-end h-[200px] w-full overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -75,7 +89,7 @@ export function NavMenu({ items }: NavMenuProps) {
                     ))}
                   </ul>
                 </div>
-              </div>
+              </motion.div>
             </NavigationMenuContent>
           </NavigationMenuItem>
         ))}
@@ -93,7 +107,10 @@ interface ListItemProps {
 
 const ListItem = React.forwardRef<HTMLAnchorElement, ListItemProps>(
   ({ href, title, onMouseEnter, onMouseLeave }, ref) => (
-    <li>
+    <motion.li
+      whileHover={{ x: 5 }}
+      transition={{ duration: 0.2 }}
+    >
       <Link
         href={href}
         ref={ref}
@@ -103,7 +120,7 @@ const ListItem = React.forwardRef<HTMLAnchorElement, ListItemProps>(
       >
         {title}
       </Link>
-    </li>
+    </motion.li>
   )
 );
 
