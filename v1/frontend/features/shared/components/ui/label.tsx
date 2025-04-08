@@ -1,0 +1,40 @@
+/**
+ * @file label.tsx
+ * @module Label
+ * @description Componente estilizado para rótulos de formulários, utilizando Radix UI como base.
+ */
+
+"use client"
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "lib"
+
+// Define as variantes de estilo para o rótulo
+const labelVariants = cva(
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+)
+
+
+/**
+ * @component Label
+ * @description Componente de rótulo estilizado para campos de formulário.
+ * @param {React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>} props - Propriedades do rótulo Radix.
+ * @param {string} [props.className] - Classes CSS adicionais.
+ * @param {React.Ref} ref - Referência ao elemento raiz do rótulo.
+ * @returns {JSX.Element} Rótulo estilizado.
+ */
+const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
+    VariantProps<typeof labelVariants>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn(labelVariants(), className)}
+    {...props}
+  />
+))
+Label.displayName = LabelPrimitive.Root.displayName
+
+export { Label }
