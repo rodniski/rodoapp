@@ -11,13 +11,17 @@ import {
   NavigationMenuTrigger,
   Separator,
 } from "ui";
-import { NavGroup } from "./navigation";
+import { NavGroup, NavItem } from "./navigation";
+import { motion, AnimatePresence } from "motion/react";
 
 interface NavMenuProps {
   items: NavGroup[];
 }
 
 export function NavMenu({ items }: NavMenuProps) {
+  const [hoveredItem, setHoveredItem] = React.useState<NavItem | null>(null);
+  const [activeGroup, setActiveGroup] = React.useState<NavGroup | null>(null);
+
   return (
     <NavigationMenu>
       <NavigationMenuList>
@@ -26,11 +30,31 @@ export function NavMenu({ items }: NavMenuProps) {
             <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
             <NavigationMenuContent>
               <div className="w-[400px] flex gap-2 p-0">
-                <div className="p-3 bg-muted flex flex-col justify-end h-[200px] w-full">
-                  <h3 className="font-medium text-sm">{item.label}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {item.description}
-                  </p>
+                <div className="p-3 bg-muted flex flex-col justify-end h-[200px] w-full overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={hoveredItem ? hoveredItem.label : item.label}
+                      initial={{ x: 20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -20, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex flex-col"
+                    >
+                      <h3 className="font-medium text-sm">
+                        {hoveredItem ? hoveredItem.label : item.label}
+                      </h3>
+                      <motion.p
+                        key={hoveredItem ? hoveredItem.description : item.description}
+                        initial={{ y: 10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -10, opacity: 0 }}
+                        transition={{ duration: 0.2, delay: 0.1 }}
+                        className="text-xs text-muted-foreground mt-1"
+                      >
+                        {hoveredItem ? hoveredItem.description : item.description}
+                      </motion.p>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
                 <div className="flex flex-col w-full">
                   <ul className="py-1">
@@ -39,6 +63,14 @@ export function NavMenu({ items }: NavMenuProps) {
                         key={subItem.href}
                         href={subItem.href}
                         title={subItem.label}
+                        onMouseEnter={() => {
+                          setHoveredItem(subItem);
+                          setActiveGroup(item);
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredItem(null);
+                          setActiveGroup(null);
+                        }}
                       />
                     ))}
                   </ul>
@@ -55,14 +87,18 @@ export function NavMenu({ items }: NavMenuProps) {
 interface ListItemProps {
   href: string;
   title: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const ListItem = React.forwardRef<HTMLAnchorElement, ListItemProps>(
-  ({ href, title }, ref) => (
+  ({ href, title, onMouseEnter, onMouseLeave }, ref) => (
     <li>
       <Link
         href={href}
         ref={ref}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         className="flex w-full cursor-pointer select-none items-center rounded-sm px-3 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
       >
         {title}

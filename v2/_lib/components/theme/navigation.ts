@@ -4,6 +4,7 @@ export interface NavItem {
   label: string;
   href: string;
   icon?: any;
+  description?: string;
 }
 
 export interface ProjectItem extends NavItem {
@@ -27,14 +28,17 @@ export const prenotaItems: NavGroup = {
     {
       label: "Lista de Pre Notas",
       href: "/central/prenota",
+      description: "Visualize e gerencie todas as notas fiscais do sistema. Acompanhe o status, valores e documentos relacionados a cada nota."
     },
     {
       label: "Incluir Manualmente",
       href: "/central/prenota/manual",
+      description: "Cadastre novas notas fiscais manualmente. Insira dados como número, valor, fornecedor e outros detalhes importantes."
     },
     {
       label: "Incluir XML",
       href: "/central/prenota/xml",
+      description: "Importe notas fiscais automaticamente através de arquivos XML. Processe múltiplos documentos de uma vez."
     },
   ],
 };
@@ -48,14 +52,17 @@ export const controleSaidaItems: NavGroup = {
     {
       label: "Borracharia",
       href: "/central/portaria/lancamento",
+      description: "Registre e acompanhe o controle de saída de itens da borracharia. Mantenha um histórico detalhado das movimentações."
     },
     {
       label: "Conferência",
       href: "/central/portaria/conferencia",
+      description: "Realize a conferência de itens. Compare o estoque físico com o sistema e identifique divergências."
     },
     {
       label: "Histórico de Conferência",
       href: "/central/portaria/historico",
+      description: "Acesse o histórico completo de conferências realizadas. Visualize relatórios e análises de movimentação."
     },
   ],
 };
@@ -70,31 +77,37 @@ export const outrosItems: NavGroup = {
       label: "Documentação",
       href: "/central/documentacao",
       icon: GraduationCap,
+      description: "Acesse a documentação completa do sistema. Encontre guias, tutoriais e informações técnicas."
     },
     {
       label: "Assinatura de Email",
       href: "http://hesk.rodoparana.com.br/signaturegen",
       icon: MailCheck,
+      description: "Gere assinaturas de email personalizadas. Mantenha uma identidade visual consistente nas comunicações."
     },
     {
       label: "Suporte",
       href: "http://hesk.rodoparana.com.br",
       icon: LifeBuoy,
+      description: "Entre em contato com nossa equipe de suporte. Abra chamados e receba assistência técnica."
     },
     {
       label: "Intranet",
       href: "https://intranet.rodoparana.com.br/",
       icon: Usb,
+      description: "Acesse a intranet da empresa. Encontre informações internas e ferramentas corporativas."
     },
     {
       label: "Rodoparaná",
       href: "https://rodoparana.com.br",
       icon: Truck,
+      description: "Visite o site oficial da Rodoparaná. Conheça mais sobre a empresa e seus serviços."
     },
     {
       label: "Timber",
       href: "https://grupotimber.com.br",
       icon: TreePine,
+      description: "Acesse o site do Grupo Timber. Explore informações sobre a empresa e suas operações."
     },
   ],
 }; 
