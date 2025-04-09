@@ -21,14 +21,25 @@
     "paths": {
       "@/*": ["./*"],
       "@/": ["./"],
-      "comp/*": ["./_lib/components/*"],
-      "comp": ["./_lib/components"],
-      "ui/*": ["./_lib/components/ui/*"],
-      "ui": ["./_lib/components/ui"],
-      "utils/*": ["./_lib/utils/*"],
-      "utils": ["./_lib/utils"],
-      "hooks/*": ["./_lib/hooks/*"],
-      "hooks": ["./_lib/hooks"]
+      "comp/*": ["./_core/components/*"],
+      "comp": ["./_core/components"],
+      "ui/*": ["./_core/components/ui/*"],
+      "ui": ["./_core/components/ui"],
+      "utils/*": ["./_core/utils/*"],
+      "utils": ["./_core/utils"],
+      "hooks/*": ["./_core/hooks/*"],
+      "hooks": ["./_core/hooks"],
+      "stores/*": ["./_core/stores/*"],
+      "stores": ["./_core/stores"],
+      "server/*": ["./_core/server/*"],
+      "server": ["./_core/server"],
+
+
+      "@modules/*": ["./app/(modules)/*"],
+      "@login/*": ["./app/(modules)/login/*"],
+      "@prenota/*": ["./app/(modules)/prenota/_lib/*"],
+      "@controle/*": ["./app/(modules)/controle/_lib/*"],
+      "@documentacao/*": ["./app/(modules)/documentacao/_lib/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

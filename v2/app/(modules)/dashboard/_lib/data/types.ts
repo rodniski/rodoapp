@@ -3,6 +3,8 @@ export interface SubLink {
     title: string
     url: string
     description: string
+    icon?: string
+    requiresGroup?: string[]
 }
 
 export interface Card {
@@ -23,3 +25,8 @@ export interface Category {
 }
 
 
+export interface CarouselProps {
+    cards: Card[];
+    className?: string;
+    category?: string;
+}

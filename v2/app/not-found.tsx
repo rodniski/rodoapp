@@ -10,7 +10,6 @@ import Image from "next/image"
 
 export default function NotFound() {
   const router = useRouter()
-  const [isHovering, setIsHovering] = useState(false)
   const [isSpinning, setIsSpinning] = useState(false)
 
   const handleNumberClick = () => {

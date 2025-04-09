@@ -1,17 +1,28 @@
+"use client";
 import { ScrollArea } from "ui";
-import { Hero, Features, CTA, Footer } from "./_lib";
+import { Hero } from "./_lp"; // Hero carrega normalmente
+import dynamic from "next/dynamic"; // Importa a função dynamic
+import { Background } from "comp";
+
+// Carrega os outros componentes dinamicamente
+// O 'ssr: false' é opcional, mas comum para componentes abaixo da dobra
+// que podem ter interatividade apenas no cliente. Se precisar de SSR, remova-o.
+const Features = dynamic(() => import("./_lp").then((mod) => mod.Features), {
+  ssr: false,
+});
+const CTA = dynamic(() => import("./_lp").then((mod) => mod.CTA), {
+  ssr: false,
+});
+const Footer = dynamic(() => import("./_lp").then((mod) => mod.Footer), {
+  ssr: false,
+});
 
 export default function Home() {
   return (
     <ScrollArea className="relative min-h-screen">
-      {/* Background gradients */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
-        <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-blue-500/10 blur-[100px]" />
-        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-purple-500/10 blur-[100px]" />
-      </div>
+      <Background />
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex flex-col items-center justify-center w-screen">
         <Hero />
         <Features />
         <CTA />
