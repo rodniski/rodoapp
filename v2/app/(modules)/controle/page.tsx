@@ -9,7 +9,7 @@ export default function ControlePage() {
         <div className="absolute -bottom-36 -left-36 h-[500px] w-[500px] dark:bg-lime-500/20 bg-lime-500/10 rounded-full blur-[100px]" />
       </div>
       <div className="relative z-10 text-2xl font-bold flex items-center justify-center">
-        Controle de Saídas
+        Controle de Saídas - Historico
       </div>
     </div>
   );

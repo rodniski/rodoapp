@@ -4,7 +4,7 @@ import React from "react";
 import { Sheet, SheetContent, SheetTrigger, Timeline } from "ui";
 import { History } from "lucide-react";
 
-export function Historico() {
+export default function Historico() {
   return (
     <Sheet>
       {/* Parando a propagação do evento no trigger */}

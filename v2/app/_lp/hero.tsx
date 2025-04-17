@@ -12,7 +12,7 @@ export function Hero() {
           <br />
           Em um só Lugar
         </h1>
-        <p className="mx-auto max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+        <p className="mx-auto max-w-[45rem] leading-normal text-muted-foreground qhd:text-2xl sm:leading-8">
           Simplifique seu dia a dia com a plataforma centralizada do Grupo Rodoparaná. Gerencie prenotas, controle
           operações e acesse documentação essencial — tudo com apenas alguns cliques.
         </p>

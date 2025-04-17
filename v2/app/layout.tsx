@@ -1,7 +1,7 @@
 "use client"; // Mantido pois Providers pode precisar de client-side
 import { Outfit } from "next/font/google";
 import { Navbar, Providers } from "comp";
-import { Toaster } from "sonner";
+import { Toaster } from "ui";
 import type React from "react";
 import "./globals.css";
 

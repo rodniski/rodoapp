@@ -24,7 +24,10 @@ import {
   FormLabel,
   FormMessage,
   Checkbox,
+  PasswordInput,
 } from "ui";
+import { useCargaInicio } from "hooks";
+import { useAuthStore, useCargaInicioStore } from "stores";
 
 // Schema de validação com Zod
 const loginSchema = z.object({
@@ -50,6 +53,14 @@ export function LoginForm() {
   });
 
   const { isSubmitting } = form.formState;
+  const { fetchAndUpdateSession } = useAuthStore();
+  const { setFiliais } = useAuthStore();
+  const { setCargaInicioData } = useCargaInicioStore();
+  const {
+    data: cargaInicioData,
+    refetch: fetchCargaInicio,
+    isLoading: cargaInicioLoading,
+  } = useCargaInicio();
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -66,21 +77,38 @@ export function LoginForm() {
         toast.error("Credenciais inválidas", {
           description: "Verifique seu usuário e senha e tente novamente.",
         });
-      } else {
-        toast.success("Login realizado com sucesso!", {
-          description: "Redirecionando para o dashboard...",
-        });
-        router.push("/dashboard");
+        return;
       }
+
+      // Atualizar sessão no useAuthStore
+      await fetchAndUpdateSession();
+
+      // Buscar dados da API CargaInicio
+      const { data: cargaData } = await fetchCargaInicio();
+
+      if (cargaData) {
+        // Atualizar filiais na useAuthStore
+        setFiliais(cargaData.Filiais);
+
+        // Atualizar outros dados na useCargaInicioStore
+        setCargaInicioData({
+          unidadeMedida: cargaData.UnidadeMedida,
+          condicoes: cargaData.Condicoes,
+          centroCusto: cargaData.CentoCusto,
+        });
+      }
+
+      toast.success("Login realizado com sucesso!", {
+        description: "Redirecionando para o dashboard...",
+      });
+      router.push("/prenota");
     } catch (error) {
-      if (error) {
-        form.setError("root", {
-          message: "Ocorreu um erro durante a autenticação.",
-        });
-        toast.error("Erro na autenticação", {
-          description: "Algo deu errado. Tente novamente mais tarde.",
-        });
-      }
+      form.setError("root", {
+        message: "Ocorreu um erro durante a autenticação.",
+      });
+      toast.error("Erro na autenticação", {
+        description: "Algo deu errado. Tente novamente mais tarde.",
+      });
     }
   };
 
@@ -89,37 +117,41 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-xl"
     >
-      <Card className="shadow-lg w-md border-primary bg-background">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold text-foreground">
+      <Card className="shadow-lg border-primary bg-muted/20 backdrop-blur-lg p-5 lg:p-10 qhd:p-20 qhd:min-w-4xl qhd:min-h-[800px] flex flex-col justify-center">
+        <CardHeader className="text-center space-y-1 qhd:space-y-5 border-b">
+          <CardTitle className="text-2xl fhd:text-3xl qhd:text-[50pt] font-bold text-foreground">
             Bem-vindo ao RodoApp
           </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Faça login para acessar sua conta
+          <CardDescription className="text-base fhd:text-lg qhd:text-3xl text-muted-foreground">
+            Utilize seu acesso do Protheus para acessar sua conta
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col gap-4"
+            >
               <FormField
                 control={form.control}
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Usuário</FormLabel>
+                    <FormLabel className="text-sm sm:text-base lg:text-lg fhd:text-xl qhd:text-2xl">
+                      Usuário:
+                    </FormLabel>
                     <FormControl>
                       <Input
                         id="username"
-                        className="text-green-600"
+                        className="text-primary text-sm sm:text-base lg:text-lg fhd:text-xl qhd:text-2xl"
                         placeholder="nome.sobrenome"
                         autoComplete="username"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || cargaInicioLoading}
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm lg:text-base fhd:text-lg qhd:text-2xl" />
                   </FormItem>
                 )}
               />
@@ -128,19 +160,20 @@ export function LoginForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Senha</FormLabel>
+                    <FormLabel className="text-sm sm:text-base lg:text-lg fhd:text-xl qhd:text-2xl">
+                      Senha:
+                    </FormLabel>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         id="password"
-                        type="password"
                         placeholder="••••••••"
                         autoComplete="current-password"
-                        disabled={isSubmitting}
-                        className="text-green-600"
+                        disabled={isSubmitting || cargaInicioLoading}
+                        className="text-primary text-sm sm:text-base lg:text-lg fhd:text-xl qhd:text-2xl"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm lg:text-base fhd:text-lg qhd:text-xl" />
                   </FormItem>
                 )}
               />
@@ -154,28 +187,27 @@ export function LoginForm() {
                         id="remember-me"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || cargaInicioLoading}
                       />
                     </FormControl>
-                    <FormLabel className="text-sm text-muted-foreground">
+                    <FormLabel className="text-xs sm:text-sm lg:text-base fhd:text-lg qhd:text-xl text-muted-foreground">
                       Lembrar-me
                     </FormLabel>
                   </FormItem>
                 )}
               />
               {form.formState.errors.root && (
-                <div className="text-sm text-red-500 text-center">
+                <div className="text-xs sm:text-sm lg:text-base fhd:text-lg qhd:text-xl text-red-500 text-center">
                   {form.formState.errors.root.message}
                 </div>
               )}
               <Button
                 type="submit"
-                className="w-full"
-                size="lg"
-                disabled={isSubmitting}
+                className="w-full text-base fhd:text-lg qhd:text-xl"
+                disabled={isSubmitting || cargaInicioLoading}
               >
-                <LogIn className="w-4 h-4 mr-2" />
-                {isSubmitting ? "Entrando..." : "Entrar"}
+                <LogIn className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 fhd:w-7 fhd:h-7 qhd:size-6 mr-2" />
+                {isSubmitting || cargaInicioLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
           </Form>

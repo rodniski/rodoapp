@@ -8,7 +8,7 @@ interface TableData {
     data: TableData[]
   }
   
-  export function DataTableDocs({ data }: DataTableProps) {
+  export default function DataTableDocs({ data }: DataTableProps) {
     return (
       <div className="w-full overflow-x-auto">
         <table className="w-full  text-white">

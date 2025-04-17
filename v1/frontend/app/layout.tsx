@@ -1,11 +1,11 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {Nunito_Sans} from "next/font/google";
+import {Nunito_Sans} from "@next/font/google";
 import {QueryProvider} from "lib";
 import {ThemeProvider} from "components/theme/theme-provider";
 import "./globals.css";
-import {Toaster} from "sonner";
+import {Toaster} from "ui";
 import {useAtom} from "jotai";
 import {tokenAtom} from "%/atoms";
 
@@ -14,7 +14,7 @@ const nunitoSans = Nunito_Sans({
     weight: ["400", "700"],
 });
 
-export function RootLayout({
+export default function RootLayout({
                                        children,
                                    }: {
     children: React.ReactNode;
@@ -53,7 +53,7 @@ export function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-            <Toaster closeButton richColors position="top-center" expand={true}/>
+            <Toaster closeButton richColors expand={true}/>
             <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
         </body>

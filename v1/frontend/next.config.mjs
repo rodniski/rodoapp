@@ -1,16 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     eslint: {
-        ignoreDuringBuilds: true,
+      ignoreDuringBuilds: true,
     },
     async rewrites() {
-        return [
-            {
-                source: "/filiais/:path*", // rota “interna”
-                destination: "http://localhost:8080/filiais/:path*", // rota real do Go
-            },
-        ];
+      return [
+        {
+          source: "/filiais/:path*",
+          destination: "http://localhost:8080/filiais/:path*",
+        },
+      ];
     },
-};
-
-export default nextConfig;
+  };
+  
+  export default nextConfig;

@@ -55,6 +55,8 @@ export function ComboboxMultiplo({
     const triggerRef = React.useRef<HTMLButtonElement | null>(null)
     const [showPing, setShowPing] = React.useState(false)
 
+    const isDisabled = items.length === 0 || disabled;
+
     // Efeito para mostrar o ping quando houver erro
     React.useEffect(() => {
         if (error) {
@@ -135,7 +137,7 @@ export function ComboboxMultiplo({
                         aria-expanded={open}
                         className={cn(
                             "w-full justify-between truncate",
-                            disabled && "text-muted-foreground",
+                            isDisabled && "text-muted-foreground",
                             error && "border-red-500",
                         )}
                         style={{
@@ -145,6 +147,7 @@ export function ComboboxMultiplo({
                             width: width,
                         }}
                         onClick={handleButtonClick}
+                        disabled={isDisabled}
                     >
                         {renderButtonContent()}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>

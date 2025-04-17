@@ -28,7 +28,7 @@ import {
 import { FornecedorCombobox } from "."; // Exemplo de Combobox de fornecedor
 import { DadosNf } from "#/incluir/components/comboboxes";
 
-export function ManualCabecalho() {
+export default function ManualCabecalho() {
   const [observacoes, setObservacoes] = useAtom(obsAtom);
 
   // Para as condições de pagamento

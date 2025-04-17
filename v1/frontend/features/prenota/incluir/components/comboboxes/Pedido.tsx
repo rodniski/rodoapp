@@ -65,11 +65,7 @@ export function ComboboxPedido({disabled, error, errorMessage, onClearError}: Co
                 }
             } else {
                 console.error("Fornecedor não encontrado na lista.")
-                toast({
-                    title: "Erro",
-                    description: "Fornecedor não encontrado.",
-                    variant: "destructive",
-                })
+                toast.error("Fornecedor não encontrado.");
             }
         } else {
             setLoja("")

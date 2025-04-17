@@ -41,6 +41,7 @@ export interface ProdutoPOST {
     TPFATO: string;
     CONV: number;
     ORIGEM: string;
+    RATEIOS?: Rateio[];
 }
 
 

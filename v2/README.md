@@ -1,87 +1,209 @@
-# RodoApp 🚛
+# 🚛 RodoApp
 
-## 📋 Sobre
-Hub de intranet desenvolvido para o Grupo Rodoparaná, integrando diversos módulos em uma única plataforma. O projeto serve como ponto central de acesso para todas as ferramentas internas do grupo, incluindo a empresa Grupo Timber.
+[![Next.js](https://img.shields.io/badge/Next.js-14-blue?logo=nextdotjs)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styled-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![Zustand](https://img.shields.io/badge/Zustand-Global%20State-orange?logo=react)](https://github.com/pmndrs/zustand)
+[![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow)](#)
 
-## 🏗️ Arquitetura
-O projeto é estruturado como um hub central que se conecta a diversos microfrontends independentes. Cada microfrontend é um projeto separado, mantendo a independência e facilitando a manutenção.
+> Hub corporativo completo para o **Grupo Rodoparaná** e **Grupo Timber**, integrando sistemas internos em uma única plataforma moderna, modular e escalável.
 
-### Estrutura de Comunicação
-- Proxy reverso para gerenciamento de requisições
-- Hospedagem unificada em servidor único
-- Portas distintas para cada microfrontend
-- Stack tecnológica consistente entre todos os módulos
+---
 
-## 🛠️ Stack Tecnológica
-- **Frontend:** React
-- **Estilização:** 
-  - Tailwind CSS
-  - Shadcn UI
-  - Aceternity UI
-  - Dice UI
-- **Autenticação:** 
-  - Next Auth
-- **Analytics:** PostHog (futuro)
-- **API:** tRPC
-- **Framework:** Next.js
-- **Linguagem:** TypeScript
-- **Banco de Dados:** 
-  - MSSQL (Protheus - módulo Prenota)
-- **ORM:** Prisma (módulo Prenota)
-- **Hospedagem:** Oracle Server (Ubuntu)
-- **Gerenciamento de Estado:** Zustand (preferido)
-- **Gerenciador de Pacotes:** pnpm
+## 📖 Visão Geral
 
-## 📦 Módulos
+O **RodoApp** é uma intranet modular que centraliza ferramentas internas da organização, como o controle de pré-notas, documentação de processos e gestão de pneus, oferecendo **acesso unificado**, **autenticação integrada** e uma experiência de uso fluida e responsiva.
 
-### 1. Hub (Em Desenvolvimento)
-- Ponto central de acesso
-- Landing Page em `/app`
-- Header responsivo
-- Navegação entre módulos
+---
 
-### 2. Prenotas
-- Cadastro de pré-documentos de entrada do Protheus
-- Integração com MSSQL do Protheus
-- Requer atualizações futuras
+## 🧱 Arquitetura
 
-### 3. Controle de Saída
-- Gerenciamento de saída de pneus
-- Exclusivo para Rodoparaná
-- Sistema de vendas integrado
+```bash
+📁 /
+├── _core/                
+│   ├── components/        # Componentes globais (UI, layout, aceternity, theme, etc.)
+│   ├── hooks/             # Hooks reutilizáveis globais
+│   ├── stores/            # Zustand stores compartilhadas
+│   ├── types/             # Tipagens globais
+│   └── utils/             # Funções utilitárias
 
-### 4. Documentação
-- Processos da empresa
-- Acesso livre (sem autenticação)
-- Base de conhecimento
+├── app/
+│   ├── (modules)          # Módulos independentes (microfrontends)
+│   │   ├── controle
+│   │   │   ├── _lib
+│   │   │   │   ├── api
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── components
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── stores
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── types
+│   │   │   │       └── index.ts
+│   │   │   └── page.tsx
+
+│   │   ├── prenota
+│   │   │   ├── _lib
+│   │   │   │   ├── api
+│   │   │   │   ├── components
+│   │   │   │   ├── stores
+│   │   │   │   ├── types
+│   │   │   │   └── hooks
+│   │   │   └── page.tsx
+
+│   │   ├── documentacao
+│   │   │   ├── _lib
+│   │   │   │   ├── api
+│   │   │   │   ├── components
+│   │   │   │   ├── stores
+│   │   │   │   └── types
+│   │   │   └── page.tsx
+
+│   │   └── login
+│   │       ├── _lib
+│   │       │   ├── api
+│   │       │   ├── components
+│   │       │   ├── types
+│   │       │   └── index.ts
+│   │       └── page.tsx
+
+│   ├── _lp/               # Landing page institucional
+│   ├── api/              # API Routes (Next.js App Router)
+│   └── layout.tsx        # Layout raiz da aplicação
+```
+
+> 📦 Cada módulo dentro de `(modules)` contém sua própria pasta `_lib`, isolando:
+> - `api/`: chamadas específicas do domínio
+> - `components/`: componentes locais
+> - `stores/`: Zustand stores locais
+> - `types/`: tipagens internas
+> - `hooks/`: (quando necessário) lógica reutilizável
+>
+> Isso promove **organização por contexto**, facilita manutenção e garante independência entre os domínios.
+
+
+---
+
+## 📦 Organização de Módulos
+
+| Módulo   | Caminho                      | Descrição                                     |
+|----------|------------------------------|-----------------------------------------------|
+| Hub      | `/app`                       | Landing page e navegação entre módulos        |
+| Login    | `/app/(modules)/login`       | Tela de login integrada ao TOTVS              |
+| Dashboard| `/app/(modules)/dashboard`   | Dashboard de navegação entre módulos          |
+| Prenotas | `/app/(modules)/prenota`     | Gestão de pré-notas integradas ao Protheus    |
+| Controle | `/app/(modules)/controle`    | Gerenciamento de saída (ex: pneus)            |
+| Controle | `/app/(modules)/documentacao`| Documentação completa de processos da empresa |
+
+---
+
+## ⚙️ Stack Tecnológica
+
+| Camada         | Tecnologias                                                                 |
+|----------------|------------------------------------------------------------------------------|
+| 🖥️ Frontend    | Next.js, React, TypeScript                                                  |
+| 🎨 Estilo      | TailwindCSS, Shadcn UI, Aceternity UI                                       |
+| 🔐 Auth        | NextAuth + API do TOTVS Protheus                                            |
+| 💾 Banco       | MSSQL (Protheus)                                                            |
+| 🔗 ORM         | Prisma (modular, usado no Prenota)                                          |
+| 🌐 API         | REST (com tRPC em estudo)                                                   |
+| 📊 Analytics   | PostHog (em planejamento)                                                   |
+| ☁️ Deploy      | Oracle Server (Ubuntu)                                                      |
+| 📦 Pacotes     | Gerenciados com `pnpm`                                                      |
+| 🔁 Estado      | Zustand para gerenciamento global                                           |
+
+---
+
+## 📂 Estrutura de Imports (`paths`)
+
+```json
+"paths": {
+  "@/*": ["./*"],
+  "@/": ["./"],
+
+  "comp/*": ["./_core/components/*"],
+  "comp": ["./_core/components"],
+
+  "ui/*": ["./_core/components/ui/*"],
+  "ui": ["./_core/components/ui"],
+
+  "utils/*": ["./_core/utils/*"],
+  "utils": ["./_core/utils"],
+
+  "hooks/*": ["./_core/hooks/*"],
+  "hooks": ["./_core/hooks"],
+
+  "stores/*": ["./_core/stores/*"],
+  "stores": ["./_core/stores"],
+
+  "server/*": ["./_core/server/*"],
+  "server": ["./_core/server"],
+
+  "types/*": ["./_core/types/*"],
+  "types": ["./_core/types"],
+
+  "@modules/*": ["./app/(modules)/*"],
+  "@login/*": ["./app/(modules)/login/*"],
+  "@prenota/*": ["./app/(modules)/prenota/_lib/*"],
+  "@controle/*": ["./app/(modules)/controle/_lib/*"],
+  "@documentacao/*": ["./app/(modules)/documentacao/_lib/*"]
+}
+```
+
+> 📁 A estrutura de imports é baseada em aliases definidos no `tsconfig.json`, permitindo imports curtos e legíveis.
+>
+> 📦 Cada pasta que representa um domínio ou grupo de funcionalidades possui um `index.ts` que reexporta os itens internos, permitindo importar diretamente da raiz da pasta.
+>
+> Exemplo de uso:
+>
+> ```ts
+> import { Button } from "ui";
+> import { useMobile } from "hooks";
+> import { columns } from "@prenota/components";
+> ```
+
+> ✅ Isso elimina a necessidade de navegar por caminhos profundos e facilita a manutenção e leitura do código.
+
+
+---
 
 ## 🔐 Autenticação
-- Integração com API TOTVS Protheus
-- Sessão compartilhada entre módulos
-- Identificação de grupo e filial
-- Documentação sem restrições de acesso
 
-## 📅 Roadmap de Desenvolvimento
-1. **Fase 1:** Hub (Atual)
-   - Estrutura base
-   - Componentes principais
-   - Navegação
+- Integração com a **API do TOTVS Protheus**
+- Sessão persistente entre todos os módulos
+- Identificação automática de grupo e filial
+- Documentação acessível sem autenticação
 
-2. **Fase 2:** Módulos Existentes
-   - Controle de Saída
-   - Documentação
+---
 
-3. **Fase 3:** Prenota
-   - Atualizações necessárias
-   - Integrações
+## 📅 Roadmap
+
+| Fase | Descrição                                  | Status           |
+|------|--------------------------------------------|------------------|
+| 1️⃣   | Implementação do Hub                      | ✅ Completo        |
+| 2️⃣   | Integração dos Módulos Existentes         | 🔜 Em breve        |
+| 3️⃣   | Expansão do Módulo Prenota                | ⏳ Desenvolvimento |
+
+---
 
 ## 🚀 Estado Atual
-- Header básico implementado
-- Landing Page em desenvolvimento
-- Componentes em fase de melhoria
-- Autenticação e funcionalidades avançadas pendentes
 
-## 📝 Notas
-- Cada microfrontend é um projeto independente
-- Stack tecnológica consistente entre módulos
-- Foco em manutenibilidade e escalabilidade
+- ✅ Header global implementado  
+- 🛠️ Layout base em produção  
+- 🧾 Módulo Prenota funcional com MSSQL  
+- 🔐 Autenticação integrada com NextAuth  
+- 📚 Documentação interna em progresso  
+
+---
+
+## 📝 Considerações
+
+- Estrutura baseada em **microfrontends**
+- Componentes e hooks compartilhados via `_core`
+- Autonomia por módulo com consistência de stack
+- Suporte planejado para multi-empresas e permissões
+
+---
+
+## 📎 Contato & Contribuições
+
+Este projeto é mantido por **Guilherme Rodniski Correia**.  

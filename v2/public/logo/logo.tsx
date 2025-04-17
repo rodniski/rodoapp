@@ -1,3 +1,4 @@
+"use client"
 import { cn } from "utils"; // Presumo que você esteja usando cn do shadcn para classes condicionais
 
 interface GlowingSVGProps {
@@ -7,7 +8,7 @@ interface GlowingSVGProps {
   height?: number | string; // Altura customizável
 }
 
-const GlowingSVG = ({
+const Logo = ({
   color = "var(--foreground)", // Cor padrão do tema
   className,
   width = 403,
@@ -55,4 +56,4 @@ const GlowingSVG = ({
   );
 };
 
-export default GlowingSVG;
+export default Logo;

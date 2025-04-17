@@ -10,7 +10,7 @@ interface AnimatedLinkProps {
     className?: string; // Classes CSS adicionais
 }
 
-export function AnimatedLink({
+export default function AnimatedLink({
                                          href,
                                          children,
                                          external = false,

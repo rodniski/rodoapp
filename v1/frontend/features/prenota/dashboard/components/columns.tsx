@@ -1,164 +1,206 @@
-// Ex: app/prenotas/columns.tsx
+// Exemplo de como definir as colunas com larguras específicas
+import type {ColumnDef} from "@tanstack/react-table"
+import {AnexoDownload, FilialHoverCard, PriorityBadge, VencimentoBadge} from "."
+import {Actions} from "./actions"
+import {StatusBadge} from "#/dashboard/components/datatable/status"
+import type {PreNota} from "#/dashboard/interfaces"
+import {formatCurrency} from "lib"
 
-"use client";
-
-import type {ColumnDef} from "@tanstack/react-table";
-
-// Componentes específicos de UI (ajuste os paths)
-import {FilialHoverCard, PriorityBadge, VencimentoBadge} from ".";
-import {Actions} from "./actions";
-import {StatusBadge} from "#/dashboard/components/datatable/status"; // Ajuste o path
-// Tipo de dados da tabela
-import type {PrenotaTableData} from "!/app/actions/prenotaActions"; // Ajuste o path
-// Helpers
-import {formatCurrency} from "lib";
-
-// Formata data YYYYMMDD -> DD/MM/YYYY para exibição
-const formatDateForCell = (dateString: string | undefined | null): string => {
-    if (!dateString || dateString.length !== 8 || !/^\d{8}$/.test(dateString)) {
-        return "-";
-    }
-    const year = dateString.substring(0, 4);
-    const month = dateString.substring(4, 6);
-    const day = dateString.substring(6, 8);
-    return `${day}/${month}/${year}`;
-};
-
-// Componente interno para célula de Nota Fiscal
+// Componentes de célula extraídos para melhorar a organização
 const NotaFiscalCell = ({doc, serie, dataEmissao}: { doc: string; serie: string; dataEmissao: string }) => (
     <div className="flex flex-col">
-        <span className={"text-xs uw:text-base"}>{`${doc || '-'} / ${serie || '-'}`}</span>
-        <span className="text-muted-foreground text-xs uw:text-base">
-            Emitido: {formatDateForCell(dataEmissao)}
-        </span>
+        <span className={"text-xs uw:text-base"}>{`${doc} - ${serie}`}</span>
+        <span className="text-muted-foreground text-xs uw:text-base">Emitido: {dataEmissao}</span>
     </div>
-);
+)
 
-
-// --- Definições das Colunas ---
-export const columns: ColumnDef<PrenotaTableData>[] = [
+export const columns: ColumnDef<PreNota>[] = [
     {
-        accessorKey: "f1_filial",
+        accessorKey: "F1Filial",
         header: "Filial",
         cell: ({row}) => (
-            // Exibe informações da filial e usuário via HoverCard
             <FilialHoverCard
-                filialNumero={row.original.f1_filial}
-                observation={row.original.f1_xobs}
-                username={row.original.usuario} // Exibe usuário extraído do F1_USERLGI
+                filialNumero={row.original.F1Filial}
+                observation={row.original.F1XObs}
+                username={row.original.AnexoPath}
             />
         ),
         filterFn: (row, id, value) => value.includes(row.getValue(id)),
         enableSorting: true,
-        meta: {width: "60px"}, // Largura fixa
+        meta: {
+            className: "whitespace-nowrap",
+            width: "60px", // Largura explícita
+        },
     },
     {
-        accessorKey: "f1_xtipo",
+        accessorKey: "F1XTipo",
         header: "Tipo",
         cell: ({row}) => (
             <div className="capitalize text-xs uw:text-base">
-                {row.getValue("f1_xtipo")}
-                {/* Usuário Protheus que incluiu */}
-                <div className="text-xs uw:text-base text-muted-foreground">{row.original.f1_xusrra}</div>
+                {row.getValue("F1XTipo")}
+                <div className="text-xs uw:text-base text-muted-foreground">{row.original.F1XUsrra}</div>
             </div>
         ),
-        // Filtro busca em Tipo e Usuário Protheus
         filterFn: (row, id, filterValue) => {
-            const tipo = row.getValue("f1_xtipo")?.toString().toLowerCase() || "";
-            const usuario = row.original.f1_xusrra?.toString().toLowerCase() || "";
-            const checkValue = (val: unknown) => {
-                const search = String(val).toLowerCase();
-                return tipo.includes(search) || usuario.includes(search);
+            const tipo = row.getValue("F1XTipo")?.toString().toLowerCase() || ""
+            const usuario = row.original.F1XUsrra?.toString().toLowerCase() || ""
+
+            if (Array.isArray(filterValue)) {
+                return filterValue.some((val) => {
+                    const search = val.toString().toLowerCase()
+                    return tipo.includes(search) || usuario.includes(search)
+                })
+            } else if (typeof filterValue === "string") {
+                const search = filterValue.toLowerCase()
+                return tipo.includes(search) || usuario.includes(search)
             }
-            return Array.isArray(filterValue) ? filterValue.some(checkValue) : checkValue(filterValue);
+            return false
         },
-        meta: {width: "120px"},
+        meta: {
+            className: "whitespace-nowrap",
+            width: "120px",
+        },
     },
     {
-        id: "documento", // ID customizado para coluna computada
+        accessorKey: "F1Doc",
         header: "Nota Fiscal",
         cell: ({row}) => (
-            <NotaFiscalCell
-                doc={row.original.f1_doc}
-                serie={row.original.f1_serie}
-                dataEmissao={row.original.f1_emissao}
-            />
+            <NotaFiscalCell doc={row.original.F1Doc} serie={row.original.F1Serie} dataEmissao={row.original.F1Emissao}/>
         ),
-        enableSorting: false, // Coluna computada não ordenável por padrão
-        meta: {width: "120px"},
+        meta: {
+            className: "whitespace-nowrap",
+            width: "120px",
+        },
     },
     {
-        accessorKey: "fornece", // Campo concatenado (Cod + Loja + Nome)
+        accessorKey: "Fornece",
         header: "Fornecedor",
-        cell: ({row}) => <span className={"text-xs uw:text-base truncate"}>{row.getValue("fornece")}</span>,
-        enableSorting: true,
-        meta: {width: "220px"},
+        cell: ({row}) => <span className={"text-xs uw:text-base"}>{row.getValue("Fornece")}</span>,
+        meta: {
+            className: "whitespace-nowrap",
+            width: "220px",
+        },
     },
     {
-        accessorKey: "f1_dtdigit_unix", // Ordena pelo timestamp UNIX para precisão
+        accessorKey: "F1DtDigit",
         header: "Inclusão",
         cell: ({row}) => (
-            // Exibe a data formatada (YYYYMMDD -> DD/MM/YYYY)
-            <span className={"text-xs uw:text-base"}>{formatDateForCell(row.original.f1_dtdigit)}</span>
+            <span className={"text-xs uw:text-base"}>{row.original.F1DtDigit}</span>
         ),
-        enableSorting: true,
-        meta: {width: "80px"},
+        sortingFn: (rowA, rowB, columnId) => {
+            const dateA = new Date(rowA.original.F1DtDigit.split('/').reverse().join('-'));
+            const dateB = new Date(rowB.original.F1DtDigit.split('/').reverse().join('-'));
+            return dateA.getTime() - dateB.getTime();
+        },
+        meta: {
+            className: "whitespace-nowrap",
+            width: "80px",
+        },
     },
     {
-        accessorKey: "vencimento", // Data YYYYMMDD
+        accessorKey: "Vencimento",
         header: "Vencimento",
         cell: ({row}) => (
-            // Componente VencimentoBadge deve tratar o formato YYYYMMDD
-            <VencimentoBadge vencimento={row.original.vencimento}/>
+            <div>
+                <VencimentoBadge vencimento={row.original.Vencimento}/>
+            </div>
         ),
-        enableSorting: true, // Ordenação de string YYYYMMDD funciona
-        meta: {width: "90px"},
+        sortingFn: (rowA, rowB, columnId) => {
+            const dateA = new Date(rowA.original.Vencimento.split('/').reverse().join('-'));
+            const dateB = new Date(rowB.original.Vencimento.split('/').reverse().join('-'));
+            return dateA.getTime() - dateB.getTime();
+        },
+        meta:
+            {
+                className: "whitespace-nowrap",
+                width:
+                    "90px",
+            }
+        ,
     },
     {
-        accessorKey: "f1_valbrut", // Campo numérico
+        accessorKey: "F1ValBrut",
         header: "Valor (R$)",
         cell: ({row}) => (
-            // Formata e alinha o valor à direita
-            <span className="text-xs uw:text-base text-right block">{formatCurrency(row.getValue("f1_valbrut"))}</span>
+            <span className="text-xs uw:text-base">
+                {formatCurrency(row.getValue("F1ValBrut"))}
+            </span>
         ),
-        enableSorting: true,
-        meta: {className: "text-right", width: "100px"}, // Alinhamento via classe
-    },
-    {
-        accessorKey: "f1_xprior",
-        header: "Prioridade",
-        cell: ({row}) => <PriorityBadge priority={row.original.f1_xprior}/>,
-        filterFn: (row, id, value) => value.includes(row.getValue(id)), // Filtro simples de inclusão
-        enableSorting: true,
-        meta: {width: "90px"},
-    },
-    {
-        id: "derivedStatus",
-        header: "Status",
-        cell: ({row}) => (
-            // Passa o objeto prenota completo para o StatusBadge
-            <StatusBadge prenota={row.original}/>
-        ),
-        // Ordenação e filtragem baseadas em status derivado são mais complexas
-        // É mais simples desabilitá-las ou filtrar/ordenar pelos campos originais (f1_status, f1_xrev)
-        // se necessário, usando a configuração da tabela ou filtros externos.
-        enableSorting: false,
-        enableFiltering: false,
+        sortingFn: "basic",
         meta: {
-            className: "text-center", // Centraliza conteúdo da célula se necessário
-            width: "60px", // Mantém largura
+            className: "whitespace-nowrap",
+            width: "100px",
         },
     },
-    // Coluna de Anexo foi removida pois 'AnexoPath' não existe nos dados do Redis.
+    {
+        accessorKey: "F1XPrior",
+        header:
+            "Prioridade",
+        cell:
+            ({row}) => <PriorityBadge priority={row.original.F1XPrior}/>,
+        filterFn:
+            (row, id, value) => value.includes(row.getValue(id)),
+        meta:
+            {
+                className: "whitespace-nowrap",
+                width:
+                    "90px",
+            }
+        ,
+    }
+    ,
+    {
+        accessorKey: "F1Status",
+        header:
+            "Status",
+        cell:
+            ({row}) => <StatusBadge status={row.getValue("F1Status")}/>,
+        filterFn:
+            (row, id, filterValue) => {
+                const status = row.getValue(id)?.toString() || "";
+                return Array.isArray(filterValue) ? filterValue.includes(status) : false;
+            },
+        meta:
+            {
+                className: "whitespace-nowrap",
+                width:
+                    "60px",
+            }
+        ,
+    }
+    ,
+    {
+        accessorKey: "Anexo",
+        header:
+            "Anexos",
+        cell:
+            ({row}) => (
+                <AnexoDownload AnexoPath={row.original.AnexoPath}/>
+            ),
+        meta:
+            {
+                className: "whitespace-nowrap",
+                width:
+                    "60px",
+            }
+        ,
+    }
+    ,
     {
         id: "actions",
-        cell: ({row}) => {
-            // Passa o objeto PrenotaTableData completo para o componente Actions
-            // Garanta que o componente Actions aceite este tipo.
-            return <Actions preNota={row.original}/>
-        },
-        meta: {width: "50px"}, // Largura fixa para ações
-        enableSorting: false,
-        enableHiding: false,
-    },
-];
+        cell:
+            ({row}) => {
+                const nota = row.original
+                return <Actions preNota={nota}/>
+            },
+        meta:
+            {
+                className: "w-[80px]",
+                width:
+                    "50px",
+            }
+        ,
+    }
+    ,
+]
+

@@ -8,6 +8,7 @@ import { Badge } from "ui";
 import { GlowingEffect } from "comp/aceternity";
 import { CardIcon } from ".";
 import { useGroupPermissions } from "hooks";
+import React from "react";
 
 interface DashboardCardProps {
   card: Card;
@@ -20,6 +21,7 @@ const linkVariants = {
   hidden: { opacity: 0, x: 10 },
   visible: { opacity: 1, x: 0 },
 };
+
 const descVariants = {
   hidden: { opacity: 0, x: -20 },
   visible: { opacity: 1, x: 0 },
@@ -42,27 +44,31 @@ export function DashboardCard({
     }
   };
 
-  // Checa se existe um subLink ativo (hover). Se sim, pega o ícone dele; se não, pega o ícone principal do card
+  // Se houver subLink ativo, utiliza o ícone dele; senão, o ícone principal do card.
   const currentIcon = activeSubLink
-    ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.icon?.toLowerCase?.() ||
-      card.icon?.toLowerCase?.()
+    ? card.subLinks
+        ?.find((sl) => sl.id === activeSubLink)
+        ?.icon?.toLowerCase?.() || card.icon?.toLowerCase?.()
     : card.icon?.toLowerCase?.();
 
-  // Filtra sublinks de acordo com a permissão
+  // Filtra os subLinks conforme as permissões.
   const visibleSubLinks = card.subLinks?.filter((subLink) => {
     if (isAdmin) return true;
-    if (!subLink.requiresGroup || subLink.requiresGroup.length === 0) return true;
+    if (!subLink.requiresGroup || subLink.requiresGroup.length === 0)
+      return true;
     return hasAnyGroup(subLink.requiresGroup);
   });
 
   return (
     <div
-      className="w-[450px] flex flex-col items-stretch transition-all duration-300 cursor-pointer bg-background"
+      className="w-full 
+                 max-w-[450px] sm:max-w-[450px] md:max-w-[600px] fhd:max-w-[900px] qhd:max-w-[800px] 
+                 transition-all duration-300 cursor-pointer bg-background flex flex-col flex-1"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleCardClick}
     >
-      <div className="relative flex flex-col flex-grow p-2 border rounded-md shadow-lg bg-card">
+      <div className="relative flex flex-col flex-grow p-2 border rounded-md shadow-lg bg-card h-full">
         <GlowingEffect
           blur={0}
           borderWidth={2}
@@ -73,34 +79,46 @@ export function DashboardCard({
           inactiveZone={0.01}
         />
 
-        <div className="flex flex-col items-start justify-start gap-3 w-full relative h-full  overflow-hidden rounded-md border-0.75 p-4 dark:shadow-[0px_0px_27px_0px_#2D2D2D]">
+        <div className="flex flex-col items-start justify-start gap-3 w-full relative h-full lg:min-h-[180px] fhd:min-h-[220px] qhd:min-h-[300px] overflow-hidden rounded-md border p-4 qhd:p-8 dark:shadow-[0px_0px_27px_0px_#2D2D2D] flex-1">
           <div className="flex items-center justify-between w-full">
-            <div className={"flex gap-3 justify-start items-start"}>
-              {/* Ícone principal (ou subLink) */}
-              <CardIcon icon={currentIcon} />
-              <h3 className="mt-2 text-base font-semibold fhd:text-xl">
+            <div className="flex flex-col gap-1 items-start">
+              {(() => {
+                const activeIcon = activeSubLink
+                  ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.icon
+                  : card.icon;
+
+                return (
+                  activeIcon && (
+                    <div className="flex items-center justify-center text-primary aspect-square">
+                      {React.createElement(activeIcon, {
+                        className: "size-6 sm:size-8 text-primary",
+                      })}
+                    </div>
+                  )
+                );
+              })()}
+              <h3 className="font-medium text-base sm:text-lg lg:text-xl fhd:text-2xl qhd:text-3xl text-start">
                 {card.title}
               </h3>
             </div>
             {card.external && (
-              <ExternalLink className="ml-2 h-3 w-3 sm:h-3.5 md:h-4 sm:w-3.5 md:w-4 text-muted-foreground" />
+              <ExternalLink className="ml-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 fhd:h-4 fhd:w-4 qhd:h-5 qhd:w-5 text-muted-foreground" />
             )}
           </div>
 
-          {/* Listagem dos subLinks, exibida somente se existir subLinks e permissões */}
           {hasSubLinks && visibleSubLinks && (
             <motion.div
               variants={linkVariants}
               initial="hidden"
               animate={isActive ? "visible" : "hidden"}
               transition={{ duration: 0.2 }}
-              className="flex justify-center gap-1 flex-wrap"
+              className="flex flex-wrap justify-center gap-1"
             >
               {visibleSubLinks.map((subLink) => (
                 <Badge
                   key={subLink.id}
                   variant="secondary"
-                  className="flex justify-end fhd:text-base text-end shadow hover:border-primary"
+                  className="flex justify-end text-[0.65rem] sm:text-[0.65rem] lg:text-xs fhd:text-base qhd:text-2xl shadow hover:border-primary"
                   onMouseEnter={() => setActiveSubLink(subLink.id)}
                   onMouseLeave={() => setActiveSubLink(null)}
                   onClick={(e) => {
@@ -114,17 +132,17 @@ export function DashboardCard({
             </motion.div>
           )}
 
-          {/* Descrição dinâmica: muda caso exista um subLink hoverado */}
           <motion.div
             variants={descVariants}
             initial="hidden"
             animate={isActive ? "visible" : "hidden"}
             transition={{ duration: 0.2 }}
-            className="mt-auto pt-2 sm:pt-3"
+            className="mt-auto pt-2 sm:pt-2 md:pt-3"
           >
-            <p className="text-xs fhd:text-base text-muted-foreground">
+            <p className="text-[0.65rem] lg:text-sm fhd:text-base qhd:text-2enxl text-muted-foreground">
               {activeSubLink
-                ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.description
+                ? card.subLinks?.find((sl) => sl.id === activeSubLink)
+                    ?.description
                 : card.description}
             </p>
           </motion.div>

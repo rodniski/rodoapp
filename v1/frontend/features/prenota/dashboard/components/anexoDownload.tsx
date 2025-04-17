@@ -76,4 +76,4 @@ const AnexoDownload: React.FC<AnexoDownloadProps> = ({AnexoPath}) => {
     );
 };
 
-export default AnexoDownload;
+export {AnexoDownload};

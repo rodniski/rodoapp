@@ -1,31 +1,33 @@
-import { create } from "zustand";
-import { signOut, getSession } from "next-auth/react"; // Import Session type if needed
+// app/(modules)/prenota/_lib/stores/authStore.ts
+import { create } from 'zustand';
+import { signOut, getSession } from 'next-auth/react';
+import type { Filial } from 'types';
 
-// Tipo User para a store Zustand - alinhado com sua Session + campos custom
 type User = {
-  id?: string;           // Vem da authorize -> session
-  name?: string | null;    // Vem da authorize -> session
-  email?: string | null;   // Vem da DefaultSession (pode ser null)
-  // image?: string | null; // Vem da DefaultSession (provavelmente null aqui)
-  username?: string;     // Adicionado via callbacks -> session
-  grupo?: string;        // Gerenciado apenas pela store
-  filial?: string;       // Gerenciado apenas pela store
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  username?: string;
+  grupo?: string;
 };
 
 type AuthStore = {
   user: User | null;
+  filiais: Filial[];
   isAuthenticated: boolean;
   isLoading: boolean;
-  setUser: (user: User | null) => void; // Mantido por flexibilidade
+  setUser: (user: User | null) => void;
   fetchAndUpdateSession: () => Promise<void>;
   logout: () => Promise<void>;
-  setGrupoFilial: (grupo: string, filial: string) => void;
+  setGrupo: (grupo: string) => void;
+  setFiliais: (filiais: Filial[]) => void;
 };
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
+  filiais: [],
   isAuthenticated: false,
-  isLoading: true, // Inicia carregando
+  isLoading: true,
 
   setUser: (user) => {
     set({ user, isAuthenticated: !!user, isLoading: false });
@@ -34,47 +36,43 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   fetchAndUpdateSession: async () => {
     if (!get().isLoading) set({ isLoading: true });
     try {
-      const session = await getSession(); // Pega sessão NextAuth
+      const session = await getSession();
       if (session?.user) {
-        const currentUserInStore = get().user; // Pega usuário atual da store
-        // Mapeia dados da session para o tipo User da store
+        const currentUserInStore = get().user;
         const userData: User = {
-          // Campos da Session NextAuth
-          id: (session.user as any).id ?? undefined, // Pegar id (ajuste se seu tipo for diferente)
+          id: (session.user as any).id ?? undefined,
           name: session.user.name,
           email: session.user.email,
-          username: session.user.username, // Deve existir baseado na sua config!
-
-          // Campos gerenciados pela store - manter valor atual se existir
+          username: session.user.username,
           grupo: currentUserInStore?.grupo,
-          filial: currentUserInStore?.filial,
         };
         set({ user: userData, isAuthenticated: true, isLoading: false });
       } else {
-        // Sem sessão, limpa o estado
         set({ user: null, isAuthenticated: false, isLoading: false });
       }
     } catch (error) {
-      console.error("Erro ao buscar sessão:", error);
+      console.error('Erro ao buscar sessão:', error);
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
 
   logout: async () => {
-    set({ user: null, isAuthenticated: false, isLoading: false }); // Limpa estado local
-    await signOut({ redirect: false }); // Chama signOut do NextAuth
-    // Limpeza opcional de localStorage/sessionStorage
+    set({ user: null, filiais: [], isAuthenticated: false, isLoading: false });
+    await signOut({ redirect: false });
     localStorage.clear();
     sessionStorage.clear();
-    // Considerar redirecionamento para /login aqui ou no componente
   },
 
-  setGrupoFilial: (grupo, filial) => {
+  setGrupo: (grupo) => {
     set((state) => {
-      if (state.user) { // Só atualiza se user não for null
-        return { user: { ...state.user, grupo, filial } };
+      if (state.user) {
+        return { user: { ...state.user, grupo } };
       }
-      return {}; // Não faz nada se não houver usuário
+      return {};
     });
+  },
+
+  setFiliais: (filiais) => {
+    set({ filiais });
   },
 }));

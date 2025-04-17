@@ -1,239 +1,318 @@
 "use client";
 
-import React, {useEffect, useRef, useState} from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  DragEvent,
+  ChangeEvent,
+  MouseEvent,
+} from "react";
 import {
-    Button,
-    DropdownMenuItem,
-    Input,
-    Sheet,
-    SheetContent,
-    SheetTrigger,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Button,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  Input,
+  ScrollArea,
+  Card,
 } from "ui";
-import {Paperclip, Save, Trash2, Upload} from "lucide-react";
-import {useAtom} from "jotai";
-import {toast} from "sonner";
-import {anexosAtom, arquivosAtom, arquivosUploadAtom,} from "#/incluir/atoms";
+import { Paperclip, Save, Upload, X } from "lucide-react";
+import { useAtom, useAtomValue } from "jotai";
+import { toast } from "sonner";
+import {
+  anexosAtom,
+  arquivosAtom,
+  arquivosUploadAtom,
+} from "#/incluir/atoms";
+import type { MenuProps } from "./rateio";
+import { ShadowNoneIcon } from "@radix-ui/react-icons";
 
 interface FileInput {
-    seq: string;
-    file: File | null;
-    description: string;
+  seq: string;
+  file: File | null;
+  description: string;
+  previewUrl?: string;
+  invalid?: boolean;
 }
 
-export function AnexosStored() {
-    const [fileInputs, setFileInputs] = useState<FileInput[]>([
-        {seq: "001", file: null, description: ""},
+export default function AnexosStored({ open, onOpenChange }: MenuProps) {
+  const anexos = useAtomValue(anexosAtom);
+  const [, setAnexos] = useAtom(anexosAtom);
+  const [, setAnexosHub] = useAtom(arquivosAtom);
+  const [, setAnexosUpload] = useAtom(arquivosUploadAtom);
+  const [fileInputs, setFileInputs] = useState<FileInput[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      const mapped = anexos.map((a) => ({
+        seq: a.seq,
+        file: a.file,
+        description: a.desc,
+        previewUrl: a.file.type.startsWith("image/")
+          ? URL.createObjectURL(a.file)
+          : undefined,
+        invalid: false,
+      }));
+
+      setFileInputs([
+        ...mapped,
+        {
+          seq: nextSeq(mapped),
+          file: null,
+          description: "",
+          previewUrl: undefined,
+          invalid: false,
+        },
+      ]);
+    }
+  }, [open, anexos]);
+
+  const nextSeq = (inputs: FileInput[] = fileInputs): string => {
+    const currentSeqs = inputs.map((input) => Number(input.seq) || 0);
+    const maxSeq = currentSeqs.length > 0 ? Math.max(...currentSeqs) : 0;
+    return String(maxSeq + 1).padStart(3, "0");
+  };
+
+  const isDuplicate = (file: File) =>
+    fileInputs.some((input) => input.file?.name === file.name);
+
+  const handleSelectFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => addFile(file));
+    e.target.value = "";
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    Array.from(e.dataTransfer.files).forEach((file) => addFile(file));
+  };
+
+  const addFile = (file: File) => {
+    if (isDuplicate(file)) {
+      toast.warning(`O arquivo "${file.name}" já foi adicionado.`);
+      return;
+    }
+
+    const previewUrl = file.type.startsWith("image/")
+      ? URL.createObjectURL(file)
+      : undefined;
+
+    setFileInputs((prev) => [
+      ...prev,
+      {
+        seq: nextSeq(prev),
+        file,
+        description: "",
+        previewUrl,
+        invalid: false,
+      },
     ]);
-    const [isSheetOpen, setIsSheetOpen] = useState(false);
-    const [anexosHub, setAnexosHub] = useAtom(arquivosAtom);
-    const [, setAnexosAtom] = useAtom(anexosAtom);
-    const [, setAnexosUpload] = useAtom(arquivosUploadAtom);
-    const fileInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  };
 
-    // Ao abrir o modal, carrega os dados do hub para popular os inputs (somente descrição)
-    useEffect(() => {
-        if (isSheetOpen) {
-            const currentFiles = anexosHub.map((anexo, index) => ({
-                seq: String(index + 1).padStart(3, "0"),
-                file: null,
-                description: anexo.desc,
-            }));
-            if (currentFiles.length === 0) {
-                setFileInputs([{seq: "001", file: null, description: ""}]);
-            } else {
-                setFileInputs([...currentFiles, {seq: "", file: null, description: ""}]);
-            }
-        }
-    }, [isSheetOpen, anexosHub]);
+  const handleRemoveFile = (index: number, evt?: MouseEvent) => {
+    evt?.stopPropagation();
+    setFileInputs((prev) => prev.filter((_, i) => i !== index));
+  };
 
-    const handleDescriptionChange = (index: number, description: string) => {
-        const newFileInputs = [...fileInputs];
-        newFileInputs[index].description = description;
-        setFileInputs(newFileInputs);
-    };
-
-    const handleFileChange = (index: number, file: File | null) => {
-        if (!file) return;
-        if (isDuplicateFile(file, index)) {
-            toast.warning(`O arquivo "${file.name}" já foi anexado.`);
-            if (fileInputRefs.current[index]) {
-                fileInputRefs.current[index]!.value = "";
-            }
-            return;
-        }
-        const newFileInputs = [...fileInputs];
-        newFileInputs[index].file = file;
-        setFileInputs(newFileInputs);
-        // Se a última linha foi preenchida, adiciona uma nova linha vazia
-        if (index === newFileInputs.length - 1) {
-            addEmptyRow();
-        }
-    };
-
-    const handleRemoveFile = (index: number) => {
-        setFileInputs((prev) => prev.filter((_, i) => i !== index));
-        setAnexosHub((prev) => prev.filter((_, i) => i !== index));
-        setAnexosUpload((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    const isDuplicateFile = (file: File, currentIndex: number) => {
-        return fileInputs.some(
-            (input, index) =>
-                index !== currentIndex && input.file?.name === file.name
-        );
-    };
-
-    const nextSeq = (): string => {
-        const currentSeqs = fileInputs.map((input) => Number(input.seq) || 0);
-        const maxSeq = currentSeqs.length > 0 ? Math.max(...currentSeqs) : 0;
-        return String(maxSeq + 1).padStart(3, "0");
-    };
-
-    const addEmptyRow = () => {
-        setFileInputs((prev) => [...prev, {seq: nextSeq(), file: null, description: ""}]);
-    };
-
-    const isValidInput = (input: FileInput) => {
-        return input.file && input.description.trim() !== "";
-    };
-
-    const handleSave = () => {
-        const validInputs = fileInputs.filter(isValidInput);
-        if (validInputs.length === 0) {
-            toast.warning("Nenhum arquivo válido para salvar.");
-            return;
-        }
-        // Aqui, "rec" deve vir do processo de envio da prenota; usamos um placeholder
-        const rec = "12345";
-
-        // Dados para o Hub: sem o objeto File
-        const anexosParaHub = validInputs.map((input, index) => ({
-            seq: String(index + 1).padStart(3, "0"),
-            arq: input.file!.name,
-            desc: input.description,
-        }));
-
-        // Dados para Upload: com o objeto File e rec como doc
-        const anexosParaUpload = validInputs.map((input, index) => ({
-            seq: String(index + 1).padStart(3, "0"),
-            file: input.file!, // garante que não é nulo
-            doc: rec,
-        }));
-
-        // Dados completos para o post ao servidor
-        const anexosCompleto = validInputs.map((input, index) => ({
-            seq: String(index + 1).padStart(3, "0"),
-            file: input.file!,
-            doc: rec,
-            arq: input.file!.name,
-            desc: input.description,
-        }));
-
-        // Atualiza os três átomos
-        setAnexosHub(anexosParaHub);
-        setAnexosUpload(anexosParaUpload);
-        setAnexosAtom(anexosCompleto);
-
-        toast.success("Anexos salvos com sucesso!");
-        // Atualiza a lista de inputs: mantém os já salvos (com descrição) e adiciona uma nova linha vazia
-        setFileInputs([
-            ...anexosParaHub.map((a) => ({seq: a.seq, file: null, description: a.desc})),
-            {seq: "", file: null, description: ""},
-        ]);
-    };
-
-    const triggerFileInput = (index: number) => {
-        fileInputRefs.current[index]?.click();
-    };
-
-    return (
-        <Sheet>
-            <SheetTrigger>
-                <DropdownMenuItem
-                    className={"hover:font-semibold group hover:border hover:shadow border-muted-foreground justify-between h-full flex"}>
-                    <Paperclip className="group-hover:text-muted-foreground w-5 h-5"/>
-                    <span className={"group-hover:text-muted-foreground"}>
-                    Anexos
-                    </span>
-                </DropdownMenuItem>
-            </SheetTrigger>
-            <SheetContent side="top" className="w-full">
-                <h2 className="w-full text-center mb-10">Anexos</h2>
-                <div className="flex flex-col gap-4 justify-center items-center">
-                    <div className="w-1/2 border rounded-lg border-muted-foreground shadow">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="bg-muted-foreground text-muted-foreground">
-                                    <TableHead>Arquivo</TableHead>
-                                    <TableHead>Descrição</TableHead>
-                                    <TableHead className="text-end">Ações</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {fileInputs.map((input, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>
-                                            <input
-                                                type="file"
-                                                accept="*"
-                                                ref={(el) => {
-                                                    fileInputRefs.current[index] = el;
-                                                }}
-                                                onChange={(e) =>
-                                                    handleFileChange(index, e.target.files?.[0] || null)
-                                                }
-                                                className="hidden"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                className="w-full text-left font-normal"
-                                                onClick={() => triggerFileInput(index)}
-                                            >
-                                                <Upload className="w-4 h-4 mr-2"/>
-                                                {input.file ? input.file.name : "Selecionar arquivo..."}
-                                            </Button>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Input
-                                                placeholder="Descrição"
-                                                value={input.description}
-                                                onChange={(e) =>
-                                                    handleDescriptionChange(index, e.target.value)
-                                                }
-                                                className="w-full"
-                                            />
-                                        </TableCell>
-                                        <TableCell className="flex justify-end">
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => handleRemoveFile(index)}
-                                            >
-                                                <Trash2 className="w-5 h-5"/>
-                                                Excluir
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                    <Button
-                        className="flex justify-center items-center text-white font-semibold bg-lime-500 hover:bg-lime-600"
-                        onClick={handleSave}
-                    >
-                        <Save className="w-5 h-5 flex-shrink-0"/>
-                        <span>Salvar</span>
-                    </Button>
-                </div>
-            </SheetContent>
-        </Sheet>
+  const handleDescriptionChange = (index: number, description: string) => {
+    setFileInputs((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, description, invalid: false } : item
+      )
     );
+  };
+
+  const handleSave = () => {
+    const errors: string[] = [];
+  
+    const validInputs = fileInputs.filter((input) => {
+      if (!input.file) return false;
+      if (!input.description.trim()) {
+        errors.push(input.file.name);
+        return false;
+      }
+      return true;
+    });
+  
+    if (errors.length > 0) {
+      errors.forEach((name) =>
+        toast.warning(`O arquivo "${name}" está sem descrição.`)
+      );
+      setFileInputs((prev) =>
+        prev.map((item) =>
+          item.file && errors.includes(item.file.name)
+            ? { ...item, invalid: true }
+            : { ...item, invalid: false }
+        )
+      );
+      return;
+    }
+  
+    const rec = "12345";
+  
+    const novosParaHub = validInputs.map((input, index) => ({
+      seq: String(index + 1).padStart(3, "0"),
+      arq: input.file!.name,
+      desc: input.description,
+    }));
+  
+    const novosParaUpload = validInputs.map((input, index) => ({
+      seq: String(index + 1).padStart(3, "0"),
+      file: input.file!,
+      doc: rec,
+    }));
+  
+    const novosCompletos = validInputs.map((input, index) => ({
+      seq: String(index + 1).padStart(3, "0"),
+      file: input.file!,
+      doc: rec,
+      arq: input.file!.name,
+      desc: input.description,
+    }));
+  
+    // 🧼 Limpa os átomos e regrava com apenas os válidos
+    setAnexosHub(novosParaHub);
+    setAnexosUpload(novosParaUpload);
+    setAnexos(novosCompletos);
+  
+    toast.success("Todos os anexos válidos foram salvos!");
+  
+    setFileInputs([
+      ...validInputs.map((input, i) => ({
+        ...input,
+        seq: String(i + 1).padStart(3, "0"),
+        previewUrl: input.previewUrl,
+      })),
+      {
+        seq: nextSeq(),
+        file: null,
+        description: "",
+        previewUrl: undefined,
+        invalid: false,
+      },
+    ]);
+  };
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="min-w-[600px] p-6 flex flex-col gap-4">
+        <SheetHeader>
+          <SheetTitle className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Paperclip className="w-5 h-5" />
+            Anexos
+          </SheetTitle>
+        </SheetHeader>
+
+        <div
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onClick={handleSelectFileClick}
+          className="w-full h-1/4 rounded-md border-2 border-dashed border-primary/50 p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-primary/5 transition-colors"
+        >
+          <Upload className="w-6 h-6 mb-1 text-primary" />
+          <p className="text-sm font-medium text-foreground/70">
+            Arraste e solte aqui, ou clique para selecionar
+          </p>
+          <input
+            type="file"
+            multiple
+            accept="*"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
+
+        <Card className="flex-1 overflow-hidden bg-muted/40">
+          <ScrollArea className="h-full overflow-auto p-4">
+            {fileInputs.filter((f) => f.file).length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center h-full py-14">
+                <ShadowNoneIcon className="size-24 mb-1 text-muted" />
+                <span className="text-lg font-medium text-muted">
+                  Nenhum anexo adicionado.
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {fileInputs.map((input, index) => {
+                  if (!input.file) return null;
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-card p-3 rounded-md relative border"
+                    >
+                      <button
+                        onClick={(evt) => handleRemoveFile(index, evt)}
+                        className="absolute top-2 right-2 text-destructive hover:bg-destructive/20 p-1 rounded-full"
+                        title="Remover arquivo"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      <div className="size-20 bg-muted/50 flex items-center justify-center rounded-md overflow-hidden">
+                        {input.previewUrl ? (
+                          <img
+                            src={input.previewUrl}
+                            alt={input.file?.name}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <Paperclip className="size-9 text-muted-foreground" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 w-full flex gap-3 flex-col">
+                        <p className="text-sm font-semibold leading-tight">
+                          {input.file?.name}
+                        </p>
+                        <Input
+                          placeholder="Descrição"
+                          value={input.description}
+                          onChange={(e) =>
+                            handleDescriptionChange(index, e.target.value)
+                          }
+                          className={`mt-1 ${
+                            input.invalid
+                              ? "border-red-500 ring-1 ring-red-500"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
+        </Card>
+
+        <SheetFooter className="flex justify-between items-center w-full">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Fechar
+          </Button>
+          <Button
+            className="flex items-center gap-2 bg-lime-500 hover:bg-lime-600 text-white font-semibold"
+            onClick={handleSave}
+          >
+            <Save className="w-5 h-5 flex-shrink-0" />
+            <span>Salvar Anexos</span>
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
 }

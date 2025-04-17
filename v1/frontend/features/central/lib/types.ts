@@ -23,3 +23,8 @@ export interface Category {
 }
 
 
+export interface CarouselProps {
+    cards: Card[];
+    className?: string;
+    category?: string;
+}

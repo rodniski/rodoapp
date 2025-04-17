@@ -20,7 +20,7 @@ interface CardIconProps {
     icon: string
 }
 
-export function CardIcon({icon}: CardIconProps) {
+export default function CardIcon({icon}: CardIconProps) {
     const iconMap: Record<string, React.ReactNode> = {
         "book-open": <BookOpen className="size-4 fhd:size-6"/>,
         globe: <Globe className="size-4 fhd:size-6"/>,

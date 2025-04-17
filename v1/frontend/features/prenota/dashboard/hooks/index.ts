@@ -1,3 +1,3 @@
-export * from "./use-prenota"
+export * from "./usePreNotas"
 export * from "./useEditPrenota"
 export * from "./useTimeline"

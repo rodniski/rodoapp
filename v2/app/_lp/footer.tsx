@@ -45,8 +45,8 @@ export function Footer() {
     <footer className="border-t w-full px-14">
       <div className="container flex flex-col gap-8 py-8 md:flex-row md:py-12">
         <div className="flex-1 space-y-4">
-          <h2 className="font-bold">Grupo Rodoparaná</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-bold qhd:text-2xl">Grupo Rodoparaná</h2>
+          <p className="text-sm text-muted-foreground qhd:text-lg">
             Hub de intranet para acesso centralizado às ferramentas internas.
           </p>
         </div>
@@ -54,8 +54,8 @@ export function Footer() {
         <div className="grid flex-1 grid-cols-2 gap-6 sm:grid-cols-3">
           {footerData.map((section, index) => (
             <div key={index} className="space-y-4">
-              <h3 className="text-sm font-medium">{section.title}</h3>
-              <ul className="space-y-3 text-sm">
+              <h3 className="text-sm font-medium qhd:text-lg">{section.title}</h3>
+              <ul className="space-y-3 text-sm qhd:text-lg">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
                     <Link
@@ -76,7 +76,7 @@ export function Footer() {
       </div>
       
       <div className="container flex flex-col items-center justify-center gap-4 py-5 md:flex-row">
-        <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+        <p className="text-center text-sm leading-loose text-muted-foreground qhd:text-lg">
           &copy; {new Date().getFullYear()} RODOPARANA IMPLEMENTOS RODOVIARIOS.
           Todos os direitos reservados.
         </p>

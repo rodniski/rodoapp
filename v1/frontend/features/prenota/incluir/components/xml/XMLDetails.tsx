@@ -29,7 +29,7 @@ interface XMLDetailsProps {
     className?: string;
 }
 
-export function XMLDetails({className}: XMLDetailsProps) {
+export default function XMLDetails({className}: XMLDetailsProps) {
     const doc = useAtomValue(docAtom);
     const serie = useAtomValue(serieAtom);
     const condFin = useAtomValue(condFinAtom); // Código da condição

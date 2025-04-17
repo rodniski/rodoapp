@@ -33,7 +33,8 @@
       "stores": ["./_core/stores"],
       "server/*": ["./_core/server/*"],
       "server": ["./_core/server"],
-
+      "types/*": ["./_core/types/*"],
+      "types": ["./_core/types"],
 
       "@modules/*": ["./app/(modules)/*"],
       "@login/*": ["./app/(modules)/login/*"],

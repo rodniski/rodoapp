@@ -17,9 +17,10 @@ import {CheckCircle, Circle, Pickaxe} from "lucide-react";
 import {useAtomValue} from "jotai";
 import {anexosAtom, arquivosAtom, arquivosUploadAtom, hubAtom} from "#/incluir/atoms";
 import {HubAnexosTab, HubJsonTab, HubProgressTab} from ".";
+import { MenuProps } from "..";
 
 
-export function HubDevelopmentSheet() {
+export default function HubDevelopmentSheet({open, onOpenChange}: MenuProps) {
     const [expandedFields, setExpandedFields] = useState<string[]>([]);
     const hubData = useAtomValue(hubAtom) || {};
 
@@ -71,17 +72,8 @@ export function HubDevelopmentSheet() {
 
     return (
         <>
-            <Sheet>
-                <SheetTrigger>
-                    <DropdownMenuItem
-                        className={"hover:font-semibold group hover:border hover:shadow border-muted-foreground justify-between h-full flex"}>
-                        <Pickaxe className="w-5 h-5 group-hover:text-muted-foreground"/>
-                        <span className={"group-hover:text-muted-foreground"}>
-                            Progresso
-                        </span>
-                    </DropdownMenuItem>
-                </SheetTrigger>
-                <SheetContent className="w-[90vw] sm:w-[600px] flex flex-col gap-4 overflow-auto">
+            <Sheet open={open} onOpenChange={onOpenChange}>
+                <SheetContent className="min-w-[600px] flex flex-col gap-4 overflow-auto">
                     <SheetHeader>
                         <SheetTitle>Desenvolvimento do Hub</SheetTitle>
                     </SheetHeader>

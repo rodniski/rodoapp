@@ -44,6 +44,9 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  --breakpoint-lg: 60rem;
+  --breakpoint-fhd: 80rem;
+  --breakpoint-qhd: 140rem;
   @keyframes accordion-down {
     from {
       height: 0;
@@ -148,3 +151,5 @@
     -webkit-background-clip: text !important;
   }
 }
+
+

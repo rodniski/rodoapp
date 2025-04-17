@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -22,121 +18,42 @@
       }
     ],
     "paths": {
-
-      "!/*": [
-        "./*"
-      ],
-      "!": [
-        "./"
-      ],
-      "@/*": [
-        "./features/portaria/*"
-      ],
-      "@": [
-        "./features/portaria"
-      ],
-      "#/*": [
-        "./features/prenota/*"
-      ],
-      "#": [
-        "./features/prenota"
-      ],
-      "$/*": [
-        "./features/shared/*"
-      ],
-      "$": [
-        "./features/shared"
-      ],
-      "%/*": [
-        "./features/login/*"
-      ],
-      "%": [
-        "./features/login"
-      ],
-      "&/*": [
-        "./features/central/*"
-      ],
-      "&": [
-        "./features/central"
-      ],
-      "doc/*": [
-        "./features/documentacao/*"
-      ],
-      "doc": [
-        "./features/documentacao"
-      ],
-      "api/*": [
-        "./features/shared/api/*"
-      ],
-      "api": [
-        "./features/shared/api"
-      ],
-      "atoms/*": [
-        "./features/shared/atoms/*"
-      ],
-      "atoms": [
-        "./features/shared/atoms"
-      ],
-      "config/*": [
-        "./features/shared/config/*"
-      ],
-      "config": [
-        "./features/shared/config"
-      ],
-      "components/*": [
-        "./features/shared/components/*"
-      ],
-      "components": [
-        "./features/shared/components"
-      ],
-      "ui/*": [
-        "./features/shared/components/ui/*"
-      ],
-      "ui": [
-        "./features/shared/components/ui"
-      ],
-      "constants/*": [
-        "./features/shared/constants/*"
-      ],
-      "constants": [
-        "./features/shared/constants"
-      ],
-      "hooks/*": [
-        "./features/shared/hooks/*"
-      ],
-      "hooks": [
-        "./features/shared/hooks"
-      ],
-      "lib/*": [
-        "./features/shared/lib/*"
-      ],
-      "lib": [
-        "./features/shared/lib"
-      ],
-      "types/*": [
-        "./features/shared/types/*"
-      ],
-      "types": [
-        "./features/shared/types"
-      ],
-      "utils/*": [
-        "./features/shared/utils/*"
-      ],
-      "utils": [
-        "./features/shared/utils"
-      ]
-    },
-    "target": "ES2017"
+      "!/*": ["./features/assinatura/*"],
+      "!": ["./features/assinatura"],
+      "@/*": ["./features/portaria/*"],
+      "@": ["./features/portaria"],
+      "#/*": ["./features/prenota/*"],
+      "#": ["./features/prenota"],
+      "$/*": ["./features/shared/*"],
+      "$": ["./features/shared"],
+      "%/*": ["./features/login/*"],
+      "%": ["./features/login"],
+      "&/*": ["./features/central/*"],
+      "&": ["./features/central"],
+      "doc/*": ["./features/documentacao/*"],
+      "doc": ["./features/documentacao"],
+      "api/*": ["./features/shared/api/*"],
+      "api": ["./features/shared/api"],
+      "atoms/*": ["./features/shared/atoms/*"],
+      "atoms": ["./features/shared/atoms"],
+      "config/*": ["./features/shared/config/*"],
+      "config": ["./features/shared/config"],
+      "components/*": ["./features/shared/components/*"],
+      "components": ["./features/shared/components"],
+      "ui/*": ["./features/shared/components/ui/*"],
+      "ui": ["./features/shared/components/ui"],
+      "constants/*": ["./features/shared/constants/*"],
+      "constants": ["./features/shared/constants"],
+      "hooks/*": ["./features/shared/hooks/*"],
+      "hooks": ["./features/shared/hooks"],
+      "lib/*": ["./features/shared/lib/*"],
+      "lib": ["./features/shared/lib"],
+      "types/*": ["./features/shared/types/*"],
+      "types": ["./features/shared/types"],
+      "utils/*": ["./features/shared/utils/*"],
+      "utils": ["./features/shared/utils"]
+    }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "features/portaria/historico/components/columns.tsx",
-    "features/shared/components/ui/data-table/hooks/index.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "features/portaria/historico/components/columns.tsx", "features/shared/components/ui/data-table/hooks/index.ts"],
+  "exclude": ["node_modules"]
 }

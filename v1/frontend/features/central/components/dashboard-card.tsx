@@ -17,7 +17,7 @@ interface DashboardCardProps {
 const linkVariants = {hidden: {opacity: 0, x: 10}, visible: {opacity: 1, x: 0}};
 const descVariants = {hidden: {opacity: 0, x: -20}, visible: {opacity: 1, x: 0}};
 
-export function DashboardCard({card, isActive, onMouseEnter, onMouseLeave}: DashboardCardProps) {
+export default function DashboardCard({card, isActive, onMouseEnter, onMouseLeave}: DashboardCardProps) {
     const [activeSubLink, setActiveSubLink] = useState<string | null>(null);
     const hasSubLinks = card.subLinks && card.subLinks.length > 0;
 

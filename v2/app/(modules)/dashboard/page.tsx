@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 // Importa os DADOS estaticamente - Se for muito grande, considere buscar de API
-import { dashboardData } from "./_lib/data";
+import { dashboardData } from "./_lib/data/menu-items";
 import { useSession } from "next-auth/react";
 // Importa dynamic do Next.js para carregamento dinâmico
 import dynamic from "next/dynamic";
@@ -63,22 +63,14 @@ export default function DashboardPage() {
 
   // Renderiza o dashboard para usuários autenticados
   return (
-    <main className="w-full h-full flex flex-col overflow-y-auto p-4 md:p-8">
-      {" "}
-      {/* Padding ajustado */}
-      {/* Background gradients (mantidos) */}
+    <main className="w-full h-[calc(100vh-65px)] flex justify-center flex-col overflow-y-auto lg:px-5 fhd:px-20">
       <Background />
-      {/* Conteúdo principal do Dashboard */}
       <div className="z-10 space-y-8">
-        {" "}
-        {/* Adicionado espaçamento entre seções */}
         {dashboardData.map((category) => (
-          // Renderiza o componente Carrossel carregado dinamicamente
           <section
             key={category.id}
             aria-labelledby={`category-title-${category.id}`}
           >
-            {/* O componente Carousel aqui é a versão dinâmica */}
             <Carousel cards={category.cards} category={category.title} />
           </section>
         ))}
