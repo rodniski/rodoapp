@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DateRange, DayPicker } from "react-day-picker";
 
-import { cn } from "utils"
-import { buttonVariants } from "ui/button"
+import { cn } from "utils";
+import { buttonVariants } from "ui/button";
 
 function Calendar({
   className,
@@ -13,6 +13,17 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: React.ComponentProps<typeof DayPicker>) {
+  const dayPickerProps = props.mode === "range"
+    ? {
+        ...props,
+        selected: props.selected as DateRange,
+        mode: "range" as const,
+      }
+    : {
+        ...props,
+        selected: props.selected as Date,
+        mode: "single" as const,
+      }
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -31,7 +42,9 @@ function Calendar({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-x-1",
         head_row: "flex",
-        head_cell: "flex items-center justify-center w-9 text-[0.8rem] text-muted-foreground font-normal",
+        head_cell:
+          "flex items-center justify-center w-8 h-8 text-[0.8rem] text-muted-foreground font-normal",
+
         row: "flex w-full mt-2",
         cell: cn(
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md",
@@ -66,9 +79,9 @@ function Calendar({
           <ChevronRight className={cn("size-4", className)} {...props} />
         ),
       }}
-      {...props}
+      {...dayPickerProps}
     />
-  )
+  );
 }
 
-export { Calendar }
+export { Calendar };

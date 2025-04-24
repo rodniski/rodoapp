@@ -1,6 +1,5 @@
 // constants.ts
 
-import { useFiliaisStore } from "stores";
 import { CampoFiltro } from "../types";
 
 /**

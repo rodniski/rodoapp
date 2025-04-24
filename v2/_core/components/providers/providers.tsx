@@ -1,25 +1,23 @@
 import React from "react";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "./theme-provider";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "ui";
+import { Navbar } from "comp/theme";
 const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <NuqsAdapter>
-      <QueryClientProvider client={queryClient}>
-        <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </SessionProvider>
-      </QueryClientProvider>
-    </NuqsAdapter>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Toaster />
+        <Navbar />
+        {children}
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

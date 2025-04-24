@@ -1,10 +1,11 @@
+// @prenota/api/service.ts
 import { Params, PrenotaResponse, PrenotaRow } from "./types";
-import { PrismaClient } from "@prisma/client";
 import {
   buildFilterConditions,
   buildSortingClause,
   serializeBigInts,
 } from "./utils";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -16,7 +17,8 @@ export async function getPrenotas({
   sorting = [],
 }: Params): Promise<PrenotaResponse> {
   const filiaisClause = filials.map((f) => `'${f}'`).join(",");
-  const filtersClause = buildFilterConditions(filters);
+  // Comentamos ou removemos a geração da filtersClause para desativar os filtros
+  // const filtersClause = buildFilterConditions(filters);
   const sortClause = buildSortingClause(sorting, "main");
   const subquerySortClause = buildSortingClause(sorting, "subquery");
   const offset = (page - 1) * pageSize;
@@ -76,7 +78,6 @@ export async function getPrenotas({
         SF1.F1_DTDIGIT >= '20240601' AND
         SF1.F1_FILIAL IN (${filiaisClause}) AND
         (SF1.F1_XORI = 'rodoapp' OR SF4.F4_TRANFIL = '1')
-        ${filtersClause}
     ) AS paged
     WHERE RowNum > ${offset} AND RowNum <= ${offset + pageSize}
     ORDER BY RowNum;
@@ -170,7 +171,7 @@ export async function getPrenotas({
         SF1.F1_DTDIGIT >= '20240601' AND
         SF1.F1_FILIAL IN (${filiaisClause}) AND
         (SF1.F1_XORI = 'rodoapp' OR SF4.F4_TRANFIL = '1')
-        ${filtersClause}
+        
       GROUP BY SF1.R_E_C_N_O_
     ) AS count_query;
   `);

@@ -9,28 +9,28 @@ datasource db {
 
 // Tabela SF1010 (Cabeçalho de Entrada)
 model SF1010 {
-  R_E_C_N_O_  Int     @id @default(autoincrement()) // REC
-  F1_FILIAL   String  // F1_FILIAL
-  F1_DOC      String  // F1_DOC
-  F1_SERIE    String  // F1_SERIE
-  F1_STATUS   String? // F1_STATUS
-  F1_FORNECE  String  // Usado em joins com SA2010 e SD1010
-  F1_LOJA     String  // Usado em joins com SA2010 e SD1010
-  F1_EMISSAO  String? // F1_EMISSAO
-  F1_DTDIGIT  String? // F1_DTDIGIT
-  F1_XTIPO    String? // F1_XTIPO
-  F1_XPRIOR   String? // F1_XPRIOR
-  F1_XORI     String? // F1_XORI
-  F1_XUSRRA   String? // F1_XUSRRA
-  F1_XOBS     String? // F1_XOBS
-  F1_ZOBSREV  String? // F1_ZOBSREV
-  F1_XREV     String? // F1_XREV
-  F1_USERLGI  String? // F1_USERLGI (usado para extrair USUARIO)
-  D_E_L_E_T_  String? @default("") // Campo de deleção lógica
+  R_E_C_N_O_ Int     @id @default(autoincrement()) // REC
+  F1_FILIAL  String // F1_FILIAL
+  F1_DOC     String // F1_DOC
+  F1_SERIE   String // F1_SERIE
+  F1_STATUS  String? // F1_STATUS
+  F1_FORNECE String // Usado em joins com SA2010 e SD1010
+  F1_LOJA    String // Usado em joins com SA2010 e SD1010
+  F1_EMISSAO String? // F1_EMISSAO
+  F1_DTDIGIT String? // F1_DTDIGIT
+  F1_XTIPO   String? // F1_XTIPO
+  F1_XPRIOR  String? // F1_XPRIOR
+  F1_XORI    String? // F1_XORI
+  F1_XUSRRA  String? // F1_XUSRRA
+  F1_XOBS    String? // F1_XOBS
+  F1_ZOBSREV String? // F1_ZOBSREV
+  F1_XREV    String? // F1_XREV
+  F1_USERLGI String? // F1_USERLGI (usado para extrair USUARIO)
+  D_E_L_E_T_ String? @default("") // Campo de deleção lógica
 
   // Relacionamentos válidos
-  SD1         SD1010[] // Relação com itens (SD1010)
-  SA2         SA2010?  @relation(fields: [F1_FORNECE, F1_LOJA], references: [A2_COD, A2_LOJA]) // Fornecedor
+  SD1 SD1010[] // Relação com itens (SD1010)
+  SA2 SA2010?  @relation(fields: [F1_FORNECE, F1_LOJA], references: [A2_COD, A2_LOJA]) // Fornecedor
 
   // Índice único para suportar relação com SD1010
   @@unique([F1_FILIAL, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA])
@@ -38,58 +38,58 @@ model SF1010 {
 
 // Tabela SD1010 (Itens da Entrada)
 model SD1010 {
-  R_E_C_N_O_  Int     @id @default(autoincrement())
-  D1_FILIAL   String  // D1_FILIAL
-  D1_DOC      String  // D1_DOC
-  D1_SERIE    String  // D1_SERIE
-  D1_FORNECE  String  // D1_FORNECE
-  D1_LOJA     String  // D1_LOJA
-  D1_TOTAL    Float   // D1_TOTAL (somado como F1_VALBRUT)
-  D1_TES      String? // D1_TES (usado no join com SF4010)
-  D_E_L_E_T_  String? @default("") // Campo de deleção lógica
+  R_E_C_N_O_ Int     @id @default(autoincrement())
+  D1_FILIAL  String // D1_FILIAL
+  D1_DOC     String // D1_DOC
+  D1_SERIE   String // D1_SERIE
+  D1_FORNECE String // D1_FORNECE
+  D1_LOJA    String // D1_LOJA
+  D1_TOTAL   Float // D1_TOTAL (somado como F1_VALBRUT)
+  D1_TES     String? // D1_TES (usado no join com SF4010)
+  D_E_L_E_T_ String? @default("") // Campo de deleção lógica
 
   // Relacionamentos
-  SF1         SF1010?  @relation(fields: [D1_FILIAL, D1_DOC, D1_SERIE, D1_FORNECE, D1_LOJA], references: [F1_FILIAL, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA])
-  SF4         SF4010?  @relation(fields: [D1_TES], references: [F4_CODIGO])
+  SF1 SF1010? @relation(fields: [D1_FILIAL, D1_DOC, D1_SERIE, D1_FORNECE, D1_LOJA], references: [F1_FILIAL, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA])
+  SF4 SF4010? @relation(fields: [D1_TES], references: [F4_CODIGO])
 }
 
 // Tabela SF4010 (TES - Tipo de Entrada/Saída)
 model SF4010 {
-  F4_CODIGO   String  @id // F4_CODIGO
-  F4_TRANFIL  String? // F4_TRANFIL
-  D_E_L_E_T_  String? @default("") // Campo de deleção lógica
+  F4_CODIGO  String  @id // F4_CODIGO
+  F4_TRANFIL String? // F4_TRANFIL
+  D_E_L_E_T_ String? @default("") // Campo de deleção lógica
 
   // Relacionamentos
-  SD1         SD1010[] // Itens que usam este TES
+  SD1 SD1010[] // Itens que usam este TES
 }
 
 // Tabela SA2010 (Fornecedores)
 model SA2010 {
-  A2_COD      String  // A2_COD
-  A2_LOJA     String  // A2_LOJA
-  A2_NOME     String  // A2_NOME
-  D_E_L_E_T_  String? @default("") // Campo de deleção lógica
+  A2_COD      String
+  A2_LOJA     String
+  A2_NOME     String
+  A2_CGC      String?           // ← adicione esta linha
+  D_E_L_E_T_  String? @default("")
 
-  // Chave primária composta
   @@id([A2_COD, A2_LOJA])
 
-  // Relacionamentos
-  SF1         SF1010[] // Entradas associadas a este fornecedor
+  SF1         SF1010[]         // opcional: relação reversa
 }
+
 
 // Tabela Z10010 (Títulos)
 model Z10010 {
-  R_E_C_N_O_  Int     @id @default(autoincrement())
-  Z10_TIPO    String  // Z10_TIPO
-  Z10_CHAVE   String  // Z10_CHAVE (usado no join com SF1010 via query raw)
-  Z10_VENCTO  String? // Z10_VENCTO
-  D_E_L_E_T_  String? @default("") // Campo de deleção lógica
+  R_E_C_N_O_ Int     @id @default(autoincrement())
+  Z10_TIPO   String // Z10_TIPO
+  Z10_CHAVE  String // Z10_CHAVE (usado no join com SF1010 via query raw)
+  Z10_VENCTO String? // Z10_VENCTO
+  D_E_L_E_T_ String? @default("") // Campo de deleção lógica
 }
 
 // Tabela Z07010 (Observações)
 model Z07010 {
-  R_E_C_N_O_  Int     @id @default(autoincrement())
-  Z07_CHAVE   String  // Z07_CHAVE (usado no join com SF1010 via query raw)
-  Z07_DESC    String? // Z07_DESC
-  D_E_L_E_T_  String? @default("") // Campo de deleção lógica
+  R_E_C_N_O_ Int     @id @default(autoincrement())
+  Z07_CHAVE  String // Z07_CHAVE (usado no join com SF1010 via query raw)
+  Z07_DESC   String? // Z07_DESC
+  D_E_L_E_T_ String? @default("") // Campo de deleção lógica
 }

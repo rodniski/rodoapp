@@ -84,13 +84,12 @@ export const usePrenotas = (params: FetchParams) => {
     page = 1,
     pageSize = 10,
     filials,
-    filters = [],
     sorting = [],
   } = params;
 
   return useQuery({
-    queryKey: ["prenotas", page, pageSize, filials, filters, sorting],
+    queryKey: ["prenotas", page, pageSize, filials, sorting],
     queryFn: () =>
-      fetchPrenotas({ page, pageSize, filials, filters, sorting }),
+      fetchPrenotas({ page, pageSize, filials, sorting }),
   });
 };

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useFiliaisStore } from "stores";
+import { useAuthStore } from "@login/stores/auth-store";
 import { MultiSelect } from "ui";
+import { FilialAcesso } from "@/app/(modules)/login/_lib";
 
 type Option = {
   label: string;
@@ -15,16 +16,16 @@ type Props = {
 };
 
 const FiltroFilialSelect: React.FC<Props> = ({ values, setValues }) => {
-  const { filiais } = useFiliaisStore();
+  const { filiais } = useAuthStore();
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
     if (filiais?.length > 0) {
       const mapped = filiais
-        .filter((f) => f.numero && f.filial)
-        .map((f) => ({
-          label: `${f.numero} - ${f.filial}`,
-          value: f.numero,
+        .filter((f: FilialAcesso) => f.M0_CODFIL && f.M0_FILIAL)
+        .map((f: FilialAcesso) => ({
+          label: `${f.M0_CODFIL} - ${f.M0_FILIAL}`,
+          value: f.M0_CODFIL,
         }));
       setOptions(mapped);
     }

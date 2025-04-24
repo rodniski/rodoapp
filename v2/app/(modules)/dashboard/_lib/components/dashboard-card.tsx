@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { ExternalLink } from "lucide-react";
 import type { Card } from "../data";
 import { Badge } from "ui";
 import { GlowingEffect } from "comp/aceternity";
-import { CardIcon } from ".";
-import { useGroupPermissions } from "hooks";
-import React from "react";
+import { useAuth } from "@login/hooks"; // nosso hook de auth
 
 interface DashboardCardProps {
   card: Card;
@@ -34,9 +32,26 @@ export function DashboardCard({
   onMouseLeave,
 }: DashboardCardProps) {
   const [activeSubLink, setActiveSubLink] = useState<string | null>(null);
-  const hasSubLinks = card.subLinks && card.subLinks.length > 0;
 
-  const { hasAnyGroup, isAdmin } = useGroupPermissions();
+  // 1) Puxamos os grupos do usuário
+  const { grupos } = useAuth(); // GrupoFilial[]
+
+  // 2) Função que checa se qualquer code exigido está no array de grupos
+  function hasAnyGroup(requiredGroups: string[]) {
+    return requiredGroups.some((rg) =>
+      grupos.some((ug) => ug.Grupo === rg)
+    );
+  }
+
+  const hasSubLinks = !!card.subLinks?.length;
+
+  // 3) Aplica o filtro: se não exige grupo, ok; senão verifica hasAnyGroup
+  const visibleSubLinks = card.subLinks?.filter((sub) => {
+    if (!sub.requiresGroup || sub.requiresGroup.length === 0) {
+      return true;
+    }
+    return hasAnyGroup(sub.requiresGroup);
+  });
 
   const handleCardClick = () => {
     if (!hasSubLinks && card.url) {
@@ -44,26 +59,9 @@ export function DashboardCard({
     }
   };
 
-  // Se houver subLink ativo, utiliza o ícone dele; senão, o ícone principal do card.
-  const currentIcon = activeSubLink
-    ? card.subLinks
-        ?.find((sl) => sl.id === activeSubLink)
-        ?.icon?.toLowerCase?.() || card.icon?.toLowerCase?.()
-    : card.icon?.toLowerCase?.();
-
-  // Filtra os subLinks conforme as permissões.
-  const visibleSubLinks = card.subLinks?.filter((subLink) => {
-    if (isAdmin) return true;
-    if (!subLink.requiresGroup || subLink.requiresGroup.length === 0)
-      return true;
-    return hasAnyGroup(subLink.requiresGroup);
-  });
-
   return (
     <div
-      className="w-full 
-                 max-w-[450px] sm:max-w-[450px] md:max-w-[600px] fhd:max-w-[900px] qhd:max-w-[800px] 
-                 transition-all duration-300 cursor-pointer bg-background flex flex-col flex-1"
+      className="w-full max-w-[600px] transition-all duration-300 cursor-pointer bg-background flex flex-col"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleCardClick}
@@ -73,37 +71,34 @@ export function DashboardCard({
           blur={0}
           borderWidth={2}
           spread={60}
-          glow={true}
+          glow
           disabled={false}
           proximity={64}
           inactiveZone={0.01}
         />
 
-        <div className="flex flex-col items-start justify-start gap-3 w-full relative h-full lg:min-h-[180px] fhd:min-h-[220px] qhd:min-h-[300px] overflow-hidden rounded-md border p-4 qhd:p-8 dark:shadow-[0px_0px_27px_0px_#2D2D2D] flex-1">
+        <div className="flex flex-col items-start justify-start gap-3 w-full relative h-full overflow-hidden rounded-md border p-4">
           <div className="flex items-center justify-between w-full">
             <div className="flex flex-col gap-1 items-start">
+              {/* Ícone */}
               {(() => {
-                const activeIcon = activeSubLink
-                  ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.icon
+                const IconComponent = activeSubLink
+                  ? card.subLinks?.find((sl) => sl.id === activeSubLink)
+                      ?.icon
                   : card.icon;
-
                 return (
-                  activeIcon && (
-                    <div className="flex items-center justify-center text-primary aspect-square">
-                      {React.createElement(activeIcon, {
-                        className: "size-6 sm:size-8 text-primary",
-                      })}
+                  IconComponent && (
+                    <div className="text-primary size-8">
+                      <IconComponent className="size-8 text-primary" />
                     </div>
                   )
                 );
               })()}
-              <h3 className="font-medium text-base sm:text-lg lg:text-xl fhd:text-2xl qhd:text-3xl text-start">
-                {card.title}
-              </h3>
+
+              <h3 className="font-medium text-lg">{card.title}</h3>
             </div>
-            {card.external && (
-              <ExternalLink className="ml-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 fhd:h-4 fhd:w-4 qhd:h-5 qhd:w-5 text-muted-foreground" />
-            )}
+
+            {card.external && <ExternalLink className="size-4 text-muted-foreground" />}
           </div>
 
           {hasSubLinks && visibleSubLinks && (
@@ -112,21 +107,21 @@ export function DashboardCard({
               initial="hidden"
               animate={isActive ? "visible" : "hidden"}
               transition={{ duration: 0.2 }}
-              className="flex flex-wrap justify-center gap-1"
+              className="flex flex-wrap gap-2 mt-2"
             >
-              {visibleSubLinks.map((subLink) => (
+              {visibleSubLinks.map((sub) => (
                 <Badge
-                  key={subLink.id}
+                  key={sub.id}
                   variant="secondary"
-                  className="flex justify-end text-[0.65rem] sm:text-[0.65rem] lg:text-xs fhd:text-base qhd:text-2xl shadow hover:border-primary"
-                  onMouseEnter={() => setActiveSubLink(subLink.id)}
+                  className="text-xs hover:border-primary"
+                  onMouseEnter={() => setActiveSubLink(sub.id)}
                   onMouseLeave={() => setActiveSubLink(null)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(subLink.url, "_self");
+                    window.open(sub.url, sub.external ? "_blank" : "_self");
                   }}
                 >
-                  {subLink.title}
+                  {sub.title}
                 </Badge>
               ))}
             </motion.div>
@@ -137,12 +132,11 @@ export function DashboardCard({
             initial="hidden"
             animate={isActive ? "visible" : "hidden"}
             transition={{ duration: 0.2 }}
-            className="mt-auto pt-2 sm:pt-2 md:pt-3"
+            className="mt-auto pt-2"
           >
-            <p className="text-[0.65rem] lg:text-sm fhd:text-base qhd:text-2enxl text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {activeSubLink
-                ? card.subLinks?.find((sl) => sl.id === activeSubLink)
-                    ?.description
+                ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.description
                 : card.description}
             </p>
           </motion.div>

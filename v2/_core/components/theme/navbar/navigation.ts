@@ -13,11 +13,12 @@ import {
   TransformIcon,
   ZoomInIcon,
 } from "@radix-ui/react-icons";
-import { TreePine, TreePineIcon, Truck } from "lucide-react";
+import { TreePine, Truck } from "lucide-react";
 
 // Interfaces para itens e grupos hierárquicos
 
 export interface NavItem {
+  id: string;
   label: string;
   href: string;
   icon?: any;
@@ -33,6 +34,7 @@ export interface NavSubGroup {
 }
 
 export interface NavGroup {
+  id: string;
   label: string;
   icon?: any;
   description: string;
@@ -45,6 +47,7 @@ export const prenotaSubGroup: NavSubGroup = {
   title: "Pré Notas",
   items: [
     {
+      id: "prenota",
       label: "Lista de Pré Notas",
       href: "/prenota",
       icon: TableIcon,
@@ -52,6 +55,7 @@ export const prenotaSubGroup: NavSubGroup = {
         "Visualize e gerencie todas as notas fiscais do sistema. Acompanhe o status, valores e documentos relacionados a cada nota.",
     },
     {
+      id: "prenota-inclusao",
       label: "Incluir Nota",
       href: "/prenota/inclusao",
       icon: Pencil2Icon,
@@ -64,6 +68,7 @@ export const assinaturaSubGroup: NavSubGroup = {
   id: "assinatura",
   items: [
     {
+      id: "assinatura",
       label: "Assinatura de Email",
       href: "http://hesk.rodoparana.com.br/signaturegen",
       icon: TransformIcon,
@@ -79,6 +84,7 @@ export const controleSubGroup: NavSubGroup = {
   title: "Controle de Itens",
   items: [
     {
+      id: "controle-borracharia",
       label: "Borracharia",
       href: "/controle/borracharia",
       icon: ClipboardIcon,
@@ -87,6 +93,7 @@ export const controleSubGroup: NavSubGroup = {
       requiresGroup: ["000190"],
     },
     {
+      id: "controle-conferencia",
       label: "Conferência",
       href: "/controle/portaria",
       icon: ZoomInIcon,
@@ -95,6 +102,7 @@ export const controleSubGroup: NavSubGroup = {
       requiresGroup: ["000191"],
     },
     {
+      id: "controle-historico",
       label: "Histórico de Conferência",
       href: "/controle",
       icon: ArchiveIcon,
@@ -111,6 +119,7 @@ export const ambienteItems: NavSubGroup = {
   items: [
 
     {
+      id: "ambiente-intranet",
       label: "Intranet",
       href: "https://intranet.rodoparana.com.br/",
       icon: DesktopIcon,
@@ -118,6 +127,7 @@ export const ambienteItems: NavSubGroup = {
         "Acesse a intranet da empresa. Encontre informações internas e ferramentas corporativas.",
     },
     {
+      id: "ambiente-suporte",
       label: "Suporte",
       href: "http://hesk.rodoparana.com.br",
       icon: QuestionMarkCircledIcon,
@@ -132,12 +142,14 @@ export const outrosItems: NavSubGroup = {
   title: "Links Externos",
   items: [
     {
+      id: "outros-central-denuncias",
       label: "Central de Denúncias",
       href: "https://docs.google.com/forms/d/e/1FAIpQLSdQg_J6w3Qr6uJffypFuZmPxDJO-5efwPz-l_avQpvLutnZnw/viewform",
       icon: ChatBubbleIcon,
       description: "Canal para reportar irregularidades ou problemas.",
     },
     {
+      id: "outros-meu-rh",
       label: "Meu RH",
       href: "https://meurh.foxconn.com.br/web/app/RH/PortalMeuRH/#/login",
       icon: AccessibilityIcon,
@@ -145,12 +157,14 @@ export const outrosItems: NavSubGroup = {
         "Portal de Recursos Humanos: acesse e visualize holerites, histórico de ponto, férias e outros dados.",
     },
     {
+      id: "outros-rodoparaná",
       label: "Rodoparaná",
       href: "https://www.rodoparana.com.br",
       icon: Truck,
       description: "Canal para reportar irregularidades ou problemas.",
     },
     {
+      id: "outros-timber",
       label: "Timber",
       href: "https://www.grupotimber.com.br",
       icon: TreePine,
@@ -161,6 +175,7 @@ export const outrosItems: NavSubGroup = {
 };
 
 export const aplicacoesGroup: NavGroup = {
+  id: "aplicacoes",
   label: "Aplicações",
   icon: DashboardIcon,
   description: "Integração de controle de itens e pré notas",
@@ -168,6 +183,7 @@ export const aplicacoesGroup: NavGroup = {
 };
 
 export const corporativoGroup: NavGroup = {
+  id: "corporativo",
   label: "Ambiente Corporativo",
   icon: GlobeIcon,
   description: "Links importantes do nosso ambiente.",

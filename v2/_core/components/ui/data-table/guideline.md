@@ -105,14 +105,14 @@ Desenvolver o componente `DataTable` genérico para o **RodoApp**, baseado no `D
 - **Lista de módulos restantes**:
   - [ ] Agrupamento de colunas
   - [ ] Filtro complexo
-  - [ ] Classificação complexa
-  - [ ] Paginação
+  - [X] Classificação complexa
+  - [X] Paginação
   - [ ] Colunas com largura adaptável
-  - [ ] Tamanho máximo com scroll
+  - [X] Tamanho máximo com scroll
   - [ ] Exportação de dados
   - [ ] Pinning de colunas
-  - [ ] Colunas ocultáveis
-  - [ ] Carregamento e feedback
+  - [X] Colunas ocultáveis
+  - [X] Carregamento e feedback
 - **Finalização**:
   - Criar hook `useDataTableQuery` para server-side.
   - Testar com 40 mil registros simulados.

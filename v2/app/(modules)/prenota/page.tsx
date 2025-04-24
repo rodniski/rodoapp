@@ -1,3 +1,4 @@
+// @(modules)/prenota/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -10,9 +11,10 @@ import {
 } from "ui/data-table";
 import { columns, DataTableFilterModal } from "@prenota/components";
 import { usePrenotas } from "@prenota/hooks";
-
-import { useFiliaisStore } from "stores";
+import { useAuthStore } from "@login/stores/auth-store"; // Importa o auth store
 import { Background } from "comp";
+import { FilialAcesso } from "@login/types";
+import { useState } from "react";
 
 export default function PrenotaPage() {
   const pageIndex = useDataTableStore((s) => s.pageIndex);
@@ -21,23 +23,31 @@ export default function PrenotaPage() {
   const sorting = useDataTableStore((s) => s.sorting);
   const setPagination = useDataTableStore((s) => s.setPagination);
 
-  const { filiais, filiaisLoading, fetchFiliais } = useFiliaisStore();
+  // Estado local para armazenar filiais e authLoading
+  const [filiais, setFiliais] = useState<FilialAcesso[]>([]);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+
+  // Carrega os dados do useAuthStore apenas no cliente
+  useEffect(() => {
+    const { filiais, isLoading } = useAuthStore.getState();
+    setFiliais(filiais);
+    setAuthLoading(isLoading);
+
+    // Opcional: Assina mudanças no store para atualizar o estado local
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      setFiliais(state.filiais);
+      setAuthLoading(state.isLoading);
+    });
+
+    return () => unsubscribe(); // Limpa a assinatura ao desmontar o componente
+  }, []);
 
   const { data, isLoading, isError, error, isSuccess } = usePrenotas({
     page: pageIndex + 1,
     pageSize,
-    filters,
     sorting,
-    filials: filiais.map((f) => f.numero),
+    filials: filiais.map((f) => f.M0_CODFIL), // Ajustado para usar M0_CODFIL conforme a interface FilialAcesso
   });
-
-  useEffect(() => {
-    toast.promise(fetchFiliais(), {
-      loading: "Carregando filiais...",
-      success: "Filiais carregadas com sucesso",
-      error: "Erro ao carregar filiais",
-    });
-  }, [fetchFiliais]);
 
   useEffect(() => {
     if (data?.pagination) {
@@ -59,18 +69,14 @@ export default function PrenotaPage() {
       toast.success(`Pré-notas carregadas (${data.data.length})`);
     }
   }, [isSuccess, data]);
-
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-66px)] overflow-hidden p-4">
       <Background />
       <div className="z-10 w-full h-full p-4 lg:p-8 qhd:p-12 flex flex-col gap-4">
-        <div className="flex justify-end w-full">
-          <DataTableFilterModal />
-        </div>
         <DataTable
           columns={columns}
           data={data?.data || []}
-          isLoading={filiaisLoading || isLoading}
+          isLoading={authLoading || isLoading} // Combina o carregamento do auth e do usePrenotas
           className="w-full backdrop-blur-2xl bg-card/60"
         >
           <DataTablePagination />

@@ -19,7 +19,7 @@ interface PrioridadePopoverProps {
     onClearError?: () => void
 }
 
-export function PrioridadePopover({ error, errorMessage, onClearError }: PrioridadePopoverProps) {
+export function  PrioridadePopover({ error, errorMessage, onClearError }: PrioridadePopoverProps) {
     const [open, setOpen] = React.useState(false)
     const [showTextarea, setShowTextarea] = React.useState(false)
     const [justificativa, setJustificativa] = React.useState("")

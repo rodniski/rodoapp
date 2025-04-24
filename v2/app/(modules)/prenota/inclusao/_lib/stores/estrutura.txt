@@ -1,0 +1,71 @@
+{
+  "FILIAL": "0101", -> cruzar cnpjDestinatario (XML) com filiais do useAuthStore e pegar o M0_CODFIL
+  "OPCAO": 3,
+  "TIPO": "N",
+  "FORNECEDOR": "18483380000128", -> cnpj do emitente (XML) (cnpjEmitente)
+  "LOJA": "01", -> buscar cnpjEmitente na api de fornecedor e pegar A2_LOJA
+  "DOC": "16584", -> numero da nota (XML) (numero)
+  "SERIE": "1", -> serie da nota (XML) (serie)
+  "OLDSERIE": "", -> 
+  "ESPECIE": "NF", -> manter nf
+  "CONDFIN": "C01", -> 
+  "CHVNF": "", -> chave da nota (XML) (chave)
+  "USERAPP": "guilherme.correia", user logado (useAuthStore)
+  "OBS": "Teste do rodoapp v2", (obs em campo input (nao da xml) )
+  "prioridade": "Alta",
+  "JUSTIFICATIVA": "Primeira justificativa do rodoapp v2",
+  "tiporodo": "Revenda", (campo)
+  "DTINC": "11/10/2024", (data atual)
+  "CGCPIX": "18483380000128", (campo)
+  "CHAVEPIX": "", (campo)
+  "ARQUIVOS": [ -> campo arquivos (posterior)
+    {
+      "seq": "001",
+      "arq": "rodo.png",
+      "desc": "Logo da rodo"
+    }
+  ],
+  "PAGAMENTOS":  -> hook de condicao (posterior)
+    "parcelas": [
+      {
+        "Parcela": "001",
+        "Vencimento": "12/11/2024",
+        "Valor": 28.93
+      }
+    ]
+  ,
+  "RATEIOS": [ -> posterior
+    {
+      "seq": "001",
+      "id": "1739384058161",
+      "FIL": "0101",
+      "filial": "0101",
+      "cc": "1",
+      "percent": 100,
+      "valor": 28.93,
+      "REC": 0
+    }
+  ],
+  "itens": [
+    {
+      "ITEM": "0001", sequencial
+      "PRODUTO": "RD000588", -> codigo do produto (pedido)
+      "QUANTIDADE": 1, -> quantidade do item (XML) (quantidade)
+      "VALUNIT": 24.99, -> valor unitario do item (XML) (valorUnitario)
+      "PRODFOR": "", -> codigo do produto (XML) (codigo)
+      "DESCFOR": "", -> descricao do item (XML) (descricao)
+      "ORIGEMXML": "", -> codigo de origem (XML) (origem)
+      "TOTAL": 24.99, -> valor total do item (XML) (valorTotal)
+      "PC": "015224", -> codigo do pedido de compra (pedido)
+      "ITEMPC": "0001", -> item do pedido de compra (pedido)
+      "B1_UM": "UN", -> unidade de medida item (pedido) (unidade)
+      "ORIGEM": "0", -> codigo de origem (pedido)
+      "SEGUN": "", -> campo
+      "TPFATO": "", -> campo
+      "CONV": 1, -> campo
+    },
+    {...}
+  ]
+}
+
+

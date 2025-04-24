@@ -86,12 +86,31 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.723 0.219 149.579);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+
+  /* Teal Palette (Tailwind Shades Light to Dark: 100 -> 950) */
+  --chart-1: 173 78% 94%;   /* Approx teal-100 */
+  --chart-2: 172 81% 86%;   /* Approx teal-200 */
+  --chart-3: 171 78% 75%;   /* Approx teal-300 */
+  --chart-4: 171 71% 64%;   /* Approx teal-400 */
+  --chart-5: 170 60% 53%;   /* Approx teal-500 */
+  --chart-6: 169 74% 43%;   /* Approx teal-600 */
+  --chart-7: 168 84% 33%;   /* Approx teal-700 */
+  --chart-8: 170 70% 30%;   /* Approx teal-800 */
+  --chart-9: 172 86% 19%;   /* Approx teal-900 */
+  --chart-10: 173 90% 13%;  /* Approx teal-950 */
+
+  /* Green Palette (Tailwind Shades Dark to Light: 950 -> 100) */
+  --chart-11: 135 94% 14%;  /* Approx green-950 */
+  --chart-12: 136 81% 21%;  /* Approx green-900 */
+  --chart-13: 137 78% 29%;  /* Approx green-800 */
+  --chart-14: 137 70% 34%;  /* Approx green-700 */
+  --chart-15: 138 66% 38%;  /* Approx green-600 */
+  --chart-16: 142 71% 45%;  /* Approx green-500 */
+  --chart-17: 143 65% 54%;  /* Approx green-400 */
+  --chart-18: 143 73% 64%;  /* Approx green-300 */
+  --chart-19: 144 78% 76%;  /* Approx green-200 */
+  --chart-20: 145 80% 89%;  /* Approx green-100 */
+
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.723 0.219 149.579);
   --sidebar-primary-foreground: oklch(0.982 0.018 155.826);
@@ -120,12 +139,31 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.527 0.154 150.069);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
+
+  /* Teal Palette (Tailwind Shades Light to Dark: 100 -> 950) */
+  --chart-1: 173 78% 94%;   /* Approx teal-100 */
+  --chart-2: 172 81% 86%;   /* Approx teal-200 */
+  --chart-3: 171 78% 75%;   /* Approx teal-300 */
+  --chart-4: 171 71% 64%;   /* Approx teal-400 */
+  --chart-5: 170 60% 53%;   /* Approx teal-500 */
+  --chart-6: 169 74% 43%;   /* Approx teal-600 */
+  --chart-7: 168 84% 33%;   /* Approx teal-700 */
+  --chart-8: 170 70% 30%;   /* Approx teal-800 */
+  --chart-9: 172 86% 19%;   /* Approx teal-900 */
+  --chart-10: 173 90% 13%;  /* Approx teal-950 */
+
+  /* Green Palette (Tailwind Shades Dark to Light: 950 -> 100) */
+  --chart-11: 135 94% 14%;  /* Approx green-950 */
+  --chart-12: 136 81% 21%;  /* Approx green-900 */
+  --chart-13: 137 78% 29%;  /* Approx green-800 */
+  --chart-14: 137 70% 34%;  /* Approx green-700 */
+  --chart-15: 138 66% 38%;  /* Approx green-600 */
+  --chart-16: 142 71% 45%;  /* Approx green-500 */
+  --chart-17: 143 65% 54%;  /* Approx green-400 */
+  --chart-18: 143 73% 64%;  /* Approx green-300 */
+  --chart-19: 144 78% 76%;  /* Approx green-200 */
+  --chart-20: 145 80% 89%;  /* Approx green-100 */
+
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.696 0.17 162.48);
   --sidebar-primary-foreground: oklch(0.393 0.095 152.535);
@@ -151,5 +189,3 @@
     -webkit-background-clip: text !important;
   }
 }
-
-

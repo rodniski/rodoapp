@@ -26,7 +26,7 @@ export function NavMenu({ items }: NavMenuProps) {
       <NavigationMenuList>
         {items.map((group) => (
           <NavigationMenuItem
-            key={group.label}
+            key={group.id}
             className="m-0 flex list-none items-center rounded p-1"
           >
             <NavigationMenuTrigger>
@@ -101,7 +101,7 @@ export function NavMenu({ items }: NavMenuProps) {
                 {/* Lista de subgrupos */}
                 <div className="flex flex-col w-full">
                   {group.subGroups.map((subGroup, index) => (
-                    <div key={subGroup.title} className="mb-2">
+                    <div key={subGroup.id} className="mb-2">
                       {subGroup.title && (
                         <h4 className="px-3 py-1 font-semibold text-xs sm:text-sm lg:text-base tracking-wide text-muted-foreground">
                           {subGroup.title}

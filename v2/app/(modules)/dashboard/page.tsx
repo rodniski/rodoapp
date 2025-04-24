@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 // Importa os DADOS estaticamente - Se for muito grande, considere buscar de API
 import { dashboardData } from "./_lib/data/menu-items";
-import { useSession } from "next-auth/react";
 // Importa dynamic do Next.js para carregamento dinâmico
 import dynamic from "next/dynamic";
 import { Background } from "comp";
@@ -33,34 +32,6 @@ const Carousel = dynamic(
 // --- Fim da Otimização ---
 
 export default function DashboardPage() {
-  const { status } = useSession();
-  const router = useRouter();
-  const isAuthenticated = status === "authenticated";
-
-  // Efeito para verificar autenticação e redirecionar
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
-  // Exibe estado de carregamento enquanto a sessão é verificada
-  if (status === "loading") {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-lg animate-pulse text-muted-foreground">
-          Carregando sessão...
-        </p>{" "}
-        {/* Estilo de loading */}
-      </div>
-    );
-  }
-
-  // Se após carregar, não está autenticado, retorna null (redirect já deve ter ocorrido)
-  if (!isAuthenticated) {
-    return null;
-  }
-
   // Renderiza o dashboard para usuários autenticados
   return (
     <main className="w-full h-[calc(100vh-65px)] flex justify-center flex-col overflow-y-auto lg:px-5 fhd:px-20">

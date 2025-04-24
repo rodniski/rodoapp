@@ -2,37 +2,28 @@
 
 import React from "react";
 import { NavGroup } from "./navigation";
-import { Button, Separator, Sheet, SheetContent, SheetTitle, SheetTrigger, ThemeSwitcher } from "ui";
+import {
+  Button,
+  Separator,
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "ui";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { UserMenuContent } from "."; // Certifique-se de que o caminho está correto
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { motion } from "motion/react";
+import { useAuth } from "@login/hooks";
+import { NavUser } from "./user";
+import { useRouter } from "next/navigation";
 
 interface NavMobileProps {
   items: NavGroup[];
 }
 
 export function NavMobile({ items }: NavMobileProps) {
-  const { data: session } = useSession();
+  const { isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const username = session?.user?.username || "";
-
-  const handleLogout = async () => {
-    document.cookie.split(";").forEach((cookie) => {
-      const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
-      document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure;`;
-    });
-
-    localStorage.clear();
-    sessionStorage.clear();
-
-    await signOut({ redirect: false });
-    router.push("/");
-  };
 
   // Variantes para animação dos títulos (h4)
   const titleVariants = {
@@ -123,8 +114,15 @@ export function NavMobile({ items }: NavMobileProps) {
           {/* Rodapé com ThemeSwitcher e UserMenuContent */}
           <div className="flex flex-col gap-4">
             <Separator className="w-full" />
-            {session && (
-              <UserMenuContent username={username} onLogout={handleLogout} />
+
+            {isLoading ? (
+              <span>Carregando...</span>
+            ) : isAuthenticated ? (
+              <NavUser />
+            ) : (
+              <Button size="lg" onClick={() => router.push("/login")}>
+                Entrar
+              </Button>
             )}
           </div>
         </div>

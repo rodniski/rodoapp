@@ -1,9 +1,15 @@
+// @prenota/components/FilialHoverCard.tsx
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, HoverCard, HoverCardContent, HoverCardTrigger } from "ui";
-import { useFiliaisStore } from "stores";
-import type { Filial } from "types";
+import { useAuthStore } from "@login/stores/auth-store";
+import type { FilialAcesso } from "@login/types";
+
+interface FilialHoverCardProps {
+  filialNumero: string;
+  observation?: string;
+}
 
 const getFilialColor = (filialName: string) => {
   if (filialName.startsWith("RODOPARANA")) return "dark:text-sky-400 text-sky-600 bg-muted";
@@ -17,27 +23,28 @@ const getAvatarSrc = (filialName: string) => {
   return "";
 };
 
-interface FilialHoverCardProps {
-  filialNumero: string;
-  username: string;
-  observation?: string;
-}
-
 export const FilialHoverCard: React.FC<FilialHoverCardProps> = ({ filialNumero, observation }) => {
-  const { filiais, fetchFiliais } = useFiliaisStore();
+  // Estado local para armazenar as filiais
+  const [filiais, setFiliais] = useState<FilialAcesso[]>([]);
 
+  // Carrega as filiais do useAuthStore apenas no cliente
   useEffect(() => {
-    if (!filiais || filiais.length === 0) {
-      fetchFiliais().catch((error) => {
-        console.error("Erro ao buscar filiais:", error);
-      });
-    }
-  }, [filiais, fetchFiliais]);
+    const { filiais } = useAuthStore.getState();
+    setFiliais(filiais);
 
-  const filial = filiais?.find((f: Filial) => f.numero === filialNumero);
-  const displayName = filial ? filial.filial : "Desconhecida";
-  const colorClass = filial ? getFilialColor(filial.filial) : "bg-muted text-muted-foreground";
-  const avatarSrc = filial ? getAvatarSrc(filial.filial) : "";
+    // Assina mudanças no store para atualizar o estado local
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      setFiliais(state.filiais);
+    });
+
+    return () => unsubscribe(); // Limpa a assinatura ao desmontar o componente
+  }, []);
+
+  // Busca a filial correspondente ao filialNumero
+  const filial = filiais?.find((f: FilialAcesso) => f.M0_CODFIL === filialNumero);
+  const displayName = filial ? filial.M0_FILIAL : "Desconhecida";
+  const colorClass = filial ? getFilialColor(filial.M0_FILIAL) : "bg-muted text-muted-foreground";
+  const avatarSrc = filial ? getAvatarSrc(filial.M0_FILIAL) : "";
 
   return (
     <HoverCard openDelay={150} closeDelay={50}>
@@ -64,7 +71,7 @@ export const FilialHoverCard: React.FC<FilialHoverCardProps> = ({ filialNumero, 
             <div className="flex flex-col">
               <span className="text-lg font-bold capitalize">{displayName}</span>
               {filial && (
-                <span className="text-muted-foreground text-sm">{filial.cnpjFilial}</span>
+                <span className="text-muted-foreground text-sm">{filial.M0_CGC}</span>
               )}
             </div>
           </div>

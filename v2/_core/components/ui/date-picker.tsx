@@ -31,7 +31,7 @@ type DatePickerGenericProps = {
 
   /** Se true, datas anteriores a hoje ficam desabilitadas */
   disableBeforeToday?: boolean;
-
+  disabled?: boolean;
   className?: string;
 };
 
@@ -46,12 +46,11 @@ export function DatePicker({
   placeholder,
   numberOfMonths = mode === "range" ? 2 : 1,
   disableBeforeToday = false,
+  disabled = false,
   className,
 }: DatePickerGenericProps) {
-  // Se for single, consideramos `Date | undefined`; se range, consideramos `DateRange`.
   const [open, setOpen] = React.useState(false);
 
-  // Converte `value` genérico para datas que o DayPicker entende
   let selected: Date | DateRange | undefined;
   if (mode === "single") {
     selected = (value as Date) ?? undefined;
@@ -59,7 +58,6 @@ export function DatePicker({
     selected = (value as DateRange) ?? { from: undefined, to: undefined };
   }
 
-  /** Exibe texto no botão */
   let buttonLabel = placeholder || (mode === "range" ? "Selecione intervalo" : "Selecione data");
 
   if (mode === "single" && selected instanceof Date) {
@@ -73,33 +71,45 @@ export function DatePicker({
     }
   }
 
-  // Handler quando o usuário seleciona data(s)
   const handleSelect = (sel: Date | DateRange | undefined) => {
-    onChange?.(sel);
+    if (!disabled) onChange?.(sel);
   };
 
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(open) => !disabled && setOpen(open)}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className={cn("w-[300px] justify-start text-left font-normal", !value && "text-muted-foreground")}>
+          <Button
+            variant="outline"
+            disabled={disabled}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !value && "text-muted-foreground",
+              disabled && "opacity-60 cursor-not-allowed"
+            )}
+          >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {buttonLabel}
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            locale={ptBR}
-            mode={mode}
-            numberOfMonths={numberOfMonths}
-            selected={selected}
-            onSelect={handleSelect}
-            // Se for range, exiba initialFocus no from
-            defaultMonth={mode === "range" && typeof selected === "object" ? selected.from : undefined}
-            disabled={disableBeforeToday ? { before: new Date() } : undefined}
-          />
-        </PopoverContent>
+        {!disabled && (
+          <PopoverContent className="w-auto p-0" align="center">
+            <Calendar
+              locale={ptBR}
+              mode={mode}
+              numberOfMonths={numberOfMonths}
+              selected={selected}
+              onSelect={handleSelect}
+              defaultMonth={
+                mode === "range" && typeof selected === "object"
+                  ? (selected as DateRange).from
+                  : undefined
+              }
+              disabled={disableBeforeToday ? { before: new Date() } : undefined}
+            />
+          </PopoverContent>
+        )}
       </Popover>
     </div>
   );
