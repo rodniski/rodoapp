@@ -87,29 +87,19 @@
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.723 0.219 149.579);
 
-  /* Teal Palette (Tailwind Shades Light to Dark: 100 -> 950) */
-  --chart-1: 173 78% 94%;   /* Approx teal-100 */
-  --chart-2: 172 81% 86%;   /* Approx teal-200 */
-  --chart-3: 171 78% 75%;   /* Approx teal-300 */
-  --chart-4: 171 71% 64%;   /* Approx teal-400 */
-  --chart-5: 170 60% 53%;   /* Approx teal-500 */
-  --chart-6: 169 74% 43%;   /* Approx teal-600 */
-  --chart-7: 168 84% 33%;   /* Approx teal-700 */
-  --chart-8: 170 70% 30%;   /* Approx teal-800 */
-  --chart-9: 172 86% 19%;   /* Approx teal-900 */
-  --chart-10: 173 90% 13%;  /* Approx teal-950 */
+  /* Cores Fornecidas */
+  --chart-1: 173 58% 39%; /* Teal/Ciano Médio-Escuro */
+  --chart-2: 12 76% 61%; /* Vermelho/Laranja Claro */
+  --chart-3: 197 37% 24%; /* Azul/Ciano Escuro (menos saturado) */
+  --chart-4: 43 74% 66%; /* Amarelo/Laranja Claro */
+  --chart-5: 27 87% 67%; /* Laranja Claro Vibrante */
 
-  /* Green Palette (Tailwind Shades Dark to Light: 950 -> 100) */
-  --chart-11: 135 94% 14%;  /* Approx green-950 */
-  --chart-12: 136 81% 21%;  /* Approx green-900 */
-  --chart-13: 137 78% 29%;  /* Approx green-800 */
-  --chart-14: 137 70% 34%;  /* Approx green-700 */
-  --chart-15: 138 66% 38%;  /* Approx green-600 */
-  --chart-16: 142 71% 45%;  /* Approx green-500 */
-  --chart-17: 143 65% 54%;  /* Approx green-400 */
-  --chart-18: 143 73% 64%;  /* Approx green-300 */
-  --chart-19: 144 78% 76%;  /* Approx green-200 */
-  --chart-20: 145 80% 89%;  /* Approx green-100 */
+  /* Novas Sugestões (Baseadas em Tailwind - tons ~500) */
+  --chart-6: 84 78% 51%; /* Approx lime-500 */
+  --chart-7: 217 91% 60%; /* Approx blue-500 */
+  --chart-8: 262 79% 60%; /* Approx violet-500 */
+  --chart-9: 333 86% 64%; /* Approx pink-500 */
+  --chart-10: 159 74% 47%; /* Approx emerald-500 */
 
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.723 0.219 149.579);
@@ -140,29 +130,18 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.527 0.154 150.069);
 
-  /* Teal Palette (Tailwind Shades Light to Dark: 100 -> 950) */
-  --chart-1: 173 78% 94%;   /* Approx teal-100 */
-  --chart-2: 172 81% 86%;   /* Approx teal-200 */
-  --chart-3: 171 78% 75%;   /* Approx teal-300 */
-  --chart-4: 171 71% 64%;   /* Approx teal-400 */
-  --chart-5: 170 60% 53%;   /* Approx teal-500 */
-  --chart-6: 169 74% 43%;   /* Approx teal-600 */
-  --chart-7: 168 84% 33%;   /* Approx teal-700 */
-  --chart-8: 170 70% 30%;   /* Approx teal-800 */
-  --chart-9: 172 86% 19%;   /* Approx teal-900 */
-  --chart-10: 173 90% 13%;  /* Approx teal-950 */
+  --chart-1: 173 58% 39%;
+  --chart-2: 12 76% 61%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
 
-  /* Green Palette (Tailwind Shades Dark to Light: 950 -> 100) */
-  --chart-11: 135 94% 14%;  /* Approx green-950 */
-  --chart-12: 136 81% 21%;  /* Approx green-900 */
-  --chart-13: 137 78% 29%;  /* Approx green-800 */
-  --chart-14: 137 70% 34%;  /* Approx green-700 */
-  --chart-15: 138 66% 38%;  /* Approx green-600 */
-  --chart-16: 142 71% 45%;  /* Approx green-500 */
-  --chart-17: 143 65% 54%;  /* Approx green-400 */
-  --chart-18: 143 73% 64%;  /* Approx green-300 */
-  --chart-19: 144 78% 76%;  /* Approx green-200 */
-  --chart-20: 145 80% 89%;  /* Approx green-100 */
+  /* Novas Sugestões */
+  --chart-6: 84 78% 51%; /* Approx lime-500 */
+  --chart-7: 217 91% 60%; /* Approx blue-500 */
+  --chart-8: 262 79% 60%; /* Approx violet-500 */
+  --chart-9: 333 86% 64%; /* Approx pink-500 */
+  --chart-10: 159 74% 47%; /* Approx emerald-500 */
 
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.696 0.17 162.48);

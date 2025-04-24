@@ -27,17 +27,17 @@ export function Installments() {
       {/* Card com Abas: Coluna 2-3 / Span 2 Linhas (lg+) */}
       <Card className="lg:col-start-2 lg:col-span-2 lg:row-span-2 flex flex-col min-h-[300px] py-0">
         {/* Tabs ocupam todo o espaço do Card */}
-        <Tabs defaultValue="rateio" className="flex flex-col flex-1">
+        <Tabs defaultValue="rateio" className="flex flex-col flex-1 w-full">
           <div className="bg-input/20 flex w-full justify-center items-center shadow">
-          <TabsList className="my-4 self-center bg-card shadow border"> {/* Alinha abas à esquerda */}
-            <TabsTrigger value="rateio" className=" text-lg">Rateio</TabsTrigger>
-            <TabsTrigger value="payment-cond" className=" text-lg">Condicão de Pagamento</TabsTrigger>
+          <TabsList className="w-full m-3 self-center bg-card shadow border"> {/* Alinha abas à esquerda */}
+            <TabsTrigger value="rateio" className="w-full text-lg">Rateio</TabsTrigger>
+            <TabsTrigger value="payment-cond" className="w-full text-lg">Condicão de Pagamento</TabsTrigger>
           </TabsList>
           </div>
-          <TabsContent value="rateio" className="flex-1 p-4 overflow-auto">
+          <TabsContent value="rateio" className="p-6">
             <RateioCard />
           </TabsContent>
-          <TabsContent value="payment-cond" className="flex-1 p-4">
+          <TabsContent value="payment-cond" className="p-6">
             {/* Conteúdo da Condição de Pagamento */}
             <div className="text-center text-muted-foreground p-10">
                 (Conteúdo da Condição de Pagamento)

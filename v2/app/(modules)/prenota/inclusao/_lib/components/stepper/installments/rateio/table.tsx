@@ -1,12 +1,15 @@
+// _lib/components/stepper/header/RateioTable.tsx (Versão Simplificada ATUALIZADA com Z10_*)
 "use client";
 
-import React, { useMemo } from "react";
-// Imports do TanStack Table e DataTable
-import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "ui/data-table"; // Assumindo que DataTable está em ui/data-table
-// Imports de UI para células e footer
+import React, { useMemo, useCallback } from "react";
 import {
-  Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
   Button,
   Select,
   SelectTrigger,
@@ -15,30 +18,31 @@ import {
   SelectItem,
   ScrollArea,
 } from "ui";
+import { NumericFormat } from "react-number-format";
 import { Trash2 } from "lucide-react";
-// Stores e Seletores
 import { useAuxStore as useLoginAuxStore } from "@login/stores";
 import { usePreNotaStore, useValorTotalXml } from "@inclusao/stores";
-// Tipos
-import type { Rateio as RateioType } from "@inclusao/types";
-import type { FilialGeral, CentroCusto } from "@login/types";
-import { cn } from "utils"; // Ou lib/utils
+// Importa o tipo Rateio ATUALIZADO
+import type {
+  Rateio as RateioType,
+} from "@inclusao/types";
 
-// Props (mantido)
-interface RateioTableProps {
-  totalNf?: number | null;
-}
-
-// Função de formatação (fora do componente para referência estável)
-const formatCurrency = (value: number) =>
+// Funções de formatação
+const formatCurrency = (value: number): string =>
   (value ?? 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-const formatPercent = (value: number) => (value ?? 0).toFixed(2);
+const formatPercent = (value: number): string => `${(value ?? 0).toFixed(2)}%`;
 
-export function RateioTable({ totalNf }: RateioTableProps) {
-  // --- Stores ---
+interface RateioTableProps {
+  // Props podem não ser mais necessárias se tudo vier do store/contexto
+}
+
+export function RateioTable({}: RateioTableProps) {
+  // Stores
   const filiais = useLoginAuxStore((state) => state.filiais);
   const centroCusto = useLoginAuxStore((state) => state.centroCusto);
   const rateios = usePreNotaStore((state) => state.draft.rateios);
@@ -46,17 +50,11 @@ export function RateioTable({ totalNf }: RateioTableProps) {
   const removeRateio = usePreNotaStore((state) => state.removeRateio);
   const totalGeralXml = useValorTotalXml();
 
-  // --- Cálculos (movidos para useMemo para melhor performance se necessário) ---
-  const totalGeral = useMemo(
-    () => totalNf ?? totalGeralXml ?? 0,
-    [totalNf, totalGeralXml]
-  );
+  const totalGeral = useMemo(() => totalGeralXml ?? 0, [totalGeralXml]);
+
+  // Cálculos de Totais (usando Z10_VALOR)
   const totalDivisao = useMemo(
-    () =>
-      rateios.reduce(
-        (acc: number, row: RateioType) => acc + (row.valor || 0),
-        0
-      ),
+    () => rateios.reduce((acc, row) => acc + (row.Z10_VALOR || 0), 0), // <<< USA Z10_VALOR
     [rateios]
   );
   const porcentagemDivisao = useMemo(
@@ -71,246 +69,258 @@ export function RateioTable({ totalNf }: RateioTableProps) {
     [totalGeral, totalDivisao]
   );
 
-  // --- Handler para Mudança de Valor/Percentual na Tabela ---
-  // Definido aqui para ser acessível pelas definições de coluna
-  const handleTableValueChange = (
-    id: string,
-    field: "valor" | "percent",
-    rawValue: string
-  ) => {
-    const numeric =
-      parseFloat(rawValue.replace(/[^0-9,.-]/g, "").replace(",", ".")) || 0;
-    let valorAtualizado: number;
-    let percentAtualizado: number;
+  // Handler para mudanças nas linhas existentes (usando Z10_*)
+  const handleChange = useCallback(
+    (
+      id: string, // ID da linha existente (deve vir do store ou ser gerado)
+      field: "Z10_FILRAT" | "Z10_CC" | "Z10_VALOR" | "Z10_PERC", // <<< Campos Atualizados
+      value: string | number
+    ) => {
+      const existingRateio = rateios.find((r) => r.id === id); // Assume que rateios do store tem 'id'
+      if (!existingRateio) return;
 
-    if (field === "valor") {
-      valorAtualizado = numeric;
-      percentAtualizado =
-        totalGeral > 0
-          ? parseFloat(((valorAtualizado / totalGeral) * 100).toFixed(2))
-          : 0;
-    } else {
-      // field === "percent"
-      percentAtualizado = numeric;
-      valorAtualizado =
-        totalGeral > 0
-          ? parseFloat(((percentAtualizado / 100) * totalGeral).toFixed(2))
-          : 0;
-    }
+      let finalUpdates: Partial<RateioType> = {};
 
-    // TODO: Validar soma total antes de atualizar?
-    if (updateRateio) {
-      updateRateio(id, { valor: valorAtualizado, percent: percentAtualizado });
-    } else {
-      console.error("Ação updateRateio não encontrada!");
-    }
-  };
+      if (field === "Z10_FILRAT") {
+        finalUpdates = { Z10_FILRAT: value as string };
+      } else if (field === "Z10_CC") {
+        finalUpdates = { Z10_CC: value as string };
+      } else if (field === "Z10_VALOR") {
+        const numericValue = typeof value === "number" ? value : 0;
+        // Validação de edição inline (simplificada)
+        const outrosValores = rateios
+          .filter((r) => r.Z10_ITEM !== id)
+          .reduce((sum, r) => sum + (r.Z10_VALOR || 0), 0);
+        const maxEditValor = Math.max(
+          0,
+          parseFloat((totalGeral - outrosValores).toFixed(2))
+        );
+        const cappedValor = Math.min(numericValue, maxEditValor + 0.001);
 
-  // --- Definição das Colunas para TanStack Table ---
-  // Usamos useMemo para evitar recriar as colunas a cada renderização
-  const columns = useMemo(
-    (): ColumnDef<RateioType>[] => [
-      {
-        accessorKey: "FIL", // ou 'filial' se for esse o campo principal
-        header: "Filial",
-        cell: ({ row }) => {
-          const rateio = row.original;
-          return (
-            <Select
-              value={rateio.FIL} // Valor atual da linha
-              onValueChange={(val) => {
-                if (updateRateio)
-                  updateRateio(rateio.id, { FIL: val, filial: val }); // Atualiza no store
-              }}
-            >
-              <SelectTrigger className="text-xs h-8 w-[180px]">
-                {" "}
-                {/* Ajustar largura */}
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                {filiais.map((f: FilialGeral) => (
-                  // AJUSTE: nomes numero, filial/nomeFilial
-                  <SelectItem
-                    key={f.numero}
-                    value={f.numero}
-                    className="text-xs"
-                  >
-                    {f.numero} - {f.filial}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          );
-        },
-        size: 200, // Exemplo de definição de tamanho (verificar se DataTable usa)
-      },
-      {
-        accessorKey: "cc",
-        header: "Centro de Custo",
-        cell: ({ row }) => {
-          const rateio = row.original;
-          return (
-            <Select
-              value={rateio.cc}
-              onValueChange={(val) => {
-                if (updateRateio) updateRateio(rateio.id, { cc: val });
-              }}
-            >
-              <SelectTrigger className="text-xs h-8 w-[230px]">
-                {" "}
-                {/* Ajustar largura */}
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                {/* AJUSTE: nomes CTT_CUSTO, CTT_DESC01 */}
-                {centroCusto.map((cc: CentroCusto) => (
-                  <SelectItem
-                    key={cc.CTT_CUSTO}
-                    value={cc.CTT_CUSTO}
-                    className="text-xs"
-                  >
-                    {cc.CTT_CUSTO} - {cc.CTT_DESC01}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          );
-        },
-        size: 250,
-      },
-      {
-        accessorKey: "valor",
-        header: () => <div className="text-right">Valor (R$)</div>, // Header alinhado
-        cell: ({ row }) => {
-          const rateio = row.original;
-          return (
-            <Input
-              type="text"
-              value={formatCurrency(rateio.valor)}
-              onChange={(e) =>
-                handleTableValueChange(rateio.id, "valor", e.target.value)
-              }
-              className="text-right text-xs h-8"
-            />
-          );
-        },
-        size: 150,
-        meta: {
-          // Exemplo se precisar de meta para alinhamento ou tipo
-          align: "right",
-        },
-      },
-      {
-        accessorKey: "percent",
-        header: () => <div className="text-right">Porcentagem (%)</div>, // Header alinhado
-        cell: ({ row }) => {
-          const rateio = row.original;
-          return (
-            <Input
-              type="text"
-              value={`${formatPercent(rateio.percent)}%`}
-              onChange={(e) =>
-                handleTableValueChange(
-                  rateio.id,
-                  "percent",
-                  e.target.value.replace("%", "")
-                )
-              }
-              className="text-right text-xs h-8"
-            />
-          );
-        },
-        size: 150,
-        meta: {
-          align: "right",
-        },
-      },
-      {
-        id: "actions", // ID único para a coluna de ações
-        header: () => <div className="text-center">Ações</div>, // Header alinhado
-        cell: ({ row }) => {
-          const rateio = row.original;
-          return (
-            <div className="flex justify-center">
-              {" "}
-              {/* Centraliza botão */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => {
-                  if (removeRateio) removeRateio(rateio.id);
-                }} // Chama removeRateio
-                aria-label="Remover rateio"
-              >
-                <Trash2 className="w-4 h-4 text-destructive" />
-              </Button>
-            </div>
-          );
-        },
-        size: 80,
-        meta: {
-          align: "center",
-        },
-      },
-    ],
-    [filiais, centroCusto, updateRateio, removeRateio, totalGeral]
-  ); // Dependências para recriar colunas
+        const percentAtualizado =
+          totalGeral > 0
+            ? parseFloat(((cappedValor / totalGeral) * 100).toFixed(2))
+            : 0;
+        // <<< Atualiza Z10_VALOR e Z10_PERC
+        finalUpdates = {
+          Z10_VALOR: parseFloat(cappedValor.toFixed(2)),
+          Z10_PERC: percentAtualizado,
+        };
+      } else if (field === "Z10_PERC") {
+        const numericPercent = typeof value === "number" ? value : 0;
+        const cappedPercent = Math.min(numericPercent, 100);
+        const valorCalculado = parseFloat(
+          ((cappedPercent / 100) * totalGeral).toFixed(2)
+        );
+
+        // Validação de edição inline (simplificada)
+        const outrosValores = rateios
+          .filter((r) => r.Z10_ITEM !== id)
+          .reduce((sum, r) => sum + (r.Z10_VALOR || 0), 0);
+        const maxEditValor = Math.max(
+          0,
+          parseFloat((totalGeral - outrosValores).toFixed(2))
+        );
+
+        if (valorCalculado > maxEditValor + 0.001) {
+          console.warn("Percentual excede valor restante ao editar.");
+          return;
+        }
+        // <<< Atualiza Z10_PERC e Z10_VALOR
+        finalUpdates = {
+          Z10_PERC: parseFloat(cappedPercent.toFixed(2)),
+          Z10_VALOR: valorCalculado,
+        };
+      }
+
+      if (id && Object.keys(finalUpdates).length > 0) {
+        // Garante que ID existe
+        updateRateio(id, finalUpdates);
+      }
+    },
+    [rateios, updateRateio, totalGeral]
+  );
+
+  // Handler para remoção (direto ao store)
+  const handleRemove = useCallback(
+    (id: string) => {
+      if (id) removeRateio(id); // Garante que ID existe
+    },
+    [removeRateio]
+  );
 
   return (
-    // Usa o componente DataTable, passando colunas e dados
-    <ScrollArea className="max-h-[500px] overflow-auto">
-      <DataTable
-        columns={columns}
-        data={rateios} // Os dados vêm do store principal
-        isLoading={false} // Defina como true se houver carregamento assíncrono dos rateios
-        enableSorting={false} // Habilitar ordenação? (Provavelmente não necessário aqui)
-        // className="max-h-[400px]" // Limitar altura se necessário
-      >
-        {(rateios.length > 0 || totalGeral > 0) && (
-          <div className="p-2 text-sm border-t bg-muted/30 w-full">
-            <div className="flex justify-between items-center divide-x divide-border">
-              <div className="flex w-1/2 justify-evenly">
-                <div className="px-4 py-1.5 font-medium text-right flex flex-col">
-                  <span>Total Geral NF:</span>
-                  {formatCurrency(totalGeral)}
-                </div>
-                <div className="px-4 py-1.5 font-medium text-right flex flex-col">
-                  <span>Valor Restante:</span>
-                  <span
-                    className={`${
-                      totalRestante > 0.005
-                        ? "text-destructive"
-                        : "text-green-600"
-                    }`}
+    <div className="flex flex-col border rounded bg-input/30 overflow-hidden h-full">
+      <ScrollArea className="flex-1 relative">
+        <Table className="border-b">
+          <TableHeader className="py-2 bg-background sticky top-0 z-10">
+            <TableRow>
+              <TableHead className="px-2" style={{ width: "200px" }}>
+                Filial
+              </TableHead>
+              <TableHead className="px-2" style={{ width: "250px" }}>
+                Centro de Custo
+              </TableHead>
+              <TableHead className="px-2 text-right" style={{ width: "150px" }}>
+                Valor (R$)
+              </TableHead>
+              <TableHead className="px-2 text-right" style={{ width: "150px" }}>
+                Porcentagem (%)
+              </TableHead>
+              <TableHead className="px-2 text-center" style={{ width: "80px" }}>
+                Ações
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {/* Renderiza apenas os rateios existentes do store */}
+            {rateios.map((row) => (
+              // <<< Usa ID ou Z10_ITEM como chave
+              <TableRow key={row.Z10_ITEM}>
+                {/* Célula Filial */}
+                <TableCell className="px-2 py-1">
+                  <Select
+                    // <<< Usa Z10_FILRAT
+                    value={row.Z10_FILRAT || ""}
+                    // <<< Passa Z10_FILRAT para o handler
+                    onValueChange={(val) =>
+                      handleChange(row.Z10_ITEM!, "Z10_FILRAT", val)
+                    }
                   >
-                    {formatCurrency(totalRestante)}
-                  </span>
-                </div>
-              </div>
-              <div className="flex w-1/2 justify-evenly">
-                <div className="px-4 py-1.5 font-medium text-right flex flex-col">
-                  <span>Totais Rateados:</span>
-                  {formatCurrency(totalDivisao)}
-                </div>
-                <div className="px-4 py-1.5 font-medium text-right flex flex-col">
-                  <span>Porcentagem Rateados:</span>
-                  <span
-                    className={`${
-                      totalRestante > 0.005
-                        ? "text-destructive"
-                        : "text-green-600"
-                    }`}
+                    <SelectTrigger className="text-xs h-8">
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filiais.map((f) => (
+                        // <<< Usa M0_CODFIL ou numero como value
+                        <SelectItem
+                          key={f.numero}
+                          value={f.numero}
+                          className="text-xs"
+                        >
+                          {/* <<< Usa numero e filial para label */}
+                          {f.numero} - {f.filial}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                {/* Célula Centro de Custo */}
+                <TableCell className="px-2 py-1">
+                  <Select
+                    // <<< Usa Z10_CC
+                    value={row.Z10_CC || ""}
+                    // <<< Passa Z10_CC para o handler
+                    onValueChange={(val) =>
+                      handleChange(row.id!, "Z10_CC", val)
+                    }
                   >
-                    {formatPercent(porcentagemDivisao)}%
-                  </span>
-                </div>
-              </div>
+                    <SelectTrigger className="text-xs h-8">
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {centroCusto.map((cc) => (
+                        // <<< Usa CTT_CUSTO como value e key
+                        <SelectItem
+                          key={cc.CTT_CUSTO}
+                          value={cc.CTT_CUSTO}
+                          className="text-xs"
+                        >
+                          {/* <<< Usa CTT_CUSTO e CTT_DESC01 para label */}
+                          {cc.CTT_CUSTO} - {cc.CTT_DESC01}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                {/* Célula Valor */}
+                <TableCell className="px-2 py-1 text-right">
+                  <NumericFormat
+                    // <<< Usa Z10_VALOR
+                    value={row.Z10_VALOR ?? 0}
+                    // <<< Passa Z10_VALOR para o handler
+                    onValueChange={(values) =>
+                      handleChange(row.Z10_ITEM!, "Z10_VALOR", values.floatValue ?? 0)
+                    }
+                    decimalScale={2}
+                    allowNegative={false}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
+                    className="text-right text-xs h-8 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="R$ 0,00"
+                    disabled={totalGeral <= 0}
+                  />
+                </TableCell>
+                {/* Célula Percentual */}
+                <TableCell className="px-2 py-1 text-right">
+                  <NumericFormat
+                    // <<< Usa Z10_PERC
+                    value={row.Z10_PERC ?? 0}
+                    onValueChange={(values) => {
+                      const limitedPercent = Math.min(
+                        values.floatValue ?? 0,
+                        100
+                      );
+                      // <<< Passa Z10_PERC para o handler
+                      handleChange(row.Z10_ITEM!, "Z10_PERC", limitedPercent);
+                    }}
+                    decimalScale={2}
+                    allowNegative={false}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    suffix=" %"
+                    className="text-right text-xs h-8 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="0,00 %"
+                    disabled={totalGeral <= 0}
+                  />
+                </TableCell>
+                {/* Célula Ações */}
+                <TableCell className="px-2 py-1 text-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleRemove(row.Z10_ITEM!)} // Usa ID (assumindo que existe)
+                    aria-label="Remover rateio"
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
+
+      {/* Footer (usando totais calculados com Z10_VALOR) */}
+      {(rateios.length > 0 || totalGeral > 0) && (
+        <div className="flex flex-wrap justify-between border-t p-2 px-4 text-sm bg-background gap-x-4 gap-y-1">
+          <div className="flex gap-4">
+            <div className="flex flex-col items-start">
+              <span>Total NF:</span>
+              <span className="font-medium">{formatCurrency(totalGeral)}</span>
+            </div>
+            <div className="flex flex-col items-start">
+              <span>Rateado:</span>
+              <span className="font-medium">
+                {formatCurrency(totalDivisao)} (
+                {formatPercent(porcentagemDivisao)})
+              </span>
             </div>
           </div>
-        )}
-      </DataTable>
-    </ScrollArea>
+          <div className="flex flex-col items-start">
+            <span>Restante:</span>
+            <span
+              className={`font-medium ${
+                totalRestante < 0.01 ? "text-green-600" : ""
+              }`}
+            >
+              {formatCurrency(totalRestante)}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

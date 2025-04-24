@@ -95,13 +95,11 @@ export interface Parcela {
 
 /** Rateio por centro de custo / filial */
 export interface Rateio {
-  seq: string;
-  id: string;
-  FIL: string;
-  filial: string;
-  cc: string;
-  percent: number;
-  valor: number;
+  Z10_ITEM: string;
+  Z10_FILRAT: string;    
+  Z10_CC: string;
+  Z10_VALOR: number;
+  Z10_PERC: number;
   REC: number;
 }
 
