@@ -1,16 +1,15 @@
-// @inclusao/stores/pre-nota-aux-store.ts (Valor Total NF agregado e persistência ajustada)
+// @inclusao/stores/pre-nota-aux-store.ts
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware"; // Importa middleware
-import type { Fornecedor } from "@inclusao/api"; // Ou @inclusao/types
+import type {
+  Fornecedor,
+  CondicaoPagamentoResponse,
+  Pedido,
+} from "@inclusao/api";
 
-// --- Interfaces dos Módulos ---
-
+/* ───────────────────────── módulos auxiliares ───────────────────────── */
 interface XmlLoadStatusState {
-  /** Sinalizador: true se o último XML populou o store principal com sucesso */
-  xmlDataLoaded: boolean; // <-- ✅ GARANTIR QUE ESTA LINHA EXISTE
-  /** Ação para marcar sucesso */
+  xmlDataLoaded: boolean;
   setXmlDataLoadedSuccess: () => void;
-  /** Ação para limpar/resetar o sinalizador */
   clearXmlDataLoadedFlag: () => void;
 }
 
@@ -20,98 +19,105 @@ interface FornecedorSearchState {
   clearSearchResult: () => void;
 }
 
-interface SelectedFornecedorInfo {
-  cod: string;
-  loja: string;
-  nome: string;
-}
-
 interface SelectionState {
-  selectedPedidoNumero: string | null;
-  selectedFornecedor: SelectedFornecedorInfo | null;
-  setSelectedPedidoNumero: (pedidoNumero: string | null) => void;
-  clearSelectedPedidoNumero: () => void;
-  setSelectedFornecedor: (fornecedor: SelectedFornecedorInfo | null) => void;
+  selectedPedido: Pedido | null; // 👈 alterado para armazenar objeto completo
+  selectedFornecedor: Omit<Fornecedor, "PEDIDOS"> | null; // 👈 ignora PEDIDOS
+  setSelectedPedido: (pedido: Pedido | null) => void; // 👈 método alterado
+  clearSelectedPedido: () => void;
+  setSelectedFornecedor: (fornecedor: Omit<Fornecedor, "PEDIDOS"> | null) => void;
   clearSelectedFornecedor: () => void;
 }
 
 interface TotalNfState {
   valorTotalXml: number | null;
-  setValorTotalXml: (valor: number | null) => void;
+  setValorTotalXml: (v: number | null) => void;
   clearValorTotalXml: () => void;
 }
 
-// --- Interface Principal do Store Auxiliar (SEM xml) ---
+interface CondicaoPagamentoState {
+  data: CondicaoPagamentoResponse | null;
+  setData: (d: CondicaoPagamentoResponse) => void;
+  clearData: () => void;
+}
+
+/* ───────────────────────── interface principal ─────────────────────── */
 export interface PreNotaAuxState {
-  // xml: XmlHistoryState; // Removido
   loadStatus: XmlLoadStatusState;
   fornecedorSearch: FornecedorSearchState;
   selection: SelectionState;
   totalNf: TotalNfState;
+  condicaoPagamento: CondicaoPagamentoState;
 }
 
-// --- Criação do Store com Persistência Seletiva ---
+/* ──────────────────────── criação do store ─────────────────────────── */
 export const usePreNotaAuxStore = create<PreNotaAuxState>((set) => ({
-  // --- Módulos de Estado ---
+  /* loadStatus */
   loadStatus: {
-    xmlDataLoaded: false, // <-- ✅ GARANTIR QUE ESTÁ INICIALIZADO AQUI
+    xmlDataLoaded: false,
     setXmlDataLoadedSuccess: () =>
-      set((state) => ({
-        loadStatus: { ...state.loadStatus, xmlDataLoaded: true },
-      })),
+      set((s) => ({ loadStatus: { ...s.loadStatus, xmlDataLoaded: true } })),
     clearXmlDataLoadedFlag: () =>
-      set((state) => ({
-        loadStatus: { ...state.loadStatus, xmlDataLoaded: false },
-      })),
+      set((s) => ({ loadStatus: { ...s.loadStatus, xmlDataLoaded: false } })),
   },
+
+  /* fornecedorSearch */
   fornecedorSearch: {
     searchResult: null,
-    setSearchResult: (result) =>
-      set((state) => ({
-        fornecedorSearch: { ...state.fornecedorSearch, searchResult: result },
+    setSearchResult: (r) =>
+      set((s) => ({
+        fornecedorSearch: { ...s.fornecedorSearch, searchResult: r },
       })),
     clearSearchResult: () =>
-      set((state) => ({
-        fornecedorSearch: { ...state.fornecedorSearch, searchResult: null },
+      set((s) => ({
+        fornecedorSearch: { ...s.fornecedorSearch, searchResult: null },
       })),
   },
+
+  /* selection ajustado */
   selection: {
-    selectedPedidoNumero: null,
+    selectedPedido: null,
     selectedFornecedor: null,
-    setSelectedPedidoNumero: (pedidoNumero) =>
-      set((state) => ({
-        selection: { ...state.selection, selectedPedidoNumero: pedidoNumero },
-      })),
-    clearSelectedPedidoNumero: () =>
-      set((state) => ({
-        selection: { ...state.selection, selectedPedidoNumero: null },
-      })),
-    setSelectedFornecedor: (fornecedor) =>
-      set((state) => ({
-        selection: { ...state.selection, selectedFornecedor: fornecedor },
-      })),
+    setSelectedPedido: (pedido: Pedido | null) =>
+      set((s) => ({ selection: { ...s.selection, selectedPedido: pedido } })),
+    clearSelectedPedido: () =>
+      set((s) => ({ selection: { ...s.selection, selectedPedido: null } })),
+    setSelectedFornecedor: (f) =>
+      set((s) => ({ selection: { ...s.selection, selectedFornecedor: f } })),
     clearSelectedFornecedor: () =>
-      set((state) => ({
-        selection: { ...state.selection, selectedFornecedor: null },
-      })),
+      set((s) => ({ selection: { ...s.selection, selectedFornecedor: null } })),
   },
+
+  /* totalNf */
   totalNf: {
     valorTotalXml: null,
-    setValorTotalXml: (valor) =>
-      set((state) => ({ totalNf: { ...state.totalNf, valorTotalXml: valor } })),
+    setValorTotalXml: (v) =>
+      set((s) => ({ totalNf: { ...s.totalNf, valorTotalXml: v } })),
     clearValorTotalXml: () =>
-      set((state) => ({ totalNf: { ...state.totalNf, valorTotalXml: null } })),
+      set((s) => ({ totalNf: { ...s.totalNf, valorTotalXml: null } })),
   },
-})); // <-- FIM DO CREATE
 
-// --- Seletores (sem useXmlHistory) ---
+  /* condicaoPagamento */
+  condicaoPagamento: {
+    data: null,
+    setData: (d) =>
+      set((s) => ({ condicaoPagamento: { ...s.condicaoPagamento, data: d } })),
+    clearData: () =>
+      set((s) => ({
+        condicaoPagamento: { ...s.condicaoPagamento, data: null },
+      })),
+  },
+}));
+
+/* ────────────────────────── selectors ─────────────────────────────── */
 export const useXmlDataLoadedStatus = () =>
-  usePreNotaAuxStore((state) => state.loadStatus.xmlDataLoaded);
+  usePreNotaAuxStore((s) => s.loadStatus.xmlDataLoaded);
 export const useFornecedorSearchResult = () =>
-  usePreNotaAuxStore((state) => state.fornecedorSearch.searchResult);
-export const useSelectedPedidoNumero = () =>
-  usePreNotaAuxStore((state) => state.selection.selectedPedidoNumero);
+  usePreNotaAuxStore((s) => s.fornecedorSearch.searchResult);
+export const useSelectedPedido = () =>
+  usePreNotaAuxStore((s) => s.selection.selectedPedido); // 👈 alterado
 export const useSelectedFornecedor = () =>
-  usePreNotaAuxStore((state) => state.selection.selectedFornecedor);
+  usePreNotaAuxStore((s) => s.selection.selectedFornecedor);
 export const useValorTotalXml = () =>
-  usePreNotaAuxStore((state) => state.totalNf.valorTotalXml);
+  usePreNotaAuxStore((s) => s.totalNf.valorTotalXml);
+export const useCondicaoPagamentoData = () =>
+  usePreNotaAuxStore((s) => s.condicaoPagamento.data);

@@ -66,6 +66,7 @@ export interface Pedido {
     B1_GRTRIB: string;
     B1_GRUPO: string;
     B1_ORIGEM: string;
+    OBS: string;
 }
 
 // Representa um fornecedor na resposta da API

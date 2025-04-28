@@ -1,4 +1,4 @@
-// Crie um novo arquivo, ex: @inclusao/components/DebugStateSheet.tsx
+// @inclusao/components/DebugStateSheet.tsx
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetDescription, // Opcional
+  SheetDescription,
   Tabs,
   TabsContent,
   TabsList,
@@ -16,183 +16,266 @@ import {
   Button,
   Progress,
   ScrollArea,
-} from "ui"; // Importe os componentes UI necessários
-import { CheckCircle, Circle, Info, Code, ChevronDown, ChevronUp } from "lucide-react";
-import { usePreNotaStore } from "@inclusao/stores"; // Importa o store principal
-import type { PreNotaDraft } from "@inclusao/types"; // Importa o tipo do draft
-import { cn } from "utils"; // Ou "lib/utils" do shadcn
+} from "ui";
+import {
+  CheckCircle,
+  Circle,
+  Info,
+  Code,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { usePreNotaStore, usePreNotaAuxStore } from "@inclusao/stores";
+import type { PreNotaDraft } from "@inclusao/types";
+import { cn } from "utils";
 
-// Definição mais específica para os campos que vamos monitorar
+/* ---------- progresso draft ---------- */
 type DraftKey = keyof PreNotaDraft;
-const monitoredKeys: DraftKey[] = ['header', 'itens', 'anexos', 'parcelas', 'rateios'];
-
+const monitoredKeys: DraftKey[] = [
+  "header",
+  "itens",
+  "anexos",
+  "parcelas",
+  "rateios",
+];
 interface FieldStatus {
-    key: DraftKey;
-    label: string;
-    value: any;
-    isFilled: boolean;
-    isExpandable: boolean;
+  key: DraftKey;
+  label: string;
+  value: any;
+  isFilled: boolean;
+  isExpandable: boolean;
 }
-
-// Função para verificar se um campo está "preenchido" (lógica customizável)
-const isFieldFilled = (key: DraftKey, value: any): boolean => {
-    switch (key) {
-        case 'header':
-            // Considera preenchido se tiver fornecedor, doc e filial (exemplo)
-            return !!value.FORNECEDOR && !!value.DOC && !!value.FILIAL;
-        case 'itens':
-        case 'anexos':
-        case 'parcelas':
-        case 'rateios':
-            // Considera preenchido se o array não estiver vazio
-            return Array.isArray(value) && value.length > 0;
-        default:
-            // Lógica padrão para outros tipos (adapte se necessário)
-            if (Array.isArray(value)) return value.length > 0;
-            if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
-            if (typeof value === 'string') return value.trim() !== '';
-            return !!value; // Booleano ou número diferente de 0
-    }
+const isFilled = (k: DraftKey, v: unknown) => {
+  if (k === "header") return !!(v as any).FORNECEDOR;
+  if (Array.isArray(v)) return v.length > 0;
+  if (typeof v === "object" && v) return Object.keys(v).length > 0;
+  if (typeof v === "string") return v.trim() !== "";
+  return !!v;
 };
 
 export function DebugStateSheet() {
   const [open, setOpen] = useState(false);
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [expanded, setExp] = useState<string[]>([]);
 
-  // Lê o estado draft completo do store
-  const draft = usePreNotaStore((state) => state.draft);
+  const draft = usePreNotaStore((s) => s.draft);
+  const auxSlices = usePreNotaAuxStore();
+  const auxList = Object.entries(auxSlices) as [string, unknown][];
 
-  // Prepara os dados para a aba de progresso
-  const fieldStatuses: FieldStatus[] = useMemo(() => {
-     return monitoredKeys.map(key => {
-        const value = draft[key];
-        const isFilled = isFieldFilled(key, value);
-        const isExpandable = typeof value === 'object' && value !== null; // Objetos e arrays são expansíveis
-        let label = key.charAt(0).toUpperCase() + key.slice(1); // Capitaliza
-        if (key === 'header') label = 'Cabeçalho';
-        if (key === 'itens') label = 'Itens da Nota';
-        if (key === 'anexos') label = 'Anexos';
-        if (key === 'parcelas') label = 'Parcelas';
-        if (key === 'rateios') label = 'Rateios';
+  /* progresso */
+  const statuses: FieldStatus[] = useMemo(() => {
+    const labels: Record<DraftKey, string> = {
+      header: "Cabeçalho",
+      itens: "Itens",
+      anexos: "Anexos",
+      parcelas: "Parcelas",
+      rateios: "Rateios",
+    };
+    return monitoredKeys.map((k) => {
+      const val = draft[k];
+      return {
+        key: k,
+        label: labels[k],
+        value: val,
+        isFilled: isFilled(k, val),
+        isExpandable: typeof val === "object" && val !== null,
+      };
+    });
+  }, [draft]);
 
-        return { key, label, value, isFilled, isExpandable };
-     });
-  }, [draft]); // Recalcula quando o draft mudar
+  const pct =
+    (statuses.filter((s) => s.isFilled).length / monitoredKeys.length) * 100;
 
-  // Calcula progresso geral
-  const filledCount = fieldStatuses.filter(f => f.isFilled).length;
-  const progressPercentage = monitoredKeys.length > 0 ? (filledCount / monitoredKeys.length) * 100 : 0;
+  const toggle = (k: string) =>
+    setExp((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
 
-  // Função para alternar expansão
-  const toggleExpand = (key: string) => {
-    setExpandedKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
-  };
-
-  // Ícone de status
-  const getStatusIcon = (isFilled: boolean) =>
-    isFilled ? (
-      <CheckCircle className="text-green-500 dark:text-green-400 w-5 h-5 flex-shrink-0" />
+  const Icon = ({ ok }: { ok: boolean }) =>
+    ok ? (
+      <CheckCircle className="w-5 h-5 text-green-500" />
     ) : (
-      <Circle className="text-muted-foreground w-5 h-5 flex-shrink-0" />
+      <Circle className="w-5 h-5 text-muted-foreground" />
     );
 
+  /* JSX */
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      {/* Botão que abre o Sheet */}
       <SheetTrigger asChild>
         <Button variant="outline" size="sm">
           <Info className="w-4 h-4 mr-2" />
-          Ver Progresso
+          Progresso
         </Button>
       </SheetTrigger>
 
-      {/* Conteúdo do Sheet */}
-      <SheetContent className="w-[80vw] flex flex-col gap-4">
+      <SheetContent className="w-[85vw] flex flex-col gap-4">
         <SheetHeader>
-          <SheetTitle>Estado Atual da Pré-Nota (Draft)</SheetTitle>
+          <SheetTitle>Estado da Pré-Nota</SheetTitle>
           <SheetDescription>
-            Visualize os dados preenchidos e o JSON correspondente.
+            Preenchimento do draft e stores auxiliares.
           </SheetDescription>
         </SheetHeader>
 
-        <Tabs defaultValue="progress" className="w-full flex-1 flex flex-col overflow-hidden">
-          {/* Abas */}
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="progress">Estrutura / Progresso</TabsTrigger>
-            <TabsTrigger value="json">JSON Completo</TabsTrigger>
-            {/* <TabsTrigger value="anexos">Debug Anexos</TabsTrigger> // Aba opcional */}
+        <Tabs
+          defaultValue="progress"
+          className="w-full flex-1 flex flex-col overflow-hidden"
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="progress">Estrutura</TabsTrigger>
+            <TabsTrigger value="aux">Auxiliares</TabsTrigger>
+            <TabsTrigger value="json">JSON</TabsTrigger>
           </TabsList>
 
-          {/* Conteúdo Aba Progresso */}
-          <TabsContent value="progress" className="mt-4 flex-1 flex flex-col gap-4 overflow-hidden">
-             <div>
-                <h4 className="text-sm font-medium mb-2 text-center">Progresso Geral (Seções Preenchidas)</h4>
-                <Progress value={progressPercentage} />
-                <p className="text-xs text-muted-foreground mt-1 text-center">
-                    {filledCount} de {monitoredKeys.length} seções preenchidas ({Math.round(progressPercentage)}%)
-                </p>
+          {/* Estrutura */}
+          <TabsContent
+            value="progress"
+            className="mt-4 flex-1 flex flex-col gap-4 overflow-hidden"
+          >
+            <div>
+              <h4 className="text-sm font-medium text-center mb-2">
+                Progresso Geral
+              </h4>
+              <Progress value={pct} />
+              <p className="text-xs text-center text-muted-foreground mt-1">
+                {Math.round(pct)}% – {statuses.filter((s) => s.isFilled).length}
+                /{monitoredKeys.length}
+              </p>
             </div>
-             <ScrollArea className="flex-1 pr-3">
-                <div className="space-y-2 ">
-                    {fieldStatuses.map((field) => (
-                        <div
-                            key={field.key}
-                            className={cn(
-                                "flex items-start gap-2 p-2 rounded-md border",
-                                field.isFilled ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800/30" : "bg-muted/50"
-                            )}
-                        >
-                            <div className="mt-1">{getStatusIcon(field.isFilled)}</div>
-                            <div className="flex-1 overflow-hidden"> {/* Prevents overflow */}
-                                <div
-                                    className={cn("flex items-center justify-between", field.isExpandable && "cursor-pointer hover:bg-muted/80 rounded p-1 -m-1 mb-1")}
-                                    onClick={field.isExpandable ? () => toggleExpand(field.key) : undefined}
-                                >
-                                    <span className="text-sm font-medium">{field.label}</span>
-                                    {field.isExpandable && (
-                                        expandedKeys.includes(field.key) ? (
-                                            <ChevronUp className="w-4 h-4 flex-shrink-0" />
-                                        ) : (
-                                            <ChevronDown className="w-4 h-4 flex-shrink-0" />
-                                        )
-                                    )}
-                                </div>
-                                {/* Detalhes (JSON para objetos/arrays, valor direto para outros) */}
-                                <div className={cn("mt-1 text-xs text-muted-foreground", !expandedKeys.includes(field.key) && !field.isExpandable && "break-words")}>
-                                    {field.isExpandable ? (
-                                        expandedKeys.includes(field.key) ? (
-                                            <pre className="text-xs bg-background p-2 rounded whitespace-pre-wrap border max-h-60 overflow-auto">
-                                                {JSON.stringify(field.value, null, 2)}
-                                            </pre>
-                                        ) : (
-                                            <span>{Array.isArray(field.value) ? `(${field.value.length} itens)` : '(Detalhes...) '}</span>
-                                        )
-                                    ): (
-                                        <span>{field.value?.toString() || <span className="italic">Vazio</span>}</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            <ScrollArea className="flex-1 pr-3">
+              <div className="space-y-2">
+                {statuses.map((f) => (
+                  <div
+                    key={f.key}
+                    className={cn(
+                      "flex items-start gap-2 p-2 rounded-md border",
+                      f.isFilled
+                        ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800/30"
+                        : "bg-muted/50"
+                    )}
+                  >
+                    <div className="mt-1">
+                      <Icon ok={f.isFilled} />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div
+                        className={cn(
+                          "flex items-center justify-between",
+                          f.isExpandable &&
+                            "cursor-pointer hover:bg-muted/80 rounded p-1 -m-1 mb-1"
+                        )}
+                        onClick={
+                          f.isExpandable ? () => toggle(f.key) : undefined
+                        }
+                      >
+                        <span className="text-sm font-medium">{f.label}</span>
+                        {f.isExpandable &&
+                          (expanded.includes(f.key) ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          ))}
+                      </div>
+                      <div
+                        className={cn(
+                          "mt-1 text-xs text-muted-foreground",
+                          f.isExpandable &&
+                            !expanded.includes(f.key) &&
+                            "truncate"
+                        )}
+                      >
+                        {f.isExpandable ? (
+                          expanded.includes(f.key) ? (
+                            <pre className="text-xs bg-background p-2 border rounded whitespace-pre-wrap max-h-56 overflow-auto">
+                              {JSON.stringify(f.value, null, 2)}
+                            </pre>
+                          ) : Array.isArray(f.value) ? (
+                            `(${f.value.length} itens)`
+                          ) : (
+                            "(detalhes…)"
+                          )
+                        ) : (
+                          <span>{String(f.value) || <i>Vazio</i>}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </ScrollArea>
           </TabsContent>
 
-          {/* Conteúdo Aba JSON */}
-          <TabsContent value="json" className="mt-4 flex-1 overflow-hidden">
-             <div className="flex items-center justify-between mb-2">
-                 <h4 className="text-sm font-medium">JSON Completo (`draft`)</h4>
-                 <Code className="w-4 h-4 text-muted-foreground" />
-             </div>
-             <ScrollArea className="h-full border rounded">
-                <pre className="text-xs p-4 whitespace-pre-wrap">
-                    {JSON.stringify(draft, null, 2)}
-                </pre>
-             </ScrollArea>
+          {/* Auxiliares */}
+          <TabsContent value="aux" className="mt-4 flex-1 overflow-hidden">
+            <ScrollArea className="h-full pr-3">
+              <div className="space-y-2">
+                {auxList.map(([sk, sv]) => {
+                  const k = `aux-${sk}`;
+                  const expandable = typeof sv === "object" && sv !== null;
+                  const exp = expanded.includes(k);
+                  return (
+                    <div
+                      key={sk}
+                      className="flex items-start gap-2 p-2 rounded-md border bg-muted/40"
+                    >
+                      <div className="mt-1">
+                        <Circle className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <div
+                          className={cn(
+                            "flex items-center justify-between",
+                            expandable &&
+                              "cursor-pointer hover:bg-muted/80 rounded p-1 -m-1 mb-1"
+                          )}
+                          onClick={expandable ? () => toggle(k) : undefined}
+                        >
+                          <span className="text-sm font-medium capitalize">
+                            {sk}
+                          </span>
+                          {expandable &&
+                            (exp ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
+                        </div>
+                        <div
+                          className={cn(
+                            "mt-1 text-xs text-muted-foreground",
+                            expandable && !exp && "truncate"
+                          )}
+                        >
+                          {expandable ? (
+                            exp ? (
+                              <pre className="text-xs bg-background p-2 border rounded whitespace-pre-wrap max-h-56 overflow-auto">
+                                {JSON.stringify(sv, null, 2)}
+                              </pre>
+                            ) : Array.isArray(sv) ? (
+                              `(${sv.length} itens)`
+                            ) : (
+                              "(detalhes…)"
+                            )
+                          ) : (
+                            <span>{String(sv) || <i>Vazio</i>}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
           </TabsContent>
 
+          {/* JSON bruto */}
+          <TabsContent value="json" className="mt-4 flex-1 overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium">Draft (raw JSON)</h4>
+              <Code className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <ScrollArea className="h-full border rounded">
+              <pre className="text-xs p-4 whitespace-pre-wrap">
+                {JSON.stringify(draft, null, 2)}
+              </pre>
+            </ScrollArea>
+          </TabsContent>
         </Tabs>
       </SheetContent>
     </Sheet>

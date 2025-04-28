@@ -26,7 +26,7 @@ import {
 import { History, Loader2, AlertCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react"; // useRef é crucial para o controle de disparo
 import { useSearchXml } from "@inclusao/hooks"; // Hook principal de busca XML
-import { usePreNotaAuxStore,useXmlHistoryStore } from "@inclusao/stores"; // Store auxiliar para histórico
+import { useXmlHistoryStore } from "@inclusao/stores"; // Store auxiliar para histórico
 
 export function XmlSearchInput() {
   const [inputValue, setInputValue] = useState("");

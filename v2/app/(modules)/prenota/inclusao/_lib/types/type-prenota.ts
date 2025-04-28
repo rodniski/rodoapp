@@ -116,9 +116,6 @@ export interface PreNotaItem {
   PC?: string;
   ITEMPC?: string;
   B1_UM: string;
-  SEGUN?: string;
-  TPFATO?: string;
-  CONV?: number;
   ORIGEM: string | number;
 }
 

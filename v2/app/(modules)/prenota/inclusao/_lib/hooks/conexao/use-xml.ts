@@ -12,7 +12,7 @@ import {
   useSearchFornecedorPedidos,
 } from "@inclusao/hooks";
 import { findFilialCodigo, getCurrentUsername } from "utils"; 
-import { populateStoresFromXml } from "@inclusao/utils"; 
+import { populateStoresFromXml } from "."; 
 import { usePreNotaAuxStore } from "@inclusao/stores";
 
 const HOOK_NAME = "useSearchXmlOrchestrator";

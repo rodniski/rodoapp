@@ -48,7 +48,7 @@
   ],
   "itens": [
     {
-      "ITEM": "0001", sequencial
+      "ITEM": "0001", sequencial 
       "PRODUTO": "RD000588", -> codigo do produto (pedido)
       "QUANTIDADE": 1, -> quantidade do item (XML) (quantidade)
       "VALUNIT": 24.99, -> valor unitario do item (XML) (valorUnitario)

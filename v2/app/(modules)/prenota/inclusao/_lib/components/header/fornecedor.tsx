@@ -14,12 +14,12 @@ import { Loader2, Users, Check } from "lucide-react";
 import { useSearchFornecedorPedidos } from "@inclusao/hooks"; // Hook para buscar fornecedor/pedidos
 import { formatCNPJ } from "utils"; // Utilitário de formatação (ajuste path se necessário)
 import {
-  usePreNotaStore,             // Store principal da pré-nota
-  usePreNotaAuxStore,          // Store auxiliar geral
-  useXmlDataLoadedStatus,      // Seletor para flag XML carregado
-  useFornecedorSearchResult,   // Seletor para resultado da busca de fornecedor
-  useSelectedFornecedor,     // Seletor para fornecedor selecionado (com nome)
-} from "@inclusao/stores";      // Stores (usando aliases)
+  usePreNotaStore, // Store principal da pré-nota
+  usePreNotaAuxStore, // Store auxiliar geral
+  useXmlDataLoadedStatus, // Seletor para flag XML carregado
+  useFornecedorSearchResult, // Seletor para resultado da busca de fornecedor
+  useSelectedFornecedor, // Seletor para fornecedor selecionado (com nome)
+} from "@inclusao/stores"; // Stores (usando aliases)
 // --- Tipos Importantes ---
 // Importa Fornecedor (que contém Pedido[]) da definição da API ou de types se movido
 import type { Fornecedor, Pedido } from "@inclusao/api";
@@ -29,10 +29,10 @@ import type { PreNotaItem } from "@inclusao/types";
 // Estrutura interna para as opções formatadas exibidas na lista
 interface FormattedOption {
   uniqueId: string; // Combinação de código e loja
-  cod: string;      // Código ou CNPJ do fornecedor
+  cod: string; // Código ou CNPJ do fornecedor
   loja: string;
-  desc: string;     // Nome formatado para exibição
-  cnpj: string;     // CNPJ original para exibição formatada
+  desc: string; // Nome formatado para exibição
+  cnpj: string; // CNPJ original para exibição formatada
   original: Fornecedor; // Objeto Fornecedor original com todos os dados (incluindo PEDIDOS)
 }
 
@@ -42,7 +42,11 @@ export function FornecedorDialog() {
 
   // --- Hooks e Stores ---
   // Hook para realizar a busca
-  const { searchFornecedor, isLoading, error: searchError } = useSearchFornecedorPedidos();
+  const {
+    searchFornecedor,
+    isLoading,
+    error: searchError,
+  } = useSearchFornecedorPedidos();
   // Lê resultados e estados dos stores auxiliares
   const searchResult = useFornecedorSearchResult();
   const xmlFoiCarregado = useXmlDataLoadedStatus();
@@ -58,17 +62,20 @@ export function FornecedorDialog() {
   // --- Memos para dados derivados ---
 
   // Formata o resultado da busca (Fornecedor[]) para as opções do CommandList
-  const options = useMemo((): FormattedOption[] => {
-    if (!searchResult) return []; // Retorna vazio se não houver resultado
-    return searchResult.map((forn) => ({
-      uniqueId: `${forn.A2_COD}-${forn.A2_LOJA}`,
-      cod: forn.A2_COD, // Guarda o código original (pode ser CNPJ se A2_COD for CNPJ)
-      loja: forn.A2_LOJA,
-      desc: forn.A2_NOME || forn.A2_NREDUZ || `Cod: ${forn.A2_COD} / Loja: ${forn.A2_LOJA}`, // Usa nome, nome reduzido ou fallback
-      cnpj: forn.A2_CGC, // Guarda CNPJ para formatação
-      original: forn, // Mantém referência ao objeto completo
-    }));
-  }, [searchResult]); // Recalcula somente se o resultado da busca mudar
+// …FornecedorDialog.tsx
+const options = useMemo((): FormattedOption[] => {
+  if (!Array.isArray(searchResult) || searchResult.length === 0) return [];
+
+  return searchResult.map((forn) => ({
+    uniqueId: `${forn.A2_COD}-${forn.A2_LOJA}`,
+    cod     : forn.A2_COD,
+    loja    : forn.A2_LOJA,
+    desc    : forn.A2_NOME || forn.A2_NREDUZ || `Cod: ${forn.A2_COD} / Loja: ${forn.A2_LOJA}`,
+    cnpj    : forn.A2_CGC,
+    original: forn,
+  }));
+}, [searchResult]);
+
 
   // Define o texto do botão principal
   const buttonLabel = useMemo(() => {
@@ -76,11 +83,11 @@ export function FornecedorDialog() {
     // Verifica se corresponde ao header principal para consistência
     if (
       selectedFornecedorInfo &&
-      selectedFornecedorInfo.cod === currentHeader.FORNECEDOR &&
-      selectedFornecedorInfo.loja === currentHeader.LOJA &&
-      selectedFornecedorInfo.nome
+      selectedFornecedorInfo.A2_COD === currentHeader.FORNECEDOR &&
+      selectedFornecedorInfo.A2_LOJA === currentHeader.LOJA &&
+      selectedFornecedorInfo.A2_NOME
     ) {
-      return selectedFornecedorInfo.nome;
+      return selectedFornecedorInfo.A2_NOME;
     }
     // Prioridade 2: Código/Loja do header principal (se nenhum nome correspondente for encontrado no aux)
     if (currentHeader.FORNECEDOR && currentHeader.LOJA) {
@@ -96,72 +103,64 @@ export function FornecedorDialog() {
   const handleSelectSupplier = (selectedOption: FormattedOption) => {
     console.log("Fornecedor Selecionado Manualmente:", selectedOption);
 
-    // 1. Atualiza o Header no Store Principal (usePreNotaStore) com Cód/Loja
     setHeader({
-      FORNECEDOR: selectedOption.cod,
-      LOJA: selectedOption.loja,
+      FORNECEDOR: selectedOption.original.A2_COD, // <- agora garantido
+      LOJA: selectedOption.original.A2_LOJA, // <- agora garantido
     });
 
-    // 2. Atualiza o Fornecedor Selecionado no Store Auxiliar (usePreNotaAuxStore) com Cód/Loja/Nome
-    setSelectedFornecedor({
-        cod: selectedOption.cod,
-        loja: selectedOption.loja,
-        nome: selectedOption.desc, // O nome formatado da opção
-    });
+    // Salvando no formato original do Store (Fornecedor completo, mas sem PEDIDOS)
+    const { PEDIDOS, ...fornecedorSemPedidos } = selectedOption.original;
 
-    // 3. Popula Itens (Condicional): Se XML não foi carregado e há pedidos
-    if (!xmlFoiCarregado && selectedOption.original.PEDIDOS?.length > 0) {
+    setSelectedFornecedor(fornecedorSemPedidos);
+
+    if (!xmlFoiCarregado && PEDIDOS.length > 0) {
       console.log("XML não carregado, populando itens a partir dos pedidos...");
-      const pedidosDoFornecedor = selectedOption.original.PEDIDOS;
+      const mappedItens: PreNotaItem[] = PEDIDOS.map((itemPedido, index) => ({
+        ITEM: String(index + 1).padStart(4, "0"),
+        PRODUTO: itemPedido.C7_PRODUTO || "",
+        QUANTIDADE: itemPedido.C7_QUANT || 0,
+        VALUNIT: itemPedido.C7_PRECO || 0,
+        PRODFOR: "",
+        DESCFOR: itemPedido.B1_DESC || "",
+        ORIGEMXML: "",
+        TOTAL: itemPedido.C7_TOTAL || 0,
+        PC: itemPedido.C7_NUM || "",
+        ITEMPC: itemPedido.C7_ITEM || "",
+        B1_UM: itemPedido.B1_UM || "",
+        ORIGEM: itemPedido.B1_ORIGEM || "",
+      }));
 
-      // Mapeia os itens do pedido selecionado para o formato PreNotaItem
-      const mappedItens: PreNotaItem[] = pedidosDoFornecedor.map(
-        (itemPedido: Pedido, index): PreNotaItem => { // Tipagem explícita aqui
-          const baseItem: PreNotaItem = {
-              ITEM: String(index + 1).padStart(4, '0'),
-              PRODUTO: itemPedido.C7_PRODUTO || '',
-              QUANTIDADE: itemPedido.C7_QUANT || 0,
-              VALUNIT: itemPedido.C7_PRECO || 0,
-              PRODFOR: '', // Não disponível nos dados do pedido (seria cód. prod. no forn.)
-              DESCFOR: itemPedido.B1_DESC || '',
-              ORIGEMXML: '', // Não aplicável aqui
-              TOTAL: itemPedido.C7_TOTAL || 0,
-              PC: itemPedido.C7_NUM || '',
-              ITEMPC: itemPedido.C7_ITEM || '',
-              B1_UM: itemPedido.B1_UM || '',
-              ORIGEM: itemPedido.B1_ORIGEM || '',
-              // Adicione outros campos necessários da interface PreNotaItem com defaults
-          };
-          // Remove chaves com valor undefined (limpeza opcional)
-          Object.keys(baseItem).forEach(
-              (key) => baseItem[key as keyof PreNotaItem] === undefined && delete baseItem[key as keyof PreNotaItem]
-          );
-          return baseItem;
-        }
-      );
-
-      // Atualiza os itens no store principal
       setItens(mappedItens);
-      console.log(`Itens da PreNota populados com ${mappedItens.length} itens.`);
-    } else if (xmlFoiCarregado) {
-        console.log("Seleção feita, mas itens não foram populados (XML já carregado).");
-         // Poderia limpar os itens se a intenção for *substituir* os do XML?
-         // setItens([]); // Descomente se este for o comportamento desejado
+      console.log(
+        `Itens da PreNota populados com ${mappedItens.length} itens.`
+      );
     } else {
-        console.log("Seleção feita, fornecedor sem pedidos para popular.");
-        setItens([]); // Limpa itens se o fornecedor selecionado não tiver pedidos
+      console.log("Itens não populados (XML já carregado ou sem pedidos).");
+      setItens([]);
     }
 
-    // 4. Fecha o diálogo e limpa o termo de busca
     setOpen(false);
     setTerm("");
   };
 
-  // Dispara a busca ao pressionar Enter no input
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && term.trim()) {
-      e.preventDefault();
-      searchFornecedor({ busca: term.trim(), reca2: "" }); // reca2 como vazio (ajuste se necessário)
+
+
+  // -- depois --
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+
+   // se já temos resultados, confirma o primeiro com Enter
+   if (options.length > 0) {
+     handleSelectSupplier(options[0]);
+     return;
+   }
+
+    // caso contrário, dispara a busca
+    if (term.trim()) {
+      searchFornecedor({ busca: term.trim()});
     }
   };
 
@@ -235,7 +234,9 @@ export function FornecedorDialog() {
                     <span className="font-medium">{opt.desc}</span>
                     <div className="w-full flex justify-between text-xs text-muted-foreground">
                       <span>CNPJ: {formatCNPJ(opt.cnpj)}</span>
-                      <span>Cod: {opt.cod} / Loja: {opt.loja}</span>
+                      <span>
+                        Cod: {opt.cod} / Loja: {opt.loja}
+                      </span>
                     </div>
                     {/* Check para indicar fornecedor atualmente selecionado */}
                     {currentHeader.FORNECEDOR === opt.cod &&

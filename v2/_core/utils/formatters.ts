@@ -142,14 +142,11 @@ export function parseCurrencyToNumber(
  * @param value Valor a ser convertido.
  * @returns O número float correspondente ou 0.
  */
-export function parseFloatOrZero(
-  value: string | number | null | undefined
-): number {
-  // <-- Mudado para export function
-  if (typeof value === "number") return isNaN(value) ? 0 : value;
+export function parseFloatOrZero(value?: string | number): number {
+  if (typeof value === "number") return value;
   if (typeof value === "string") {
-    const cleanedValue = value.replace(/[R$\s.]/g, "").replace(",", ".");
-    const parsed = parseFloat(cleanedValue);
+    const normalized = value.replace(",", ".").trim();
+    const parsed = parseFloat(normalized);
     return isNaN(parsed) ? 0 : parsed;
   }
   return 0;
