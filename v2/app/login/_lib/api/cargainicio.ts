@@ -1,6 +1,6 @@
 import { config } from "config";
 import axios from "axios";
-import type { CargaInicio } from "@login/types";
+import type { CargaInicio } from "@/app/login/_lib/types";
 
 const CARGA_INICIO_API_URL = `${config.API_PRODUCTION_URL}reidoapsdu/consultar/cargaInicio`;
 export async function fetchCargaInicio(username: string): Promise<CargaInicio> {

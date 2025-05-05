@@ -1,3 +1,4 @@
+// _core/components/ui/data-table/action-header.tsx
 import {
   Button,
   DropdownMenu,
@@ -29,6 +30,12 @@ export function DataTableColumnHeader<TData, TValue>({
   const setSorting = useDataTableStore((s) => s.setSorting);
   const setPageIndex = useDataTableStore((s) => s.setPageIndex);
 
+  // Verificação para garantir que setSorting é uma função
+  if (typeof setSorting !== "function") {
+    console.error("setSorting não é uma função. Verifique a implementação do useDataTableStore.");
+    return <span>Erro na configuração da tabela</span>; // Feedback visual opcional
+  }
+
   const columnId = column.id;
   const currentSort = sorting.find((s) => s.id === columnId);
 
@@ -36,7 +43,7 @@ export function DataTableColumnHeader<TData, TValue>({
     const newSorting = sorting.filter((s) => s.id !== columnId);
     newSorting.unshift({ id: columnId, desc });
     setSorting(newSorting);
-    setPageIndex(0); // resetar página
+    setPageIndex(0); // Resetar página ao ordenar
   };
 
   return (

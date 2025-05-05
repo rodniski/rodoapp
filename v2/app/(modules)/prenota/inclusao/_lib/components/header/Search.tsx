@@ -94,7 +94,6 @@ export function XmlSearchInput() {
               handleManualSearch(inputValue);
             }
           }}
-          maxLength={44}
           className={`pr-10 ${
             error ? "border-destructive focus-visible:ring-destructive" : ""
           }`}

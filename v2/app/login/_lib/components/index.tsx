@@ -1,8 +1,6 @@
-// app/(modules)/login/LoginForm.tsx
 "use client";
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +24,7 @@ import {
   Checkbox,
   PasswordInput,
 } from "ui";
-import { useAuth } from "@login/hooks";
+import { useAuth } from "@/app/login/_lib/hooks";
 
 const loginSchema = z.object({
   username: z
@@ -39,15 +37,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const router = useRouter();
-  const { login, isAuthenticated, isLoading } = useAuth();
-
-  // as soon as we become authenticated, jump to /dashboard
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/dashboard");
-    }
-  }, [isAuthenticated, router]);
+  const { login, isLoading } = useAuth();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -64,7 +54,6 @@ export function LoginForm() {
       return;
     }
     toast.success("Login bem-sucedido! Redirecionando…");
-    // redirect happens via the useEffect above
   };
 
   return (
@@ -99,7 +88,6 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="password"
@@ -117,7 +105,6 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="rememberMe"
@@ -126,20 +113,19 @@ export function LoginForm() {
                     <FormControl>
                       <Checkbox
                         disabled={isSubmitting || isLoading}
-                        {...field}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <FormLabel>Lembrar-me</FormLabel>
                   </FormItem>
                 )}
               />
-
               {form.formState.errors.root && (
                 <div className="text-red-500 text-center text-sm">
                   {form.formState.errors.root.message}
                 </div>
               )}
-
               <Button
                 type="submit"
                 className="w-full flex justify-center items-center"

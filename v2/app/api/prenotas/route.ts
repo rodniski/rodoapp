@@ -1,15 +1,16 @@
-// /app/api/prenotas/route.ts
+
 import { NextResponse } from "next/server";
 import { getPrenotas } from "./service";
 
-export async function POST(request: Request) {
+export async function handleGetPrenotas(request: Request) {
   try {
     const body = await request.json();
     const {
       pagination: { page = 1, pageSize = 10 } = {},
-      filters = {},
+      filters = {}, // Garante que filters seja um objeto vazio por padrão
       sorting = [],
-      filials = ["0101"],
+      filials = [],
+      searchTerm,
     } = body;
 
     const result = await getPrenotas({
@@ -18,14 +19,28 @@ export async function POST(request: Request) {
       filters,
       sorting,
       filials,
+      searchTerm,
     });
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Erro ao processar requisição:", error);
+    console.error("Erro no controller handleGetPrenotas:", error);
+
+    let statusCode = 500;
+    let errorMessage = "Erro interno do servidor ao buscar prenotas.";
+
+    if (error instanceof Error) {
+      if (error.message.includes("array vazio") || error.message.includes("obrigatórias")) {
+        statusCode = 400;
+        errorMessage = error.message;
+      }
+    }
+
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }
+
+export { handleGetPrenotas as POST };

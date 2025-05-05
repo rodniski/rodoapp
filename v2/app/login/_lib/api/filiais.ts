@@ -1,7 +1,7 @@
 
 
 import axios from "axios";
-import type { FilialGeral } from "@login/types";
+import type { FilialGeral } from "@/app/login/_lib/types";
 import { config } from "config";
 
 const FILIAIS_API_URL = `${config.API_PRODUCTION_URL}reidoapsdu/consultar/filiais/`;

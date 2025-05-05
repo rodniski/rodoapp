@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "ui";
 import { Badge } from "ui";
 import { Button } from "ui";
 import { cn } from "utils";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "ui";
 
 export type Option = {
   label: string;
@@ -67,8 +68,8 @@ export function MultiSelect({
     let totalWidth = 0;
     let visibleCount = 0;
 
-    // Add clear button and chevron widths
-    totalWidth += 56; // Approximate width for clear button and chevron
+    // Reserva espaço para botão de limpar e chevron
+    totalWidth += 56;
 
     for (let i = 0; i < selectedOptions.length; i++) {
       const badge = document.createElement("div");
@@ -79,7 +80,6 @@ export function MultiSelect({
       totalWidth += badge.offsetWidth;
 
       if (totalWidth > triggerWidth - 30) {
-        // Leave space for the +X badge
         break;
       }
 
@@ -114,16 +114,19 @@ export function MultiSelect({
     onChange([]);
   };
 
+  // Filiais ocultas para o tooltip
+  const hiddenSelections = selectedOptions.slice(visibleSelections.length);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div
           ref={triggerRef}
-          role="button"
+          role="combobox"
           aria-expanded={open}
           tabIndex={0}
           className={cn(
-            "w-full justify-between inline-flex items-center rounded-md border border-input bg-muted/30 px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "w-full justify-between inline-flex items-center rounded-md border border-input bg-muted/30 h-9 px-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
             className
           )}
           onClick={() => setOpen(!open)}
@@ -140,16 +143,35 @@ export function MultiSelect({
                 {visibleSelections.map((option) => (
                   <Badge
                     key={option.value}
-                    variant="secondary"
-                    className={cn("mr-1 px-2 py-0.5", badgeClassName)}
+                    variant="outline"
+                    className={cn(badgeClassName)}
                   >
                     {option.label}
                   </Badge>
                 ))}
                 {hiddenCount > 0 && (
-                  <Badge variant="secondary" className="px-2 py-0.5">
-                    +{hiddenCount}
-                  </Badge>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Badge
+                        variant="secondary"
+                        className={cn("px-2 py-0.5", badgeClassName)}
+                      >
+                        +{hiddenCount}
+                      </Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-auto max-w-xs">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Filiais ocultas:</p>
+                        <ul className="text-xs">
+                          {hiddenSelections.map((option) => (
+                            <li key={option.value} className="truncate">
+                              {option.label}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 )}
               </>
             ) : (
@@ -161,45 +183,49 @@ export function MultiSelect({
               <span
                 role="button"
                 tabIndex={0}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClear(e as any);
-                }}
+                onClick={handleClear}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") handleClear(e as any);
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleClear(e as any);
+                  }
                 }}
                 className="h-8 px-2 mr-1 inline-flex items-center justify-center cursor-pointer hover:bg-transparent"
+                aria-label="Limpar seleções"
               >
                 <XCircle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                <span className="sr-only">Limpar</span>
               </span>
             )}
-            <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown
+              className="h-4 w-4 shrink-0 opacity-50"
+              aria-hidden="true"
+            />
           </div>
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder="Search..." />
+          <CommandInput placeholder="Pesquisar..." />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
             <CommandGroup>
               {options.map((option, index) => (
                 <CommandItem
-                  key={`${option.value}-${index}`} // garante unicidade
-                  value={option.value ?? `item-${index}`} // fallback se value vier undefined
+                  key={`${option.value}-${index}`}
+                  value={option.value ?? `item-${index}`}
                   onSelect={() => handleSelect(option.value)}
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center w-full">
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 size-3",
                         selected.includes(option.value)
                           ? "opacity-100"
                           : "opacity-0"
                       )}
+                      aria-hidden="true"
                     />
-                    {option.label}
+                    <span className="truncate">{option.label}</span>
                   </div>
                 </CommandItem>
               ))}

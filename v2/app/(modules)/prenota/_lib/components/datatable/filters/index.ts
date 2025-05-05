@@ -1,7 +1,8 @@
-export {default as FiltroDataRange} from './FiltroDataRange';
-export {default as FiltroNumeroRange} from './FiltroNumeroRange';
-export {default as FiltroSelect} from './FiltroSelect';
-export {default as FiltroSelectMultiple} from './FiltroSelectMultiple';
-export {default as FiltroTexto} from './FiltroTexto';
-export {default as FiltroFilialSelect} from './FiltroFilialSelect';
+export * from './FiltroDataRange';
+export * from './FiltroFilialSelect';
+export * from './FiltroNumeroRange';
+export * from './FiltroSelect';
+export * from './FiltroSelectMultiple';
+export * from './FiltroTexto';
+export * from './filter-row';
 export * from './filters';

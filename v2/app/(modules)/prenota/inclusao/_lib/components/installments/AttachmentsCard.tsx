@@ -1,7 +1,6 @@
-// _lib/components/stepper/header/AttachmentsCard.tsx
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardHeader,
@@ -11,109 +10,128 @@ import {
   Button,
   Input,
   ScrollArea,
-  Progress, // Presume que você tenha um componente Progress na sua UI lib
-} from "ui"; // Seus componentes UI
-import { Paperclip, Trash2, Upload, Loader2 } from "lucide-react"; // Adicionado Loader2 para progresso < 100
-
+  Progress,
+} from "ui";
+import { Paperclip, Trash2, Upload, Loader2, Check } from "lucide-react";
 import {
   usePreNotaStore,
   useFileUploadAuxStore,
   useUploadProgressMap,
-} from "@inclusao/stores"; // Ajuste os paths se necessário
-
-// Importa o tipo Anexo (metadados)
+} from "@inclusao/stores";
 import type { Anexo } from "@inclusao/types";
 
 export function AttachmentsCard() {
-  // --- Leitura de Estado ---
-  // Lê os metadados do store principal para EXIBIÇÃO
-  const anexosParaExibir = usePreNotaStore((s) => s.draft.anexos);
-  // Lê o mapa de progresso do store auxiliar
+  // store state
+  const anexosStore = usePreNotaStore((s) => s.draft.ARQUIVOS);
   const uploadProgressMap = useUploadProgressMap();
 
-  // --- Ações dos Stores ---
-  // Ações do store principal (para sincronizar metadados)
-  const { addAnexo, removeAnexo, updateAnexoDesc, clearAnexos } = usePreNotaStore.getState();
-  // Ações do store auxiliar (para gerenciar Files e progresso)
+  // direct store actions
+  const { addAnexo, removeAnexo, clearAnexos, updateAnexoDesc } =
+    usePreNotaStore.getState();
   const {
     addManagedFile,
     removeManagedFile,
-    updateManagedFileDescription,
     clearAllManagedFiles,
-    // getFileData, // Poderia ser usado se precisasse ler dados do arquivo aqui
-    // setUploadProgress, // Usado pela lógica de upload real (fora deste componente)
-    // removeUploadProgress, // Usado pela lógica de upload real (fora deste componente)
+    updateManagedFileDescription,
   } = useFileUploadAuxStore.getState();
+
+  const [localAnexos, setLocalAnexos] = useState<Anexo[]>([]);
+  const [initialAnexos, setInitialAnexos] = useState<Anexo[]>([]);
+
+  // on mount or store change reset local copies
+  useEffect(() => {
+    setLocalAnexos(anexosStore.map((a) => ({ ...a })));
+    setInitialAnexos(anexosStore.map((a) => ({ ...a })));
+  }, [anexosStore]);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // --- Handlers (Agora chamam ações de AMBOS os stores) ---
-
   const handleAddClick = () => inputRef.current?.click();
 
-  // Processa e adiciona arquivos aos DOIS stores
-  const processAndAddFiles = (filesToAdd: FileList | File[]) => {
-    const filesArray = Array.from(filesToAdd);
-
-    filesArray.forEach((file) => {
-      // 1. Chama a ação do store AUXILIAR e pega o SEQ gerado
-      const seq = addManagedFile(file); // Descrição inicial vazia por padrão
-
-      // 2. Chama a ação do store PRINCIPAL para sincronizar metadados
-      const newAnexoMeta: Anexo = {
-        seq: seq,
-        arq: file.name,
-        desc: "", // Descrição inicial vazia
-      };
-      addAnexo(newAnexoMeta);
-
-      // 3. Opcional: Iniciar o upload aqui? Ou apenas adicionar à lista?
-      // Se o upload iniciar aqui, você chamaria uma função/hook de upload
-      // que usaria setUploadProgress e removeUploadProgress do aux store.
-      // Ex: uploadFile(seq, file);
+  const processAndAddFilesLocal = (files: FileList | File[]) => {
+    const arr = Array.from(files);
+    arr.forEach((file) => {
+      // create local annotation with temporary seq (e.g. timestamp)
+      const seq = String(Date.now()) + Math.random();
+      const meta: Anexo = { seq, arq: file.name, desc: "" };
+      setLocalAnexos((prev) => [...prev, meta]);
     });
   };
 
-  // Handler para o input de seleção de arquivos
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      processAndAddFiles(e.target.files);
-      e.target.value = ""; // Limpa o input
+      processAndAddFilesLocal(e.target.files);
+      e.target.value = "";
     }
   };
 
-  // Handler para o drop de arquivos
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    processAndAddFiles(e.dataTransfer.files);
+    processAndAddFilesLocal(e.dataTransfer.files);
   };
 
-  // Atualiza a descrição em AMBOS os stores
   const handleDescriptionChange = (seq: string, desc: string) => {
-    updateManagedFileDescription(seq, desc); // Atualiza no Aux Store
-    updateAnexoDesc(seq, desc); // Atualiza no PreNota Store
+    setLocalAnexos((prev) =>
+      prev.map((a) => (a.seq === seq ? { ...a, desc } : a))
+    );
   };
 
-  // Remove de AMBOS os stores
-  const handleRemove = (seq: string) => {
-    removeManagedFile(seq); // Remove do Aux Store (e da fila de progresso internamente)
-    removeAnexo(seq); // Remove do PreNota Store
+  const handleRemoveLocal = (seq: string) => {
+    setLocalAnexos((prev) => prev.filter((a) => a.seq !== seq));
   };
 
-  // Limpa AMBOS os stores
-  const handleClearAll = () => {
-    clearAllManagedFiles(); // Limpa Aux Store (arquivos e progresso)
-    clearAnexos(); // Limpa PreNota Store
+  const handleClearLocal = () => {
+    setLocalAnexos([]);
+  };
+
+  const isSaveDisabled = useMemo(
+    () => localAnexos.length === 0 || localAnexos.some((a) => !a.desc?.trim()),
+    [localAnexos]
+  );
+
+  const handleSaveAll = () => {
+    // itens adicionados: presentes em local mas não em initial
+    const added = localAnexos.filter(
+      (la) => !initialAnexos.some((ia) => ia.seq === la.seq)
+    );
+    // itens removidos: presentes em initial mas não em local
+    const removed = initialAnexos.filter(
+      (ia) => !localAnexos.some((la) => la.seq === ia.seq)
+    );
+    // itens existentes para update descrição: seqs em common
+    const updated = localAnexos.filter((la) =>
+      initialAnexos.some((ia) => ia.seq === la.seq)
+    );
+
+    // processa removals
+    removed.forEach((a) => {
+      removeManagedFile(a.seq);
+      removeAnexo(a.seq);
+    });
+    // processa additions
+    added.forEach((a) => {
+      const seqReal = addManagedFile(new File([], a.arq)); // ajusta caso precise Upload real
+      addAnexo({ seq: seqReal, arq: a.arq, desc: a.desc });
+    });
+    // processa updates
+    updated.forEach((a) => {
+      updateManagedFileDescription(a.seq, a.desc);
+      updateAnexoDesc(a.seq, a.desc);
+    });
+
+    setLocalAnexos([]);
+    setInitialAnexos([]);
   };
 
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
-        <CardTitle>Anexos</CardTitle>
+        <CardTitle>
+          Anexos <span className="text-destructive">*</span>
+        </CardTitle>
       </CardHeader>
 
       <CardContent className="flex-1 space-y-4 flex flex-col">
-        {/* Zona de Drag & Drop e clique */}
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -137,37 +155,25 @@ export function AttachmentsCard() {
           />
         </div>
 
-        {/* Lista de arquivos */}
         <ScrollArea className="flex-1 p-4 overflow-auto">
-          {/* Usa os anexos do PreNotaStore para renderizar */}
-          {anexosParaExibir.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted">
+          {localAnexos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50">
               <span>Nenhum anexo adicionado.</span>
             </div>
           ) : (
             <div className="space-y-3">
-              {/* Itera sobre os metadados do usePreNotaStore */}
-              {anexosParaExibir.map((anexo) => {
-                // Verifica o progresso no store auxiliar
-                const progressItem = uploadProgressMap.get(anexo.seq);
-                const currentProgress = progressItem?.progress; // Pode ser undefined se não estiver na fila
-                const isUploading =
-                  currentProgress !== undefined && currentProgress < 100;
-
+              {localAnexos.map((anexo) => {
+                const progress = uploadProgressMap.get(anexo.seq)?.progress;
+                const isUploading = progress !== undefined && progress < 100;
                 return (
                   <div
                     key={anexo.seq}
-                    className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-card p-3 rounded-md border relative" // Adicionado relative para posicionar progresso/spinner
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-card p-3 rounded-md border relative"
                   >
-                    {/* Ícone */}
                     <div className="w-16 h-16 bg-muted/50 flex items-center justify-center rounded-md flex-shrink-0">
                       <Paperclip className="w-6 h-6 text-muted-foreground" />
                     </div>
-
-                    {/* Nome e Descrição */}
                     <div className="flex-1 flex flex-col gap-1 w-full">
-                      {" "}
-                      {/* Diminuído gap */}
                       <p
                         className="text-sm font-semibold truncate"
                         title={anexo.arq}
@@ -176,39 +182,33 @@ export function AttachmentsCard() {
                       </p>
                       <Input
                         placeholder="Descrição"
-                        value={anexo.desc || ""} // Lê do anexo (PreNotaStore)
+                        value={anexo.desc}
                         onChange={(e) =>
                           handleDescriptionChange(anexo.seq, e.target.value)
-                        } // Chama handler que atualiza ambos stores
-                        disabled={isUploading} // Desabilita descrição durante upload (opcional)
+                        }
+                        disabled={isUploading}
                       />
-                      {/* Barra de Progresso ou Spinner */}
-                      {currentProgress !== undefined && (
+                      {progress !== undefined && (
                         <div className="mt-1 flex items-center gap-2">
                           {isUploading ? (
                             <Loader2 className="h-3 w-3 animate-spin text-primary" />
                           ) : (
-                            <Check className="h-3 w-3 text-green-600" /> // Exemplo de ícone de concluído
+                            <Check className="h-3 w-3 text-green-600" />
                           )}
-                          <Progress
-                            value={currentProgress}
-                            className="h-1 w-full"
-                          />
+                          <Progress value={progress} className="h-1 w-full" />
                           <span className="text-xs font-mono text-muted-foreground w-10 text-right">
-                            {currentProgress}%
+                            {progress}%
                           </span>
                         </div>
                       )}
                     </div>
-
-                    {/* Botão Remover */}
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleRemove(anexo.seq)} // Chama handler que atualiza ambos stores
+                      onClick={() => handleRemoveLocal(anexo.seq)}
                       aria-label="Remover anexo"
                       className="w-8 h-8"
-                      disabled={isUploading} // Desabilita remoção durante upload (opcional)
+                      disabled={isUploading}
                     >
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>
@@ -220,14 +220,20 @@ export function AttachmentsCard() {
         </ScrollArea>
       </CardContent>
 
-      <CardFooter className="flex justify-end">
-        {/* Botão Limpar */}
+      <CardFooter className="flex justify-end space-x-2">
         <Button
           variant="outline"
-          onClick={handleClearAll}
-          disabled={anexosParaExibir.length === 0}
+          onClick={handleClearLocal}
+          disabled={localAnexos.length === 0}
         >
           Limpar Tudo
+        </Button>
+        <Button
+          variant="default"
+          onClick={handleSaveAll}
+          disabled={isSaveDisabled}
+        >
+          Salvar
         </Button>
       </CardFooter>
     </Card>

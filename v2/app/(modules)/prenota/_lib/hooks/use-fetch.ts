@@ -1,43 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-
-interface FilterBase {
-  campo: string;
-  tipo: "texto" | "intervalo" | "select";
-}
-
-interface FiltroTexto extends FilterBase {
-  tipo: "texto";
-  comparador: "contains" | "equals" | "startsWith" | "endsWith";
-  valor: string;
-}
-
-interface FiltroIntervalo extends FilterBase {
-  tipo: "intervalo";
-  min?: string | number | Date;
-  max?: string | number | Date;
-}
-
-interface FiltroSelect extends FilterBase {
-  tipo: "select";
-  valores: string[];
-}
-
-export type FiltroAvancado = FiltroTexto | FiltroIntervalo | FiltroSelect;
+import { useDataTableStore } from "ui/data-table";
 
 interface FetchParams {
   page?: number;
   pageSize?: number;
   filials: string[];
-  filters?: FiltroAvancado[];
+  searchTerm?: string;
   sorting?: { id: string; desc: boolean }[];
+  filters?: Record<string, any>;
 }
 
 export const fetchPrenotas = async ({
   page = 1,
   pageSize = 10,
   filials,
-  filters = [],
+  searchTerm = "",
   sorting = [],
+  filters = {},
 }: FetchParams) => {
   console.groupCollapsed(
     `%c🔍 Buscando pré-notas`,
@@ -46,8 +25,9 @@ export const fetchPrenotas = async ({
   console.log("📄 Página:", page);
   console.log("📦 Page Size:", pageSize);
   console.log("🏢 Filiais:", filials);
-  console.log("🔍 Filtros Avançados:", filters);
+  console.log("🔍 Termo de Busca:", searchTerm);
   console.log("↕️ Ordenação:", sorting);
+  console.log("🔧 Filtros:", filters);
   console.groupEnd();
 
   const body = {
@@ -55,7 +35,10 @@ export const fetchPrenotas = async ({
     filters,
     sorting,
     filials,
+    searchTerm,
   };
+
+  console.log("📋 Corpo da requisição para /api/prenotas:", JSON.stringify(body, null, 2));
 
   try {
     const response = await fetch("/api/prenotas", {
@@ -80,16 +63,12 @@ export const fetchPrenotas = async ({
 };
 
 export const usePrenotas = (params: FetchParams) => {
-  const {
-    page = 1,
-    pageSize = 10,
-    filials,
-    sorting = [],
-  } = params;
+  const { page = 1, pageSize = 10, filials, searchTerm = "", sorting = [] } = params;
+  const { filters } = useDataTableStore();
 
   return useQuery({
-    queryKey: ["prenotas", page, pageSize, filials, sorting],
+    queryKey: ["prenotas", page, pageSize, filials, searchTerm, sorting, filters],
     queryFn: () =>
-      fetchPrenotas({ page, pageSize, filials, sorting }),
+      fetchPrenotas({ page, pageSize, filials, searchTerm, sorting, filters }),
   });
 };

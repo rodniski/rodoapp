@@ -5,9 +5,9 @@ import {
   getUserGrupoFilial,
   fetchCargaInicio,
   fetchFiliais,
-} from "@login/api"; // Ajuste path API
-import { useAuthStore } from "@login/stores/auth-store"; // Ajuste path Store
-import { useAuxStore }  from "@login/stores/aux-store";  // Ajuste path Store
+} from "@/app/login/_lib/api"; // Ajuste path API
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store"; // Ajuste path Store
+import { useAuxStore }  from "@/app/login/_lib/stores/aux-store";  // Ajuste path Store
 // Ajuste path Types e importe todos os tipos necessários
 import type {
   AuthResponse,
@@ -19,7 +19,7 @@ import type {
   UnidadeMedida, // Tipo para CargaInicio.UnidadeMedida
   Condicao, // Tipo para CargaInicio.Condicoes (exemplo de nome)
   CentroCusto // Tipo para CargaInicio.CentoCusto (exemplo de nome)
-} from "@login/types";
+} from "@/app/login/_lib/types";
 
 export function useAuth() {
   const { setUser, logout } = useAuthStore();

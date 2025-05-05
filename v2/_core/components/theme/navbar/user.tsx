@@ -10,7 +10,7 @@ import {
 } from "ui";
 import { getInitials } from "utils";
 import { UserMenuContent } from ".";
-import { useAuthStore } from "@login/stores/auth-store";
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
 
 export function NavUser() {
   const { user } = useAuthStore();

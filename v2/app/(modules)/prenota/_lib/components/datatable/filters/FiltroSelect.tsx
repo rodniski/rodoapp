@@ -1,16 +1,16 @@
 "use client";
 
 import React from "react";
-import { Combobox } from "ui";
+import { Combobox, ComboboxItem } from "ui";
 
 type FiltroSelectProps = {
   value: string;
   setValue: (val: string) => void;
-  options: ComboboxOption[];
+  options: ComboboxItem[];
 };
 
 const FiltroSelect: React.FC<FiltroSelectProps> = ({ value, setValue, options }) => {
-  const comboboxOptions: ComboboxOption[] = options.map((opt) => ({
+  const comboboxOptions: ComboboxItem[] = options.map((opt) => ({
     value: opt.value,
     label: opt.label,
   }));
@@ -20,7 +20,7 @@ const FiltroSelect: React.FC<FiltroSelectProps> = ({ value, setValue, options })
       <Combobox
         items={comboboxOptions}
         placeholder="Selecione..."
-        onSelect={setValue}
+        onSelect={(val) => setValue(val ?? "")}
       />
     </div>
   );

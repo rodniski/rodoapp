@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
 }
 
 // Tabela SF1010 (Cabeçalho de Entrada)
@@ -65,17 +65,16 @@ model SF4010 {
 
 // Tabela SA2010 (Fornecedores)
 model SA2010 {
-  A2_COD      String
-  A2_LOJA     String
-  A2_NOME     String
-  A2_CGC      String?           // ← adicione esta linha
-  D_E_L_E_T_  String? @default("")
+  A2_COD     String
+  A2_LOJA    String
+  A2_NOME    String
+  A2_CGC     String? // ← adicione esta linha
+  D_E_L_E_T_ String? @default("")
+
+  SF1 SF1010[] // opcional: relação reversa
 
   @@id([A2_COD, A2_LOJA])
-
-  SF1         SF1010[]         // opcional: relação reversa
 }
-
 
 // Tabela Z10010 (Títulos)
 model Z10010 {

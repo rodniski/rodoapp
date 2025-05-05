@@ -39,7 +39,7 @@
       "types": ["./_core/types"],
 
       "@modules/*": ["./app/(modules)/*"],
-      "@login/*": ["./app/(modules)/login/_lib/*"],
+      "@login/*": ["./app/login/_lib/*"],
       "@prenota/*": ["./app/(modules)/prenota/_lib/*"],
       "@inclusao/*": ["./app/(modules)/prenota/inclusao/_lib/*"],
       "@controle/*": ["./app/(modules)/controle/_lib/*"],

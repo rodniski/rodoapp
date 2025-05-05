@@ -4,6 +4,7 @@ import {
   Globe,
   Users,
   Computer,
+  PlusIcon,
 } from "lucide-react";
 
 import type { Category } from ".";
@@ -48,6 +49,15 @@ export const dashboardData: Category[] = [
             description:
               "Importe notas fiscais automaticamente através de arquivos XML.",
             icon: Pencil2Icon,
+          },
+          {
+            id: "pedido-inclusao",
+            title: "Incluir Pedido de Compra",
+            url: "/prenota/pedido",
+            description:
+              "Cadastre novos pedidos de compra. Para aceleração do cadastro de Pré Documentos de Entrada",
+            icon: PlusIcon,
+            requiresGroup: ["000013", "000014"],
           },
         ],
       },
@@ -110,8 +120,7 @@ export const dashboardData: Category[] = [
             title: "Assinatura de Email",
             url: "http://hesk.rodoparana.com.br/signaturegen",
             icon: TransformIcon,
-            description:
-              "Gere a sua assinatura de email corporativa.",
+            description: "Gere a sua assinatura de email corporativa.",
           },
           {
             id: "intranet",
@@ -133,7 +142,7 @@ export const dashboardData: Category[] = [
           {
             id: "meu-rh",
             title: "Meu RH",
-            url: "https://meurh.foxconn.com.br/web/app/RH/PortalMeuRH/#/login",
+            url: "https://datasul.rodoparana.com.br/totvs-login/loginForm",
             description:
               "Portal RH: holerites, histórico de ponto, férias e mais.",
             icon: AccessibilityIcon,

@@ -46,7 +46,7 @@ export function ThemeSwitcher({ onThemeChange }: ThemeSwitcherProps) {
   return (
     <div
       className={cn(
-        "relative flex items-center p-1 rounded-full border border-primary bg-background shadow-md w-[6.6rem] h-10"
+        "relative flex items-center p-1 rounded-full border border-primary bg-background shadow-md h-10"
       )}
     >
       {/* Indicador animado de fundo */}

@@ -137,20 +137,22 @@ const GlowingEffect = memo(
               "--active": "0",
               "--glowingeffect-border-width": `${borderWidth}px`,
               "--repeating-conic-gradient-times": "5",
+              // --- GRADIENTE ATUALIZADO COM AZUL/ÍNDIGO NEUTRO ---
               "--gradient": `
-      radial-gradient(circle, oklch(0.723 0.219 149.579) 10%, oklch(0.723 0.219 149.579 / 0) 20%),
-      radial-gradient(circle at 40% 40%, oklch(0.8 0.219 149.579) 5%, oklch(0.8 0.219 149.579 / 0) 15%),
-      radial-gradient(circle at 60% 60%, oklch(0.6 0.219 149.579) 10%, oklch(0.6 0.219 149.579 / 0) 20%), 
-      radial-gradient(circle at 40% 60%, oklch(0.75 0.219 149.579) 10%, oklch(0.75 0.219 149.579 / 0) 20%),
+      radial-gradient(circle, oklch(0.58 0.12 260) 10%, oklch(0.58 0.12 260 / 0) 20%),
+      radial-gradient(circle at 40% 40%, oklch(0.65 0.14 275) 5%, oklch(0.65 0.14 275 / 0) 15%),
+      radial-gradient(circle at 60% 60%, oklch(0.50 0.12 260) 10%, oklch(0.50 0.12 260 / 0) 20%),
+      radial-gradient(circle at 40% 60%, oklch(0.62 0.14 275) 10%, oklch(0.62 0.14 275 / 0) 20%),
       repeating-conic-gradient(
         from 236.84deg at 50% 50%,
-        oklch(0.723 0.219 149.579) 0%,
-        oklch(0.8 0.219 149.579) calc(25% / var(--repeating-conic-gradient-times)),
-        oklch(0.6 0.219 149.579) calc(50% / var(--repeating-conic-gradient-times)), 
-        oklch(0.75 0.219 149.579) calc(75% / var(--repeating-conic-gradient-times)),
-        oklch(0.723 0.219 149.579) calc(100% / var(--repeating-conic-gradient-times))
+        oklch(0.58 0.12 260) 0%,                      /* Base Azul Neutro */
+        oklch(0.65 0.14 275) calc(25% / var(--repeating-conic-gradient-times)), /* Índigo Claro Neutro */
+        oklch(0.50 0.12 260) calc(50% / var(--repeating-conic-gradient-times)), /* Azul Escuro Neutro */
+        oklch(0.62 0.14 275) calc(75% / var(--repeating-conic-gradient-times)), /* Índigo Neutro */
+        oklch(0.58 0.12 260) calc(100% / var(--repeating-conic-gradient-times)) /* Base Azul Neutro (fecha ciclo) */
       )
     `,
+              // -----------------------------------------------
             } as React.CSSProperties
           }
           className={cn(

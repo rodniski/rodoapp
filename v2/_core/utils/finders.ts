@@ -1,7 +1,9 @@
 // src/utils/finders.ts (ou _core/utils/finders.ts)
-import { useAuthStore } from "@login/stores/auth-store"; // Ajuste path
-import { useAuxStore as useLoginAuxStore } from "@login/stores/aux-store"; // Ajuste path
-import type { FilialGeral } from "@/app/(modules)/login/_lib"; // Ajuste path
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store"; // Ajuste path
+import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores/aux-store"; // Ajuste path
+import type { FilialGeral } from "@/app/login/_lib"; // Ajuste path
+import { ComboboxItem } from "comp";
+import { useMemo } from "react";
 
 const DEFAULT_USERNAME = "USUARIO_DESCONHECIDO";
 
@@ -24,7 +26,9 @@ export function getCurrentUsername(): string {
  * @param cnpjDestinatario CNPJ a ser procurado.
  * @returns O código da filial (ex: "0101") ou uma string vazia se não encontrado.
  */
-export function findFilialCodigo(cnpjDestinatario: string | null | undefined): string {
+export function findFilialCodigo(
+  cnpjDestinatario: string | null | undefined
+): string {
   const cleanCnpj = cnpjDestinatario?.replace(/\D/g, ""); // Limpa CNPJ antes de comparar
   if (!cleanCnpj) {
     // console.warn("[findFilialCodigo] CNPJ do destinatário inválido ou não fornecido.");
@@ -33,7 +37,8 @@ export function findFilialCodigo(cnpjDestinatario: string | null | undefined): s
 
   try {
     // AJUSTE: Confirme nomes 'filiais', 'cnpjFilial', 'numero'
-    const listaFiliais: FilialGeral[] | undefined = useLoginAuxStore.getState().filiais;
+    const listaFiliais: FilialGeral[] | undefined =
+      useLoginAuxStore.getState().filiais;
 
     if (!listaFiliais || listaFiliais.length === 0) {
       // console.warn("[findFilialCodigo] Lista de filiais vazia ou indisponível.");
@@ -57,15 +62,54 @@ export function findFilialCodigo(cnpjDestinatario: string | null | undefined): s
   }
 }
 
-// Você poderia adicionar aqui findCentroCustoNome, findCondicaoPagamentoDesc, etc.
-// Exemplo:
-// import type { CentroCusto } from "@login/types";
-// export function findCentroCustoNome(codigo: string | null | undefined): string {
-//   if (!codigo) return "";
-//   try {
-//      // AJUSTE: Confirme nome 'centroCusto', 'CTT_CUSTO', 'CTT_DESC01'
-//     const listaCC: CentroCusto[] | undefined = useLoginAuxStore.getState().centroCusto;
-//     const ccEncontrado = listaCC?.find(cc => cc.CTT_CUSTO?.trim() === codigo.trim());
-//     return ccEncontrado?.CTT_DESC01?.trim() || ""; // Retorna descrição
-//   } catch(e) { console.error("[findCentroCustoNome] Erro:", e); return "";}
-// }
+/**
+ * Retrieves authentication state from localStorage via useAuthStore.
+ * @returns Object containing isAuthenticated, username, accessToken, filiais, and grupos.
+ */
+export function getAuthState(): {
+  isAuthenticated: boolean;
+  username: string;
+  accessToken: string | null;
+  filiais: Array<{ M0_CODFIL: string; M0_FILIAL: string; M0_CGC: string }>;
+  grupos: Array<{ Grupo: string; Filial: Array<{ Loja: string }> }>;
+} {
+  try {
+    const state = useAuthStore.getState();
+    const { isAuthenticated, user } = state;
+    return {
+      isAuthenticated,
+      username: user?.username || DEFAULT_USERNAME,
+      accessToken: user?.accessToken || null,
+      filiais: state.filiais || [],
+      grupos: state.grupos || [],
+    };
+  } catch (error) {
+    console.error("[getAuthState] Erro:", error);
+    return {
+      isAuthenticated: false,
+      username: DEFAULT_USERNAME,
+      accessToken: null,
+      filiais: [],
+      grupos: [],
+    };
+  }
+}
+
+/**
+ * Retorna uma lista de ComboboxItem para as filiais que o usuário
+ * tem acesso, extraídas do auth-store.
+ */
+export function useFilialOptions(): ComboboxItem[] {
+  const filiais = useAuthStore((s) => s.filiais);
+
+  return useMemo(
+    () =>
+      filiais.map((f) => ({
+        value: f.M0_CODFIL ?? "",
+        label: `${f.M0_CODFIL ?? "??"} - ${
+          f.M0_FILIAL ?? "Filial desconhecida"
+        }`,
+      })),
+    [filiais]
+  );
+}

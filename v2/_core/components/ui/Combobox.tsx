@@ -1,193 +1,233 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, X } from "lucide-react"; // X pode ser útil para limpar
 import { cn } from "utils";
 import {
-  Button,
+  Input, // Usaremos Input
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
-  Popover,
+  Popover, // Popover ainda é útil para o dropdown
   PopoverContent,
-  PopoverTrigger,
-  ScrollArea,
+  PopoverAnchor,
 } from "ui";
 import { toast } from "sonner";
 
-// Tipagem para os itens do Combobox
 export interface ComboboxItem {
   value: string;
   label: string;
 }
 
-// Propriedades aceitas pelo Combobox
 interface ComboboxProps {
   items: ComboboxItem[];
   placeholder?: string;
+  emptyMessage?: string;
   onSelect: (value: string | null) => void;
-  selectedValue?: string | null;
-  renderSelected?: (item: ComboboxItem) => React.ReactNode;
+  selectedValue?: string | null; // Ainda relevante para saber o item selecionado
+  // renderSelected não faz mais tanto sentido aqui, o valor do input mostrará o label
   disabled?: boolean;
   disabledReason?: string;
-  itemRender?: (item: any) => React.ReactNode;
-  // Props para tratamento de erro
+  itemRender?: (item: ComboboxItem) => React.ReactNode;
   error?: boolean;
   errorMessage?: string;
   onClearError?: () => void;
-  className?: string;
+  className?: string; // Classe para o wrapper principal (Input + Popover)
+  popoverClassName?: string;
+  listMaxHeight?: string;
 }
 
 export function Combobox({
   items,
-  placeholder = "Selecione um item...",
+  placeholder = "Digite para buscar...",
+  emptyMessage = "Nenhum item encontrado.",
   onSelect,
   selectedValue,
-  renderSelected,
   disabled = false,
   disabledReason,
   itemRender,
-  // Props de erro
   error = false,
   errorMessage,
   onClearError,
   className,
+  popoverClassName,
+  listMaxHeight = "200px",
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
-  const [showPing, setShowPing] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   const isDisabled = items.length === 0 || disabled;
 
-  // Efeito para mostrar o ping quando houver erro
-  React.useEffect(() => {
-    if (error) {
-      setShowPing(true);
-    } else {
-      setShowPing(false);
+  // Encontra o item selecionado baseado no 'selectedValue' vindo das props
+  const selectedItem = React.useMemo(
+    () => items.find((item) => item.value === selectedValue),
+    [items, selectedValue]
+  );
+
+  // Filtra os itens baseado no que foi digitado no input
+  const filteredItems = React.useMemo(() => {
+    if (!inputValue) {
+      return items; // Mostra todos se input vazio? Ou nenhum? Decidi mostrar todos.
     }
-  }, [error]);
+    const lowerCaseInput = inputValue.toLowerCase();
+    return items.filter((item) =>
+      item.label.toLowerCase().includes(lowerCaseInput)
+    );
+  }, [items, inputValue]);
 
-  const selectedItem = items.find((item) => item.value === selectedValue);
+  // Efeito para sincronizar o input com o valor selecionado externamente
+  // ou quando um item é selecionado internamente.
+  React.useEffect(() => {
+    if (selectedItem) {
+      setInputValue(selectedItem.label);
+      // Não fechar o popover aqui, só sincronizar o texto
+    }
+    // Se selectedValue for null/undefined e o input não estiver focado, limpa input?
+    // Isso pode ser complexo, depende do comportamento desejado.
+    // Por ora, só sincroniza quando há seleção.
+  }, [selectedItem]);
 
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled && disabledReason) {
-      event.preventDefault();
-      event.stopPropagation();
-      toast.error(disabledReason);
-    } else {
-      setOpen((prevOpen) => !prevOpen);
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInputValue(value);
+    // Se o usuário começar a digitar algo diferente do item selecionado,
+    // podemos considerar que a seleção foi desfeita para iniciar nova busca.
+    if (selectedItem && value !== selectedItem.label) {
+      onSelect(null); // Informa o componente pai que a seleção foi limpa
+      if (onClearError) onClearError(); // Limpa erro ao digitar
+    }
+    if (!open && value) {
+      setOpen(true); // Abre o popover ao começar a digitar
+    } else if (!value) {
+      setOpen(false); // Fecha se apagar tudo
     }
   };
 
-  return (
-    <div className="relative w-full">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            ref={triggerRef}
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className={cn(
-              "w-full justify-between truncate border-input bg-background hover:bg-accent hover:text-accent-foreground",
-              disabled && "opacity-50 cursor-not-allowed hover:bg-background",
-              error && "border-destructive focus:ring-destructive",
-              className
-            )}
-            style={{
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-            onClick={handleButtonClick}
-            disabled={isDisabled}
-          >
-            <span className="truncate text-foreground">
-              {selectedItem
-                ? renderSelected
-                  ? renderSelected(selectedItem)
-                  : selectedItem.label
-                : placeholder}
-            </span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          style={{
-            width: triggerRef.current?.offsetWidth || "auto",
-          }}
-          className="w-full p-0"
-          align="start"
-        >
-          <ScrollArea className="overflow-y-auto">
-            <Command className="border-none rounded-lg">
-              <CommandInput
-                placeholder={`Buscar ${placeholder}...`}
-                className="border-none focus:ring-0"
-              />
-              <CommandList>
-                <CommandEmpty className="py-3 text-center text-sm text-muted-foreground">
-                  Nenhum item encontrado.
-                </CommandEmpty>
-                <CommandGroup>
-                  {items.map((item) => (
-                    <CommandItem
-                      key={item.value}
-                      value={item.label}
-                      onSelect={(currentValue) => {
-                        onSelect(
-                          currentValue === selectedValue ? null : item.value
-                        );
-                        // Limpa o erro quando seleciona um valor
-                        if (onClearError && currentValue !== selectedValue) {
-                          onClearError();
-                        }
-                        setOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
-                    >
-                      <Check
-                        className={cn(
-                          "h-4 w-4 text-primary",
-                          selectedValue === item.value
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {itemRender ? (
-                        itemRender(item)
-                      ) : (
-                        <span className="truncate">{item.label}</span>
-                      )}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>{" "}
-          </ScrollArea>
-        </PopoverContent>
-      </Popover>
+  const handleInputFocus = () => {
+    if (!isDisabled) {
+      setOpen(true); // Abre ao focar
+    } else if (disabledReason) {
+      toast.error(disabledReason);
+    }
+  };
 
-      {/* Indicador de erro com animate-ping */}
-      {showPing && (
-        <div className="absolute -top-1 -right-1 z-10">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive/70 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
-          </span>
+  // Cuidado com onBlur: fechar imediatamente pode impedir cliques nos itens.
+  // Popover do shadcn/ui geralmente lida bem com isso internamente se não for controlado externamente.
+  // Vamos deixar o Popover controlar o fechamento no blur por enquanto.
+  // const handleInputBlur = () => { setOpen(false); };
+
+  const handleItemSelect = (item: ComboboxItem) => {
+    setInputValue(item.label); // Atualiza o input com o label do item selecionado
+    onSelect(item.value); // Chama o callback principal com o valor
+    if (onClearError) onClearError(); // Limpa erro ao selecionar
+    setOpen(false); // Fecha o popover
+    inputRef.current?.blur(); // Tira o foco do input
+  };
+
+  return (
+    // Usar PopoverAnchor para conectar PopoverContent ao Input
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
+      <PopoverAnchor asChild>
+        <div className={cn("relative w-full", className)}>
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder={placeholder}
+            value={inputValue}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+            disabled={isDisabled}
+            className={cn(
+              error &&
+                "border-destructive focus:ring-destructive/50 focus:ring-1"
+            )}
+            autoComplete="off"
+          />
+          {inputValue && !isDisabled && (
+            <button
+              type="button"
+              onClick={() => {
+                setInputValue("");
+                onSelect(null);
+                if (onClearError) onClearError();
+                setOpen(false);
+                inputRef.current?.focus();
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Limpar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
-      )}
+      </PopoverAnchor>
+
+      <PopoverContent
+        style={{
+          width: inputRef.current?.offsetWidth
+            ? `${inputRef.current.offsetWidth}px`
+            : "auto",
+          zIndex: 60,
+        }}
+        className={cn("w-full p-0", popoverClassName)}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          if (e.target === inputRef.current) {
+            e.preventDefault();
+          }
+        }}
+      >
+        <Command shouldFilter={false}>
+          <CommandList
+            className="overflow-y-auto"
+            style={{ maxHeight: listMaxHeight, minHeight: "100px" }}
+          >
+            {filteredItems.length === 0 && inputValue && (
+              <CommandEmpty className="py-3 px-4 text-center text-sm text-muted-foreground">
+                {emptyMessage}
+              </CommandEmpty>
+            )}
+            {filteredItems.length === 0 && !inputValue && items.length > 0 && (
+              <CommandEmpty className="py-3 px-4 text-center text-sm text-muted-foreground">
+                Digite para buscar...
+              </CommandEmpty>
+            )}
+            {items.length === 0 && (
+              <CommandEmpty className="py-3 px-4 text-center text-sm text-muted-foreground">
+                Não há itens disponíveis.
+              </CommandEmpty>
+            )}
+            <CommandGroup>
+              {filteredItems.map((item) => {
+                const isSelected = selectedValue === item.value;
+                return (
+                  <CommandItem
+                    key={item.value}
+                    onSelect={() => handleItemSelect(item)}
+                    className={cn(
+                      "px-3 py-2 cursor-pointer text-sm",
+                      "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                      isSelected && "font-medium"
+                    )}
+                  >
+                    {itemRender ? itemRender(item) : item.label}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
 
       {/* Mensagem de erro */}
       {error && errorMessage && (
-        <p className="text-sm font-medium text-destructive mt-1">
+        <p className="text-[0.8rem] font-medium text-destructive mt-1">
           {errorMessage}
         </p>
       )}
-    </div>
+    </Popover>
   );
 }

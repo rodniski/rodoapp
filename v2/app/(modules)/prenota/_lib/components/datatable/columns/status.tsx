@@ -2,13 +2,21 @@
 
 import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui";
+// Certifique-se que PrenotaRow em @prenota/types inclui o campo 'Status: string'
 import type { PrenotaRow } from "@prenota/types";
-import { CheckCircledIcon, TimerIcon, ExclamationTriangleIcon, InfoCircledIcon } from "@radix-ui/react-icons";
+import {
+  CheckCircledIcon,
+  TimerIcon,
+  ExclamationTriangleIcon,
+  InfoCircledIcon,
+} from "@radix-ui/react-icons";
 
 interface StatusBadgeProps {
+  // A propriedade prenota agora contém o campo 'Status' calculado pelo backend
   prenota: PrenotaRow;
 }
 
+// A configuração de status permanece a mesma
 const statusConfig = {
   Pendente: {
     color: "text-sky-500",
@@ -22,9 +30,10 @@ const statusConfig = {
   },
   Revisar: {
     color: "text-amber-500",
-    icon: <ExclamationTriangleIcon  className="w-5 h-5" />,
+    icon: <ExclamationTriangleIcon className="w-5 h-5" />,
     tooltip: "Status: A Revisar",
   },
+  // Mantemos um fallback para caso o valor de Status seja inesperado
   Desconhecido: {
     color: "text-muted-foreground",
     icon: <InfoCircledIcon className="w-5 h-5" />,
@@ -32,29 +41,33 @@ const statusConfig = {
   },
 } as const;
 
+// Tipo para garantir que usamos apenas as chaves válidas de statusConfig
 type DerivedStatus = keyof typeof statusConfig;
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ prenota }) => {
-  let derivedStatus: DerivedStatus;
-
-  if (prenota.F1_STATUS && prenota.F1_STATUS.trim() !== "") {
-    derivedStatus = "Classificada";
-  } else if (prenota.F1_XREV && prenota.F1_XREV.trim() !== "") {
-    derivedStatus = "Revisar";
-  } else {
-    derivedStatus = "Pendente";
-  }
-
-  const config = statusConfig[derivedStatus] || statusConfig["Desconhecido"];
+  // Removemos a lógica if/else if/else.
+  // Usamos diretamente o campo 'Status' vindo da API.
+  // Usamos 'as DerivedStatus' para garantir a tipagem correta ao acessar statusConfig.
+  // O fallback || statusConfig["Desconhecido"] lida com casos inesperados.
+  const config =
+    statusConfig[prenota.Status as DerivedStatus] ||
+    statusConfig["Desconhecido"];
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className={`flex items-center justify-center h-full w-full ${config.color}`}>
+        <div
+          className={`flex items-center justify-center h-full w-full ${config.color}`}
+        >
           {config.icon}
         </div>
       </TooltipTrigger>
-      <TooltipContent>{config.tooltip}</TooltipContent>
+      {/* O conteúdo do Tooltip pode ser ajustado. Manter o original por enquanto: */}
+      <TooltipContent>
+        {config.tooltip}
+      </TooltipContent>
+      {/* Alternativa mais simples para o tooltip: */}
+      {/* <TooltipContent>{config.tooltip}</TooltipContent> */}
     </Tooltip>
   );
 };

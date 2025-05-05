@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "utils";
 import { SavePreNotaButton } from "@inclusao/components";
 import { DebugStateSheet } from "@inclusao/components";
+import Link from "next/link";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 export interface TabItem {
   value: string;
@@ -39,31 +41,41 @@ export function AnimatedTabs({ tabs, defaultValue, className }: Props) {
   /* —— UI ———————————————————————————————————————————————— */
   return (
     <>
-      <div className="fixed top-[70px] right-10 z-50">
-        <DebugStateSheet />
-      </div>
       <Tabs
         value={active}
         onValueChange={setActive}
         className={cn("w-screen h-[calc(100vh-66px)] p-5 px-14", className)}
       >
-        {/* barra de passos ------------------------------------------------ */}
-        <TabsList className="fixed top-[70px] left-1/2 -translate-x-1/2 bg-muted">
-          {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              disabled={tab.valid === false && tab.value !== active}
-              className={cn(
-                "px-4 py-3 text-lg",
-                active === tab.value && "bg-background shadow"
-              )}
-            >
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
+        <div className="relative flex justify-between w-full">
+          <div>
+            <Link href="/prenota">
+              <Button
+                size="sm"
+                variant="outline"
+                className="font-semibold flex items-center gap-2"
+              >
+                <ArrowLeftIcon />
+                Voltar
+              </Button>
+            </Link>
+          </div>
+          <TabsList className="fixed top-[70px] left-1/2 -translate-x-1/2 bg-muted">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                disabled={tab.valid === false && tab.value !== active}
+                className={cn(
+                  "px-4 py-3 text-lg",
+                  active === tab.value && "bg-background shadow"
+                )}
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <DebugStateSheet />
+        </div>
         {/* conteúdos ------------------------------------------------------ */}
         <div className="flex-1 relative overflow-hidden">
           {tabs.map((tab) => (

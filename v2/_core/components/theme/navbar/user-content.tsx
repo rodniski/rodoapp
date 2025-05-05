@@ -3,8 +3,8 @@
 import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, Button, Separator, ThemeSwitcher } from "ui";
 import { formatUsername, getInitials } from "utils";
-import { useAuth } from "@login/hooks";
-import { useAuthStore } from "@login/stores/auth-store";
+import { useAuth } from "@/app/login/_lib/hooks";
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
 
 export function UserMenuContent() {
   const { logout } = useAuth();

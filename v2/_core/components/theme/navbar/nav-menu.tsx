@@ -36,7 +36,7 @@ export function NavMenu({ items }: NavMenuProps) {
                 whileTap={{ scale: 0.95 }}
               >
                 {group.icon && (
-                  <group.icon className="size-5 lg:size-6 fhd:size-7 qhd:size-8" />
+                  <group.icon className="size-5 lg:size-6 qhd:size-8" />
                 )}
                 <span className="text-sm lg:text-base qhd:text-xl">
                   {group.label}
@@ -46,13 +46,13 @@ export function NavMenu({ items }: NavMenuProps) {
             <NavigationMenuContent>
               <motion.div
                 // Responsividade com Tailwind
-                className="flex flex-col w-full gap-2 p-2 sm:p-0 sm:flex-row sm:w-[380px] lg:w-[450px] fhd:w-[500px] qhd:w-[600px]"
+                className="flex flex-col w-full gap-2 p-2 sm:p-0 sm:flex-row sm:w-[380px] lg:w-[450px] qhd:w-[600px]"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
                 {/* Painel de preview */}
-                <div className="p-3 bg-background rounded-md shadow flex flex-col justify-end h-[150px] w-full overflow-hidden sm:h-[255px] lg:h-[280px] fhd:h-[340px] qhd:h-[350px]">
+                <div className="p-3 bg-background rounded-md shadow flex flex-col justify-end h-[150px] w-full overflow-hidden sm:h-[300px] lg:h-[340px] qhd:h-[390px]">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={hoveredItem ? hoveredItem.label : group.label}
@@ -76,7 +76,7 @@ export function NavMenu({ items }: NavMenuProps) {
                           )}
                         </motion.div>
                       )}
-                      <h3 className="font-medium text-base sm:text-lg lg:text-xl fhd:text-2xl qhd:text-3xl text-start">
+                      <h3 className="font-medium text-base sm:text-lg qhd:text-2xl text-start">
                         {hoveredItem ? hoveredItem.label : group.label}
                       </h3>
                       <motion.p
@@ -89,7 +89,7 @@ export function NavMenu({ items }: NavMenuProps) {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -10, opacity: 0 }}
                         transition={{ duration: 0.2, delay: 0.1 }}
-                        className="text-xs sm:text-sm lg:text-base fhd:text-lg qhd:text-xl text-muted-foreground mt-1"
+                        className="text-xs sm:text-sm qhd:text-xl text-muted-foreground mt-1"
                       >
                         {hoveredItem
                           ? hoveredItem.description
@@ -103,7 +103,7 @@ export function NavMenu({ items }: NavMenuProps) {
                   {group.subGroups.map((subGroup, index) => (
                     <div key={subGroup.id} className="mb-2">
                       {subGroup.title && (
-                        <h4 className="px-3 py-1 font-semibold text-xs sm:text-sm lg:text-base tracking-wide text-muted-foreground">
+                        <h4 className="px-3 py-1 font-semibold text-xs sm:text-sm qhd:text-base tracking-wide text-muted-foreground">
                           {subGroup.title}
                         </h4>
                       )}
@@ -155,7 +155,7 @@ const ListItem = React.forwardRef<HTMLAnchorElement, ListItemProps>(
         ref={ref}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        className="flex w-full cursor-pointer select-none items-center rounded px-3 py-1.5 text-xs sm:text-sm lg:text-base fhd:text-lg qhd:text-xl outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+        className="flex w-full cursor-pointer select-none items-center rounded px-3 py-1.5 text-xs sm:text-sm lg:text-base qhd:text-xl outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
       >
         {title}
       </Link>

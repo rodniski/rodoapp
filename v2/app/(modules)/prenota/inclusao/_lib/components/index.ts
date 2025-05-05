@@ -1,4 +1,5 @@
 export * from './DebugStateSheet';
+export * from './formProgress';
 export * from './header/HeaderForm';
 export * from './header/Prioridade';
 export * from './header/Search';
@@ -12,7 +13,7 @@ export * from './installments/rateio/Rateio';
 export * from './installments/rateio/chart';
 export * from './installments/rateio/table';
 export * from './products/Tabela';
-export * from './products/UnitMismatchModal';
+export * from './products/quantidade';
 export * from './products/columns';
 export * from './products/inclusao-table';
 export * from './products/produto';

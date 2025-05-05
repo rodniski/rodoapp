@@ -15,7 +15,7 @@ import { Card, Tabs, TabsList, TabsTrigger, TabsContent } from "ui";
 export function Installments() {
   return (
     // Grid principal: 1 coluna default, 3 colunas em lg+, 2 linhas em lg+
-    <div className="flex w-full h-full justify-center items-top py-10">
+    <div className="flex w-full h-full justify-center items-top pt-[70px]">
       <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 w-full gap-4 p-1">
         {/* Anexos: Coluna 1 / Span 2 Linhas (lg+) */}
         <div className="lg:col-span-1 lg:row-span-2 min-h-[300px]">
@@ -26,27 +26,8 @@ export function Installments() {
         {/* Card com Abas: Coluna 2-3 / Span 2 Linhas (lg+) */}
         <Card className="lg:col-start-2 lg:col-span-2 lg:row-span-2 flex flex-col min-h-[300px] py-0">
           {/* Tabs ocupam todo o espaço do Card */}
-          <Tabs defaultValue="rateio" className="flex flex-col flex-1 w-full">
-            <div className="bg-input/20 flex w-full justify-center items-center shadow">
-              <TabsList className="w-full m-3 self-center bg-card shadow border">
-                {" "}
-                {/* Alinha abas à esquerda */}
-                <TabsTrigger value="rateio" className="w-full text-lg">
-                  Rateio
-                </TabsTrigger>
-                <TabsTrigger value="payment-cond" className="w-full text-lg">
-                  Condicão de Pagamento
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value="rateio" className="p-6">
-              <RateioCard />
-            </TabsContent>
-            <TabsContent value="payment-cond" className="p-6">
-              {/* Conteúdo da Condição de Pagamento */}
-              <CondicaoPagamentoForm />
-            </TabsContent>
-          </Tabs>
+
+          <RateioCard />
         </Card>
       </div>
     </div>

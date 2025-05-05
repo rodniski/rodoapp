@@ -11,7 +11,7 @@ export interface PrenotaRow {
   A2_LOJA: string;
   A2_NOME: string;
   FORNECE: string;
-  F1_EMISSAO: string; // pode ajustar para Date se o formato for ISO
+  F1_EMISSAO: string;
   F1_DTDIGIT: string;
   F1_VALBRUT: number;
   F1_XTIPO: string;
@@ -25,6 +25,7 @@ export interface PrenotaRow {
   VENCIMENTO: string;
   Z07_DESC: string;
   Z07_CHAVE: string;
+  Status: string;
 }
 
 export interface Pagination {
@@ -37,12 +38,14 @@ export interface Pagination {
 export interface PrenotaResponse {
   data: PrenotaRow[];
   pagination: Pagination;
+  searchTerm: string;
 }
 
 export interface Params {
   page: number;
   pageSize: number;
   filials: string[];
-  filters?: Record<string, any>;
+  filters?: Partial<Record<keyof PrenotaRow, string | number>>; // Filtros baseados nas chaves do PrenotaRow
   sorting?: { id: string; desc: boolean }[];
+  searchTerm?: string;
 }

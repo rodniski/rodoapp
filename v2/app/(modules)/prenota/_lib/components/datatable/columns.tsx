@@ -10,7 +10,7 @@ import {
 } from "@prenota/components";
 import { DataTableColumnHeader } from "ui/data-table";
 import { formatCurrency } from "utils";
-import { PrenotaRow } from "../types";
+import { PrenotaRow } from "@prenota/types";
 
 const formatDateForCell = (dateString: string | undefined | null): string => {
   if (!dateString || dateString.length !== 8 || !/^\d{8}$/.test(dateString)) {
@@ -115,7 +115,7 @@ export const columns: ColumnDef<PrenotaRow>[] = [
     cell: ({ row }) => <PriorityBadge priority={row.original.F1_XPRIOR} />,
   },
   {
-    id: "derivedStatus",
+    accessorKey: "Status",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),

@@ -4,9 +4,11 @@ import type {
   Fornecedor,
   CondicaoPagamentoResponse,
   Pedido,
-} from "@inclusao/api";
+} from "@inclusao/api"; // Ajuste o caminho se necessário
+import type { PreNotaItem } from "@inclusao/types"; // Importar o tipo do Item
 
-/* ───────────────────────── módulos auxiliares ───────────────────────── */
+/* ───────────────────────── Interfaces das Slices ───────────────────────── */
+
 interface XmlLoadStatusState {
   xmlDataLoaded: boolean;
   setXmlDataLoadedSuccess: () => void;
@@ -20,9 +22,9 @@ interface FornecedorSearchState {
 }
 
 interface SelectionState {
-  selectedPedido: Pedido | null; // 👈 alterado para armazenar objeto completo
-  selectedFornecedor: Omit<Fornecedor, "PEDIDOS"> | null; // 👈 ignora PEDIDOS
-  setSelectedPedido: (pedido: Pedido | null) => void; // 👈 método alterado
+  selectedPedido: Pedido | null;
+  selectedFornecedor: Omit<Fornecedor, "PEDIDOS"> | null;
+  setSelectedPedido: (pedido: Pedido | null) => void;
   clearSelectedPedido: () => void;
   setSelectedFornecedor: (fornecedor: Omit<Fornecedor, "PEDIDOS"> | null) => void;
   clearSelectedFornecedor: () => void;
@@ -36,88 +38,164 @@ interface TotalNfState {
 
 interface CondicaoPagamentoState {
   data: CondicaoPagamentoResponse | null;
-  setData: (d: CondicaoPagamentoResponse) => void;
+  setData: (d: CondicaoPagamentoResponse | null) => void; // Permitir null para limpar
   clearData: () => void;
 }
 
-/* ───────────────────────── interface principal ─────────────────────── */
+// Interface para a nova Slice de Edição de Itens
+interface ItemEditingState {
+  editableItems: PreNotaItem[] | null; // Cópia dos itens para edição
+  initializeEditableItems: (items: PreNotaItem[] | null) => void; // Permitir null para limpar
+  updateEditableItemQuantity: (itemIdentifier: string, newQuantity: number) => void;
+  clearEditableItems: () => void;
+  updateEditableItem: (itemIdentifier: string, patch: Partial<PreNotaItem>) => void;
+}
+
+/* ───────────────── Interface Principal da Store Auxiliar ───────────────── */
 export interface PreNotaAuxState {
   loadStatus: XmlLoadStatusState;
   fornecedorSearch: FornecedorSearchState;
   selection: SelectionState;
   totalNf: TotalNfState;
   condicaoPagamento: CondicaoPagamentoState;
+  itemEditing: ItemEditingState; // <<< Nova slice adicionada
 }
 
-/* ──────────────────────── criação do store ─────────────────────────── */
+/* ──────────────────────── Criação da Store Zustand ────────────────────────── */
 export const usePreNotaAuxStore = create<PreNotaAuxState>((set) => ({
-  /* loadStatus */
+  /* --- Slice: loadStatus --- */
   loadStatus: {
     xmlDataLoaded: false,
     setXmlDataLoadedSuccess: () =>
-      set((s) => ({ loadStatus: { ...s.loadStatus, xmlDataLoaded: true } })),
+      set((state) => ({ loadStatus: { ...state.loadStatus, xmlDataLoaded: true } })),
     clearXmlDataLoadedFlag: () =>
-      set((s) => ({ loadStatus: { ...s.loadStatus, xmlDataLoaded: false } })),
+      set((state) => ({ loadStatus: { ...state.loadStatus, xmlDataLoaded: false } })),
   },
 
-  /* fornecedorSearch */
+  /* --- Slice: fornecedorSearch --- */
   fornecedorSearch: {
     searchResult: null,
-    setSearchResult: (r) =>
-      set((s) => ({
-        fornecedorSearch: { ...s.fornecedorSearch, searchResult: r },
+    setSearchResult: (result) =>
+      set((state) => ({
+        fornecedorSearch: { ...state.fornecedorSearch, searchResult: result },
       })),
     clearSearchResult: () =>
-      set((s) => ({
-        fornecedorSearch: { ...s.fornecedorSearch, searchResult: null },
+      set((state) => ({
+        fornecedorSearch: { ...state.fornecedorSearch, searchResult: null },
       })),
   },
 
-  /* selection ajustado */
+  /* --- Slice: selection --- */
   selection: {
     selectedPedido: null,
     selectedFornecedor: null,
-    setSelectedPedido: (pedido: Pedido | null) =>
-      set((s) => ({ selection: { ...s.selection, selectedPedido: pedido } })),
+    setSelectedPedido: (pedido) =>
+      set((state) => ({ selection: { ...state.selection, selectedPedido: pedido } })),
     clearSelectedPedido: () =>
-      set((s) => ({ selection: { ...s.selection, selectedPedido: null } })),
-    setSelectedFornecedor: (f) =>
-      set((s) => ({ selection: { ...s.selection, selectedFornecedor: f } })),
+      set((state) => ({ selection: { ...state.selection, selectedPedido: null } })),
+    setSelectedFornecedor: (fornecedor) =>
+      set((state) => ({ selection: { ...state.selection, selectedFornecedor: fornecedor } })),
     clearSelectedFornecedor: () =>
-      set((s) => ({ selection: { ...s.selection, selectedFornecedor: null } })),
+      set((state) => ({ selection: { ...state.selection, selectedFornecedor: null } })),
   },
 
-  /* totalNf */
+  /* --- Slice: totalNf --- */
   totalNf: {
     valorTotalXml: null,
-    setValorTotalXml: (v) =>
-      set((s) => ({ totalNf: { ...s.totalNf, valorTotalXml: v } })),
+    setValorTotalXml: (valor) =>
+      set((state) => ({ totalNf: { ...state.totalNf, valorTotalXml: valor } })),
     clearValorTotalXml: () =>
-      set((s) => ({ totalNf: { ...s.totalNf, valorTotalXml: null } })),
+      set((state) => ({ totalNf: { ...state.totalNf, valorTotalXml: null } })),
   },
 
-  /* condicaoPagamento */
+  /* --- Slice: condicaoPagamento --- */
   condicaoPagamento: {
     data: null,
-    setData: (d) =>
-      set((s) => ({ condicaoPagamento: { ...s.condicaoPagamento, data: d } })),
+    setData: (condData) =>
+      set((state) => ({ condicaoPagamento: { ...state.condicaoPagamento, data: condData } })),
     clearData: () =>
-      set((s) => ({
-        condicaoPagamento: { ...s.condicaoPagamento, data: null },
+      set((state) => ({
+        condicaoPagamento: { ...state.condicaoPagamento, data: null },
       })),
   },
-}));
 
-/* ────────────────────────── selectors ─────────────────────────────── */
-export const useXmlDataLoadedStatus = () =>
-  usePreNotaAuxStore((s) => s.loadStatus.xmlDataLoaded);
-export const useFornecedorSearchResult = () =>
-  usePreNotaAuxStore((s) => s.fornecedorSearch.searchResult);
-export const useSelectedPedido = () =>
-  usePreNotaAuxStore((s) => s.selection.selectedPedido); // 👈 alterado
-export const useSelectedFornecedor = () =>
-  usePreNotaAuxStore((s) => s.selection.selectedFornecedor);
-export const useValorTotalXml = () =>
-  usePreNotaAuxStore((s) => s.totalNf.valorTotalXml);
-export const useCondicaoPagamentoData = () =>
-  usePreNotaAuxStore((s) => s.condicaoPagamento.data);
+  /* --- Slice: itemEditing (NOVA) --- */
+  itemEditing: {
+    editableItems: null, // Inicia como nulo
+
+    // Inicializa/substitui a lista de itens editáveis com uma cópia
+    initializeEditableItems: (items) =>
+      set((state) => ({
+        itemEditing: {
+          ...state.itemEditing,
+          // Usar structuredClone para cópia profunda mais moderna, ou JSON.parse/stringify
+          editableItems: items ? structuredClone(items) : null,
+        },
+      })),
+
+    // Atualiza a quantidade de um item específico na lista editável
+    updateEditableItemQuantity: (itemIdentifier, newQuantity) =>
+      set((state) => {
+        if (!state.itemEditing.editableItems) {
+            console.warn("Tentativa de atualizar quantidade sem itens editáveis inicializados.");
+            return state; // Não faz nada se a lista não existe
+        }
+        const updatedItems = state.itemEditing.editableItems.map((item) => {
+          // <<< CONFIRME SE 'ITEM' é o campo identificador único correto >>>
+          if (item.ITEM === itemIdentifier) {
+            // Retorna um novo objeto item com a quantidade atualizada
+            return { ...item, QUANTIDADE: newQuantity };
+          }
+          return item; // Mantém os outros itens inalterados
+        });
+        // Retorna o novo estado da slice com a lista atualizada
+        return {
+          itemEditing: { ...state.itemEditing, editableItems: updatedItems },
+        };
+      }),
+
+    // Limpa a lista de itens editáveis (define como null)
+    clearEditableItems: () =>
+      set((state) => ({
+        itemEditing: { ...state.itemEditing, editableItems: null },
+      })),
+
+    // Action genérica para aplicar um patch a um item editável
+    updateEditableItem: (itemIdentifier, patch) =>
+      set((state) => {
+        if (!state.itemEditing.editableItems) {
+            console.warn("Tentativa de aplicar patch sem itens editáveis inicializados.");
+            return state;
+        }
+        const updatedItems = state.itemEditing.editableItems.map((item) => {
+          // <<< CONFIRME SE 'ITEM' é o campo identificador único correto >>>
+          if (item.ITEM === itemIdentifier) {
+            // Retorna um novo objeto item com o patch aplicado
+            return { ...item, ...patch };
+          }
+          return item;
+        });
+        return {
+          itemEditing: { ...state.itemEditing, editableItems: updatedItems },
+        };
+      }),
+  },
+})); // Fim do create
+
+/* ────────────────────────── Selectors / Hooks ─────────────────────────── */
+
+// Hooks existentes...
+export const useXmlDataLoadedStatus = () => usePreNotaAuxStore((s) => s.loadStatus.xmlDataLoaded);
+export const useFornecedorSearchResult = () => usePreNotaAuxStore((s) => s.fornecedorSearch.searchResult);
+export const useSelectedPedido = () => usePreNotaAuxStore((s) => s.selection.selectedPedido);
+export const useSelectedFornecedor = () => usePreNotaAuxStore((s) => s.selection.selectedFornecedor);
+export const useValorTotalXml = () => usePreNotaAuxStore((s) => s.totalNf.valorTotalXml);
+export const useCondicaoPagamentoData = () => usePreNotaAuxStore((s) => s.condicaoPagamento.data);
+
+// --- NOVOS Hooks/Selectors para a Slice de Edição ---
+export const useEditableItems = () => usePreNotaAuxStore((s) => s.itemEditing.editableItems);
+export const useInitializeEditableItems = () => usePreNotaAuxStore((s) => s.itemEditing.initializeEditableItems);
+export const useUpdateEditableItemQuantity = () => usePreNotaAuxStore((s) => s.itemEditing.updateEditableItemQuantity);
+export const useUpdateEditableItem = () => usePreNotaAuxStore((s) => s.itemEditing.updateEditableItem);
+export const useClearEditableItems = () => usePreNotaAuxStore((s) => s.itemEditing.clearEditableItems);
+// --- FIM NOVOS Hooks/Selectors ---

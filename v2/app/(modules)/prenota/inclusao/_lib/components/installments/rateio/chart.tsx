@@ -16,7 +16,7 @@ import {
   CardContent,
 } from "ui"; // Seu UI Kit
 import { usePreNotaStore } from "@inclusao/stores";
-import { useAuxStore as useLoginAuxStore } from "@login/stores";
+import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores";
 import { formatCurrency } from "utils"; // Seu utilitário de formatação
 // Tipos atualizados com Z10_*
 import type { Rateio as RateioType } from "@inclusao/types";
@@ -25,10 +25,10 @@ import type { Rateio as RateioType } from "@inclusao/types";
 
 // Paleta ÚNICA de 10 cores
 const VIVID_PALETTE = [
-  "hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))", "hsl(var(--chart-5))", "hsl(var(--chart-6))",
-  "hsl(var(--chart-7))", "hsl(var(--chart-8))", "hsl(var(--chart-9))",
-  "hsl(var(--chart-10))",
+  "var(--chart-1)", "var(--chart-2)", "var(--chart-3)",
+  "var(--chart-4)", "var(--chart-5)", "var(--chart-6)",
+  "var(--chart-7)", "var(--chart-8)", "var(--chart-9)",
+  "var(--chart-10)",
 ];
 
 // Funções de cores (forward/reverse)

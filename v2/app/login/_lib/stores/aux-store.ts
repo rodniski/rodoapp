@@ -5,7 +5,7 @@
 import { create } from "zustand";
 // Importa o middleware de persistência e o storage helper
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { AuxState } from "@login/types"; // Seus tipos
+import type { AuxState } from "@/app/login/_lib/types"; // Seus tipos
 
 // Define a interface AuxState com persistência (nenhuma mudança necessária na interface em si)
 // export interface AuxState { ... }

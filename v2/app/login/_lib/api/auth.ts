@@ -1,5 +1,5 @@
 import { config } from "config";
-import type { AuthResponse, AuthError } from "@login/types";
+import type { AuthResponse, AuthError } from "@/app/login/_lib/types";
 import axios from "axios";
 
 const AUTH_API_URL = `${config.API_PRODUCTION_URL}api/oauth2/v1/token`;

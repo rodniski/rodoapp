@@ -1,4 +1,3 @@
-// Carousel.tsx
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";

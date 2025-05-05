@@ -2,7 +2,7 @@
 import { useMemo } from "react"
 import { get } from "lodash-es"          // para ler por “caminho”.
 import { usePreNotaStore } from "@inclusao/stores"
-import { requiredAll }   from "@inclusao/validation/required-fields"
+import { requiredAllFields }   from "@inclusao/validation/required-fields"
 
 export function usePrenotaProgress() {
   const draft = usePreNotaStore(s => s.draft)
@@ -10,7 +10,7 @@ export function usePrenotaProgress() {
   return useMemo(() => {
     let filled = 0
 
-    requiredAll.forEach(path => {
+    requiredAllFields.forEach(path => {
       const value = get(draft, path as string)
       // regra simples: se for array - precisa length>0
       // se for string/number/bool - precisa value truthy
@@ -19,7 +19,7 @@ export function usePrenotaProgress() {
       }
     })
 
-    const total = requiredAll.length
+    const total = requiredAllFields.length
     const percent = Math.round((filled / total) * 100)
 
     return { filled, total, percent }

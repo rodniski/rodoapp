@@ -25,7 +25,11 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { usePreNotaStore, usePreNotaAuxStore } from "@inclusao/stores";
+import {
+  usePreNotaStore,
+  usePreNotaAuxStore,
+  useFileUploadAuxStore,
+} from "@inclusao/stores";
 import type { PreNotaDraft } from "@inclusao/types";
 import { cn } from "utils";
 
@@ -34,9 +38,9 @@ type DraftKey = keyof PreNotaDraft;
 const monitoredKeys: DraftKey[] = [
   "header",
   "itens",
-  "anexos",
-  "parcelas",
-  "rateios",
+  "ARQUIVOS",
+  "PAGAMENTOS",
+  "RATEIOS",
 ];
 interface FieldStatus {
   key: DraftKey;
@@ -53,7 +57,72 @@ const isFilled = (k: DraftKey, v: unknown) => {
   return !!v;
 };
 
+/* ---------- transformar draft em payload ---------- */
+const transformDraftToPayload = (draft: PreNotaDraft) => ({
+  FILIAL: draft.header.FILIAL,
+  OPCAO: draft.header.OPCAO,
+  TIPO: draft.header.TIPO,
+  FORNECEDOR: draft.header.FORNECEDOR,
+  LOJA: draft.header.LOJA,
+  DOC: draft.header.DOC,
+  SERIE: draft.header.SERIE,
+  OLDSERIE: draft.header.OLDSERIE || "",
+  ESPECIE: draft.header.ESPECIE,
+  CONDFIN: draft.header.CONDFIN,
+  CHVNF: draft.header.CHVNF,
+  USERAPP: draft.header.USERAPP,
+  OBS: draft.header.OBS || "",
+  prioridade: draft.header.prioridade || "",
+  JUSTIFICATIVA: draft.header.JUSTIFICATIVA || "",
+  tiporodo: draft.header.tiporodo || "",
+  DTINC: draft.header.DTINC,
+  CGCPIX: draft.header.CGCPIX || "",
+  CHAVEPIX: draft.header.CHAVEPIX || "",
+  ARQUIVOS: draft.ARQUIVOS.map((anexo) => ({
+    seq: anexo.seq,
+    arq: anexo.arq,
+    desc: anexo.desc,
+  })),
+  PAGAMENTOS: draft.PAGAMENTOS.map((parcela) => ({
+    Parcela: parcela.Parcela,
+    Vencimento: parcela.Vencimento,
+    Valor: Number(parcela.Valor.toFixed(2)),
+  })),
+  RATEIOS: draft.RATEIOS.map((rateio) => ({
+    seq: rateio.seq,
+    id: rateio.id,
+    FIL: rateio.FIL,
+    cc: rateio.cc,
+    percent: rateio.percent,
+    valor: Number(rateio.valor.toFixed(2)),
+    REC: rateio.REC,
+  })),
+  itens: draft.itens.map((item) => ({
+    ITEM: item.ITEM,
+    PRODUTO: item.PRODUTO,
+    QUANTIDADE: item.QUANTIDADE,
+    VALUNIT: Number(item.VALUNIT.toFixed(2)),
+    PRODFOR: item.PRODFOR,
+    DESCFOR: item.DESCFOR,
+    ORIGEMXML: item.ORIGEMXML,
+    TOTAL: Number(item.TOTAL.toFixed(2)),
+    PC: item.PC || "",
+    ITEMPC: item.ITEMPC || "",
+    B1_UM: item.B1_UM,
+    SEGUN: item.SEGUN || "",
+    TPFATO: item.TPFATO || "",
+    CONV: item.CONV,
+    ORIGEM: item.ORIGEM,
+  })),
+});
+
 export function DebugStateSheet() {
+  const managedFilesMap = useFileUploadAuxStore((s) => s.managedFiles);
+  const managedFiles = useMemo(
+    () => Array.from(managedFilesMap.values()),
+    [managedFilesMap]
+  );
+
   const [open, setOpen] = useState(false);
   const [expanded, setExp] = useState<string[]>([]);
 
@@ -66,9 +135,9 @@ export function DebugStateSheet() {
     const labels: Record<DraftKey, string> = {
       header: "Cabeçalho",
       itens: "Itens",
-      anexos: "Anexos",
-      parcelas: "Parcelas",
-      rateios: "Rateios",
+      ARQUIVOS: "Anexos",
+      PAGAMENTOS: "Parcelas",
+      RATEIOS: "Rateios",
     };
     return monitoredKeys.map((k) => {
       const val = draft[k];
@@ -99,8 +168,12 @@ export function DebugStateSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Info className="w-4 h-4 mr-2" />
+        <Button
+          variant="outline"
+          size="sm"
+          className="font-semibold flex items-center gap-2"
+        >
+          <Info className="w-4 h-4" />
           Progresso
         </Button>
       </SheetTrigger>
@@ -134,8 +207,8 @@ export function DebugStateSheet() {
               </h4>
               <Progress value={pct} />
               <p className="text-xs text-center text-muted-foreground mt-1">
-                {Math.round(pct)}% – {statuses.filter((s) => s.isFilled).length}
-                /{monitoredKeys.length}
+                {Math.round(pct)}% – {statuses.filter((s) => s.isFilled).length}/
+                {monitoredKeys.length}
               </p>
             </div>
             <ScrollArea className="flex-1 pr-3">
@@ -204,6 +277,85 @@ export function DebugStateSheet() {
           {/* Auxiliares */}
           <TabsContent value="aux" className="mt-4 flex-1 overflow-hidden">
             <ScrollArea className="h-full pr-3">
+              {/* --- Managed Files (único cartão) --- */}
+              {(() => {
+                const k = "aux-managedFiles";
+                const exp = expanded.includes(k);
+
+                return (
+                  <div
+                    key={k}
+                    className="flex items-start gap-2 p-2 rounded-md border bg-muted/40"
+                  >
+                    <div className="mt-1">
+                      <Circle className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      {/* cabeçalho expansível */}
+                      <div
+                        className={cn(
+                          "flex items-center justify-between",
+                          "cursor-pointer hover:bg-muted/80 rounded p-1 -m-1 mb-1"
+                        )}
+                        onClick={() => toggle(k)}
+                      >
+                        <span className="text-sm font-medium capitalize">
+                          Managed Files ({managedFiles.length})
+                        </span>
+                        {exp ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </div>
+
+                      {/* corpo do cartão: JSON completo ou resumo */}
+                      <div
+                        className={cn(
+                          "mt-1 text-xs text-muted-foreground",
+                          !exp && "truncate"
+                        )}
+                      >
+                        {exp ? (
+                          <div className="space-y-2">
+                            {managedFiles.map(
+                              ({ seq, file, fileName, description }) => (
+                                <div
+                                  key={seq}
+                                  className="text-xs bg-background p-2 border rounded"
+                                >
+                                  <p>
+                                    <strong>seq:</strong> {seq}
+                                  </p>
+                                  <p>
+                                    <strong>fileName:</strong> {fileName}
+                                  </p>
+                                  <p>
+                                    <strong>size:</strong> {file.size} bytes
+                                  </p>
+                                  <p>
+                                    <strong>type:</strong>{" "}
+                                    {file.type || "<desconhecido>"}
+                                  </p>
+                                  <p>
+                                    <strong>description:</strong>{" "}
+                                    {description || "<nenhuma>"}
+                                  </p>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            seqs: [{managedFiles.map((f) => f.seq).join(", ")}]
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="space-y-2">
                 {auxList.map(([sk, sv]) => {
                   const k = `aux-${sk}`;
@@ -264,15 +416,15 @@ export function DebugStateSheet() {
             </ScrollArea>
           </TabsContent>
 
-          {/* JSON bruto */}
+          {/* JSON bruto (formato do payload) */}
           <TabsContent value="json" className="mt-4 flex-1 overflow-hidden">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-medium">Draft (raw JSON)</h4>
+              <h4 className="text-sm font-medium">Payload da Pré-Nota (JSON)</h4>
               <Code className="w-4 h-4 text-muted-foreground" />
             </div>
             <ScrollArea className="h-full border rounded">
               <pre className="text-xs p-4 whitespace-pre-wrap">
-                {JSON.stringify(draft, null, 2)}
+                {JSON.stringify(transformDraftToPayload(draft), null, 2)}
               </pre>
             </ScrollArea>
           </TabsContent>

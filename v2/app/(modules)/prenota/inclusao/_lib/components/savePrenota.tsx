@@ -1,46 +1,33 @@
-/* ------------------------------------------------------------------------
- * Botão que valida e dispara o POST da Pré-Nota
- * --------------------------------------------------------------------- */
 "use client";
 
 import { Button } from "ui";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { usePreNotaStore } from "@inclusao/stores";
-import { postPreNota } from "@inclusao/api";          // ▼ item 3
 import { prenotaDraftSchema } from "@inclusao/validation/prenota.schema";
+import { usePostPreNota } from "@inclusao/hooks";
 
 export function SavePreNotaButton({ disabled }: { disabled?: boolean }) {
-  const draft = usePreNotaStore(s => s.draft);
-  const reset = usePreNotaStore(s => s.reset);
+  const draft = usePreNotaStore((s) => s.draft);
+  const reset = usePreNotaStore((s) => s.reset);
 
-  /* — mutation ------------------------------------------------------- */
-  const mut = useMutation({
-    mutationFn: postPreNota,
-    onSuccess: (data) => {
-      toast.success(`Pré-Nota ${data.numero} gravada com sucesso!`);
-      reset();                    // limpa o formulário
-    },
-    onError: (err: any) => {
-      toast.error(err.message ?? "Falha ao gravar a Pré-Nota.");
-    }
-  });
+  const mut = usePostPreNota();
 
-  /* — handler -------------------------------------------------------- */
   const handleSave = () => {
-    /* valida draft completo */
-    const parsed = prenotaDraftSchema.safeParse(draft);
-    if (!parsed.success) {
+    const result = prenotaDraftSchema.safeParse(draft);
+    if (!result.success) {
       toast.warning("Preencha todos os campos obrigatórios antes de salvar.");
-      console.warn(parsed.error.flatten());            // log detalhado
+      console.group("⚠️ [SavePreNota] Erros de validação do draft");
+      console.log(result.error.flatten());
+      console.groupEnd();
       return;
     }
-    mut.mutate(parsed.data);
+    mut.mutate();
   };
 
   return (
-    <Button onClick={handleSave} disabled={disabled || mut.isLoading}>
-      {mut.isLoading ? "Salvando…" : "Salvar Pré-Nota"}
+    <Button onClick={handleSave} disabled={disabled || mut.isPending}>
+      {mut.isPending ? "Salvando…" : "Salvar Pré-Nota"}
     </Button>
   );
 }

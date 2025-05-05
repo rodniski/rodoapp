@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useMemo } from "react";
 import {
   Button,
@@ -18,48 +19,30 @@ import {
 import type { Pedido, Fornecedor } from "@inclusao/api";
 import type { PreNotaItem } from "@inclusao/types";
 
-/* ---------- util: sobrescreve dados do pedido SOBRE o item XML ---------- */
-const mergeXmlPedido = (xml: PreNotaItem, ped: Pedido): PreNotaItem => ({
-  ...xml, // tudo que já estava no XML
-  /* somente campos que realmente vêm do pedido -------------------------- */
-  PRODUTO: ped.C7_PRODUTO,
-  PC: ped.C7_NUM,
-  ITEMPC: ped.C7_ITEM,
-  QUANTIDADE: ped.C7_QUANT,
-  VALUNIT: ped.C7_PRECO,
-  TOTAL: ped.C7_TOTAL,
-  B1_UM: ped.B1_UM,
-  ORIGEM: ped.B1_ORIGEM ?? xml.ORIGEM,
-});
-
-/* ---------- estrutura interna para exibir na lista -------------------- */
 interface PedidoResumo {
   numero: string;
   total: number;
   qtdItens: number;
-  obs: string; //  🆕  campo OBS
+  obs: string;
   itensOriginais: Pedido[];
 }
 
-export function PedidoDialog() {
+interface PedidoDialogProps {
+  value?: string;
+  onChange: (numeroPedido: string, condicao: string) => void;
+}
+
+export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
   const [open, setOpen] = useState(false);
+  // novo estado para controlar o valor de busca
+  const [filter, setFilter] = useState("");
 
-  /* ---------- stores ---------- */
   const header = usePreNotaStore((s) => s.draft.header);
-  const xmlItens = usePreNotaStore((s) => s.draft.itens);
-  const setItens = usePreNotaStore((s) => s.setItens);
-  const setHeader = usePreNotaStore((s) => s.setHeader);
-
+  const fornecedores = useFornecedorSearchResult();
   const setSelectedPedido = usePreNotaAuxStore(
     (s) => s.selection.setSelectedPedido
   );
-  const pedidoSelecionado = usePreNotaAuxStore(
-    (s) => s.selection.selectedPedido
-  );
 
-  const fornecedores = useFornecedorSearchResult();
-
-  /* ---------- lista de pedidos do fornecedor atual -------------------- */
   const pedidosResumo: PedidoResumo[] = useMemo(() => {
     if (!Array.isArray(fornecedores) || fornecedores.length === 0) return [];
 
@@ -78,39 +61,33 @@ export function PedidoDialog() {
       {}
     );
 
-    return Object.entries(agrupados).map(([numero, itens]) => ({
+    // cria o resumo completo
+    const todos = Object.entries(agrupados).map(([numero, itens]) => ({
       numero,
       total: itens.reduce((s, i) => s + (i.C7_TOTAL || 0), 0),
       qtdItens: itens.length,
-      obs: itens[0]?.OBS ?? "", //  🆕  pega OBS do 1º item
+      obs: itens[0]?.OBS ?? "",
       itensOriginais: itens,
     }));
-  }, [fornecedores, header.FORNECEDOR, header.LOJA]);
 
-  const buttonLabel = pedidoSelecionado?.C7_NUM ?? "Selecionar pedido";
+    // filtra pelo número do pedido conforme digitado
+    return todos.filter((p) => p.numero.includes(filter));
+  }, [fornecedores, header.FORNECEDOR, header.LOJA, filter]);
 
-  /* ---------- quando o usuário escolhe um pedido ---------------------- */
+  const buttonLabel = value ?? "Selecionar pedido";
+
   const handleSelectPedido = (pedResumo: PedidoResumo) => {
-    /* 1. guarda referência ao pedido escolhido ------------------------- */
     setSelectedPedido(pedResumo.itensOriginais[0]);
-
-    /* 2. grava CONDFIN no header (usa C7_COND do 1º item) -------------- */
     const condicao = pedResumo.itensOriginais[0]?.C7_COND ?? "";
-    setHeader({ CONDFIN: condicao });
 
-    /* 3. faz merge item-a-item ---------------------------------------- */
-    const novosItens: PreNotaItem[] = xmlItens.map((xmlIt) => {
-      const ped = pedResumo.itensOriginais.find(
-        (p) => p.C7_ITEM === xmlIt.ITEM || p.C7_ITEM === xmlIt.ITEMPC
-      );
-      return ped ? mergeXmlPedido(xmlIt, ped) : xmlIt;
-    });
+    // Aqui chamamos o onChange que atualiza no componente pai
+    onChange(pedResumo.numero, condicao);
 
-    setItens(novosItens);
+    // limpa filtro ao fechar
+    setFilter("");
     setOpen(false);
   };
 
-  /* ---------- UI ------------------------------------------------------ */
   return (
     <>
       <Button
@@ -127,7 +104,12 @@ export function PedidoDialog() {
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Buscar número do pedido..." />
+        {/* adiciona value e onValueChange para controlar a busca */}
+        <CommandInput
+          placeholder="Buscar número do pedido..."
+          value={filter}
+          onValueChange={(value) => setFilter(value)}
+        />
         <CommandList>
           {pedidosResumo.length ? (
             <CommandGroup
@@ -143,7 +125,7 @@ export function PedidoDialog() {
                   <div className="justify-between items-center w-full flex">
                     <span className="font-medium">Pedido: {p.numero}</span>
                     <span className="text-xs">
-                      Total:&nbsp;
+                      Total:{" "}
                       {p.total.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
@@ -159,7 +141,7 @@ export function PedidoDialog() {
                     <span>Itens: {p.qtdItens}</span>
                   </div>
 
-                  {pedidoSelecionado?.C7_NUM === p.numero && (
+                  {value === p.numero && (
                     <Check className="absolute right-2 top-1/2 -translate-y-1/2 text-primary h-4 w-4" />
                   )}
                 </CommandItem>

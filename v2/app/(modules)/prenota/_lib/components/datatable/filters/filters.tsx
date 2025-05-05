@@ -1,214 +1,274 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useDataTableStore } from "ui/data-table"; // Ajuste o caminho
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
   DialogFooter,
   Button,
-  DialogDescription,
-} from "ui";
-import { useState, useEffect } from "react";
-import { ZoomInIcon } from "@radix-ui/react-icons";
-import { useDataTableStore } from "ui/data-table";
-import { CAMPOS_FILTRO } from "@prenota/stores";
-import type { CampoFiltro } from "@prenota/types";
-import {
-  FiltroDataRange,
-  FiltroNumeroRange,
-  FiltroSelect,
-  FiltroTexto,
-  FiltroSelectMultiple,
-  FiltroFilialSelect,
-} from ".";
+  ScrollArea,
+  Label,
+  Card,
+} from "ui"; // Ajuste o caminho
+import { ZoomInIcon, PlusIcon } from "@radix-ui/react-icons";
+import { CAMPOS_FILTRO } from "@prenota/stores"; // Ajuste o caminho
+import { FilterRow } from ".";
+import { toast } from "sonner";
 
-// ✅ Importe o Combobox (Popover + Command) – ajuste o path conforme sua estrutura
-import { Combobox } from "ui";
+interface LocalFilterState {
+  id: string;
+  field: string;
+  value: any;
+}
 
+/**
+ * Componente Modal para configurar e aplicar filtros.
+ * Layout: Botão Adicionar no topo, filtros em um card único abaixo.
+ * Filial é tratada como um filtro dinâmico comum.
+ */
 export function DataTableFilterModal() {
+  const logPrefix = "[DataTableFilterModal]";
   const [isOpen, setIsOpen] = useState(false);
-  const [pendingFilters, setPendingFilters] = useState<Record<string, unknown>>(
-    {}
+  const [internalFilters, setInternalFilters] = useState<LocalFilterState[]>(
+    []
   );
-  // Campo e valor do filtro selecionado
-  const [field, setField] = useState<string>("");
-  const [value, setValue] = useState<any>("");
+  const {
+    setFilters,
+    clearFilters,
+    filters: appliedFilters,
+  } = useDataTableStore();
 
-  // Operador textual (ex.: contém, igual, diferente...)
-  const [textOperator, setTextOperator] = useState<string>("contains");
-
-  // Opções dinâmicas vindas do `selectedField.opcoes`
-  const [opcoes, setOpcoes] = useState<{ label: string; value: string }[]>([]);
-
-  // Store do DataTable
-  const setFilters = useDataTableStore((s) => s.setFilters);
-
-  // Localiza no array CAMPOS_FILTRO qual configuração corresponde ao `field`
-  const selectedField: CampoFiltro | undefined = CAMPOS_FILTRO.find(
-    (f) => f.campo === field
-  );
-
-  // Carrega as opções se a coluna tiver `opcoes: async () => Promise<...> | array`
+  // Efeito para carregar filtros aplicados ao abrir
   useEffect(() => {
-    const loadOpcoes = async () => {
-      if (typeof selectedField?.opcoes === "function") {
-        const result = await selectedField.opcoes();
-        setOpcoes(result);
-      } else if (Array.isArray(selectedField?.opcoes)) {
-        setOpcoes(selectedField.opcoes);
-      } else {
-        setOpcoes([]);
-      }
-    };
-    loadOpcoes();
-  }, [selectedField]);
-
-  // Quando o usuário aplica o filtro, convertemos para o formato esperado
-  const handleAddFilter = () => {
-    if (!field || !value) return;
-
-    let formatted;
-    if (
-      selectedField?.tipo === "data-range" ||
-      selectedField?.tipo === "numero-range"
-    ) {
-      formatted = {
-        [`${field}_MIN`]: value.from ?? value.min,
-        [`${field}_MAX`]: value.to ?? value.max,
-      };
-    } else if (selectedField?.tipo === "texto") {
-      formatted = {
-        [`${field}_${textOperator}`]: value,
-      };
-    } else {
-      formatted = { [field]: value };
+    if (isOpen) {
+      console.log(`${logPrefix} Modal aberto. Carregando estado da store.`);
+      const loadedFilters = Object.entries(appliedFilters || {}).map(
+        ([field, value], index) => ({
+          id: `filter-load-${Date.now()}-${index}`,
+          field,
+          value,
+        })
+      );
+      setInternalFilters(loadedFilters);
     }
+  }, [isOpen, appliedFilters]);
 
-    setPendingFilters((prev) => ({ ...prev, ...formatted }));
+  // Handlers para Filtros Dinâmicos
+  const handleAddFilter = () => {
+    const availableFields = CAMPOS_FILTRO.filter(
+      (f) => !internalFilters.some((intF) => intF.field === f.campo)
+    );
+    if (!availableFields.length) {
+      toast.info("Todos os campos de filtro disponíveis já foram adicionados.");
+      return;
+    }
+    const defaultFieldConfig = availableFields[0];
+    const defaultField = defaultFieldConfig.campo;
+    let defaultValue: any;
+    switch (defaultFieldConfig?.tipo) {
+      case "select-multiple":
+      case "filial-select":
+        defaultValue = [];
+        break;
+      case "data-range":
+      case "numero-range":
+        defaultValue = { from: "", to: "" };
+        break;
+      default:
+        defaultValue = "";
+        break;
+    }
+    setInternalFilters((prev) => [
+      ...prev,
+      { id: `filter-${Date.now()}`, field: defaultField, value: defaultValue },
+    ]);
+    console.log(`${logPrefix} Filtro adicionado:`, {
+      field: defaultField,
+      value: defaultValue,
+    });
+  };
 
-    // Reset campo atual
-    setField("");
-    setValue("");
-    setTextOperator("contains");
-  };
-  const handleApplyAll = () => {
-    setFilters(pendingFilters);
-    setIsOpen(false);
-    setPendingFilters({});
-  };
-  // Reseta os campos
-  const handleReset = () => {
-    setField("");
-    setValue("");
-    setTextOperator("contains");
+  const handleChangeFilter = (id: string, field: string, value: any) => {
+    console.log(`${logPrefix} Alterando filtro:`, { id, field, value });
+    setInternalFilters((prevFilters) =>
+      prevFilters.map((f) => (f.id === id ? { ...f, field, value } : f))
+    );
   };
 
-  // Mapeia CAMPOS_FILTRO → Combobox Items
-  const comboboxItems = CAMPOS_FILTRO.map((f) => ({
-    value: f.campo,
-    label: f.label,
-  }));
+  const handleRemoveFilter = (id: string) => {
+    console.log(`${logPrefix} Removendo filtro ID:`, id);
+    setInternalFilters((prevFilters) => prevFilters.filter((f) => f.id !== id));
+  };
+
+  // Handler para aplicar filtros
+  const handleApply = () => {
+    console.groupCollapsed(`${logPrefix} Aplicando Filtros`);
+    let finalFilterObject: Record<string, any> = {};
+    console.log("Filtros internos:", internalFilters);
+
+    internalFilters.forEach((f) => {
+      // Lógica para verificar se valor é vazio (igual à anterior)
+      const isEmptyString =
+        typeof f.value === "string" && f.value.trim() === "";
+      const isEmptyArray = Array.isArray(f.value) && f.value.length === 0;
+      const isEmptyRange =
+        typeof f.value === "object" &&
+        f.value !== null &&
+        !Array.isArray(f.value) &&
+        (f.value.from === undefined || f.value.from === "") &&
+        (f.value.to === undefined || f.value.to === "");
+      const isTrulyEmpty =
+        f.value === undefined ||
+        f.value === null ||
+        isEmptyString ||
+        isEmptyArray ||
+        isEmptyRange;
+
+      if (isTrulyEmpty) {
+        console.log(` - Ignorando ${f.field}: valor vazio.`);
+        return; // Pula filtro vazio
+      }
+
+      console.log(
+        ` - Processando: Campo=${f.field}, Valor=${JSON.stringify(f.value)}`
+      );
+
+      // Lógica para ranges (garante strings, só adiciona se não vazio)
+      const fieldConfig = CAMPOS_FILTRO.find((cf) => cf.campo === f.field);
+      if (
+        (fieldConfig?.tipo === "data-range" ||
+          fieldConfig?.tipo === "numero-range") &&
+        typeof f.value === "object" &&
+        f.value !== null &&
+        !Array.isArray(f.value)
+      ) {
+        const rangeValue = {
+          from: String(f.value.from ?? ""),
+          to: String(f.value.to ?? ""),
+        };
+        if (rangeValue.from !== "" || rangeValue.to !== "") {
+          finalFilterObject[f.field] = rangeValue;
+        } else {
+          console.log(` - Ignorando ${f.field}: range vazio.`);
+        }
+      }
+      // Outros campos (incluindo F1_FILIAL e Status que vêm como array direto)
+      else {
+        finalFilterObject[f.field] = f.value;
+      }
+    });
+
+    console.log(
+      "Objeto de Filtro final (enviado para store):",
+      finalFilterObject
+    );
+    setFilters(finalFilterObject); // Aplica na store global
+    console.groupEnd();
+    setIsOpen(false); // Fecha o modal
+  };
+
+  // Handler para limpar filtros
+  const handleClear = () => {
+    console.log(`${logPrefix} Limpando filtros.`);
+    clearFilters(); // Limpa store global (filters, filials, searchTerm)
+    setInternalFilters([]); // Limpa estado local
+  };
+
+  // Verifica se há filtros locais ativos para habilitar botões
+  const hasActiveLocalFilters = internalFilters.some(
+    (f) =>
+      f.value !== undefined &&
+      f.value !== null &&
+      f.value !== "" &&
+      (!Array.isArray(f.value) || f.value.length > 0) &&
+      (typeof f.value !== "object" ||
+        Array.isArray(f.value) ||
+        f.value === null ||
+        (f.value.from !== undefined && f.value.from !== "") ||
+        (f.value.to !== undefined && f.value.to !== ""))
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="h-9 gap-2 px-3 bg-background text-foreground hover:bg-accent"
-        >
-          <ZoomInIcon className="size-5" />
+        <Button variant="outline" size="sm" className="h-9 gap-1.5 px-3">
+          <ZoomInIcon className="size-4" />
           <span>Filtrar</span>
+          {/* Badge Opcional */}
+          {Object.keys(appliedFilters || {}).length > 0 ? (
+            <span className="ml-1.5 inline-flex items-center rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+              {Object.keys(appliedFilters).length}
+            </span>
+          ) : null}
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full min-w-1/2">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Adicionar Filtro</DialogTitle>
+          <DialogTitle>Filtrar Pré-notas</DialogTitle>
+          <DialogDescription>
+            Adicione ou remova filtros para refinar os resultados.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="w-full px-6 flex gap-2 items-center justify-between">
-          {/* ✅ Combobox para seleção da Coluna */}
-          <div className="w-60">
-            <Combobox
-              items={comboboxItems}
-              onSelect={(val) => {
-                setField(val ?? "");
-                setValue("");
-              }}
-              selectedValue={field}
-              placeholder="Coluna..."
-            />
+        {/* --- Layout Alterado --- */}
+        <div className="py-4 space-y-4">
+          {/* Botão Adicionar no Topo */}
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddFilter}
+              className="gap-1 w-full sm:w-auto"
+            >
+              <PlusIcon className="size-4" />
+              Adicionar Filtro
+            </Button>
           </div>
 
-          {selectedField?.tipo === "filial-select" && (
-            <FiltroFilialSelect values={value} setValues={setValue} />
-          )}
+          {/* Card Único Contendo os Filtros */}
 
-          {/* Se o tipo do campo for texto */}
-          {selectedField?.tipo === "texto" && (
-            <FiltroTexto
-              value={value}
-              onChange={setValue}
-              comparador={textOperator}
-              setComparador={setTextOperator}
-            />
-          )}
-
-          {/* Se for select (ex.: Filial, Status, etc) */}
-          {selectedField?.tipo === "select" && (
-            <div className="w-64">
-              <FiltroSelect
-                value={value}
-                setValue={setValue}
-                options={opcoes}
-              />
-            </div>
-          )}
-          {selectedField?.tipo === "select-multiple" && (
-            <FiltroSelectMultiple
-              values={value ?? []}
-              setValues={setValue}
-              options={opcoes}
-            />
-          )}
-          {/* Número range ex.: min e max */}
-          {selectedField?.tipo === "numero-range" && (
-            <FiltroNumeroRange value={value} setValue={setValue} />
-          )}
-
-          {/* Data range ex.: from e to */}
-          {selectedField?.tipo === "data-range" && (
-            <FiltroDataRange value={value} setValue={setValue} />
-          )}
-
-          {Object.keys(pendingFilters).length > 0 && (
-            <div className="px-6 pb-2 text-sm text-muted-foreground">
-              {Object.entries(pendingFilters).map(([key, val]) => (
-                <div key={key}>
-                  <strong>{key}</strong>: {JSON.stringify(val)}
+          {/* Container do Card */}
+          <Card className="overflow-hidden max-h-[50vh] px-2 py-4">
+            <ScrollArea className="h-full overflow-auto">
+              {internalFilters.length > 0 ? (
+                <div className="divide-y divide-border/40">
+                  {internalFilters.map((filter) => (
+                    <div className="px-3 first:pt-0 last:pb-0" key={filter.id}>
+                      <FilterRow
+                        filter={filter}
+                        onChange={handleChangeFilter}
+                        onRemove={handleRemoveFilter}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6 px-4">
+                  Nenhum filtro adicionado. Clique em "Adicionar Filtro" acima.
+                </p>
+              )}
+            </ScrollArea>
+          </Card>
+          {/* --- Fim Layout Alterado --- */}
         </div>
 
-        <DialogFooter className="flex justify-between items-center px-6">
-          <Button variant="outline" onClick={() => setPendingFilters({})}>
-            Limpar Tudo
+        <DialogFooter className="mt-2 flex flex-row justify-between sm:justify-between border-t pt-4 px-1 pb-1">
+          <Button
+            variant="destructive"
+            onClick={handleClear}
+            disabled={!hasActiveLocalFilters}
+          >
+            Limpar Filtros
           </Button>
-          <div className="flex gap-2">
-            <Button onClick={handleAddFilter} disabled={!field || !value}>
-              Adicionar
-            </Button>
-            <Button
-              onClick={handleApplyAll}
-              disabled={Object.keys(pendingFilters).length === 0}
-            >
-              Aplicar Filtros
-            </Button>
-          </div>
+          <Button onClick={handleApply} disabled={!hasActiveLocalFilters} className="text-white">
+            Aplicar Filtros
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

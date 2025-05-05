@@ -4,16 +4,23 @@
  * --------------------------------------------------------------------------*/
 
 import { create } from "zustand";
-import type { PreNotaState } from "@inclusao/types";
+import type {
+  PreNotaState,
+  PreNotaItem,
+  Anexo,
+  Parcela,
+  Rateio,
+  PreNotaHeader,
+} from "@inclusao/types";
 import { preNotaInitial } from "@inclusao/types";
 
 export const usePreNotaStore = create<PreNotaState>((set) => ({
-  // estado inicial
+  // Estado inicial
   draft: { ...preNotaInitial },
   mode: "manual",
 
-  /* Header */
-  setHeader: (patch) =>
+  /* Header ---------------------------------------------------------------*/
+  setHeader: (patch: Partial<PreNotaHeader>) =>
     set((state) => ({
       draft: {
         ...state.draft,
@@ -22,7 +29,7 @@ export const usePreNotaStore = create<PreNotaState>((set) => ({
     })),
 
   /* Alias para compatibilidade */
-  setHeaderPatch: (patch) =>
+  setHeaderPatch: (patch: Partial<PreNotaHeader>) =>
     set((state) => ({
       draft: {
         ...state.draft,
@@ -30,34 +37,26 @@ export const usePreNotaStore = create<PreNotaState>((set) => ({
       },
     })),
 
-  /**
-   * Define o valor total da nota diretamente no header
-   */
-  setHeaderTotal: (valor: number) =>
+  /* Itens ----------------------------------------------------------------*/
+  setItens: (list: PreNotaItem[]) =>
+    set((state) => ({ draft: { ...state.draft, itens: [...list] } })),
+
+  addItem: (item: PreNotaItem) =>
     set((state) => ({
-      draft: {
-        ...state.draft,
-        header: { ...state.draft.header, valorTotalDaNota: valor },
-      },
+      draft: { ...state.draft, itens: [...state.draft.itens, item] },
     })),
 
-  /* Itens */
-  setItens: (list) =>
-    set((state) => ({ draft: { ...state.draft, itens: [...list] } })),
-  addItem: (it) =>
-    set((state) => ({
-      draft: { ...state.draft, itens: [...state.draft.itens, it] },
-    })),
-  updateItem: (idx, patch) =>
+  updateItem: (idx: number, patch: Partial<PreNotaItem>) =>
     set((state) => ({
       draft: {
         ...state.draft,
-        itens: state.draft.itens.map((i, iIdx) =>
-          iIdx === idx ? { ...i, ...patch } : i
+        itens: state.draft.itens.map((it, i) =>
+          i === idx ? { ...it, ...patch } : it
         ),
       },
     })),
-  removeItem: (idx) =>
+
+  removeItem: (idx: number) =>
     set((state) => ({
       draft: {
         ...state.draft,
@@ -65,65 +64,65 @@ export const usePreNotaStore = create<PreNotaState>((set) => ({
       },
     })),
 
-  /* Anexos */
-  addAnexo: (a) =>
+  /* Anexos (ARQUIVOS) -----------------------------------------------------*/
+  addAnexo: (anexo: Anexo) =>
     set((state) => ({
-      draft: { ...state.draft, anexos: [...state.draft.anexos, a] },
+      draft: { ...state.draft, ARQUIVOS: [...state.draft.ARQUIVOS, anexo] },
     })),
-  removeAnexo: (seq) =>
+
+  removeAnexo: (seq: string) =>
     set((state) => ({
       draft: {
         ...state.draft,
-        anexos: state.draft.anexos.filter((x) => x.seq !== seq),
+        ARQUIVOS: state.draft.ARQUIVOS.filter((a) => a.seq !== seq),
       },
     })),
+
   updateAnexoDesc: (seq: string, description: string) =>
     set((state) => ({
       draft: {
         ...state.draft,
-        anexos: state.draft.anexos.map((anexo) =>
-          anexo.seq === seq ? { ...anexo, desc: description } : anexo
+        ARQUIVOS: state.draft.ARQUIVOS.map((a) =>
+          a.seq === seq ? { ...a, desc: description } : a
         ),
       },
     })),
 
   clearAnexos: () =>
-    set((state) => ({
-      draft: {
-        ...state.draft,
-        anexos: [], // Define a lista de anexos como vazia
-      },
-    })),
-  /* Parcelas */
-  setParcelas: (p) =>
-    set((state) => ({ draft: { ...state.draft, parcelas: [...p] } })),
+    set((state) => ({ draft: { ...state.draft, ARQUIVOS: [] } })),
 
-  /* Rateios */
-  addRateio: (r) =>
+  /* Parcelas (PAGAMENTOS) -------------------------------------------------*/
+  setParcelas: (parcelas: Parcela[]) =>
+    set((state) => ({ draft: { ...state.draft, PAGAMENTOS: [...parcelas] } })),
+
+  /* Rateios (RATEIOS) -----------------------------------------------------*/
+  addRateio: (rateio: Rateio) =>
     set((state) => ({
-      draft: { ...state.draft, rateios: [...state.draft.rateios, r] },
+      draft: { ...state.draft, RATEIOS: [...state.draft.RATEIOS, rateio] },
     })),
-  updateRateio: (id, patch) =>
+
+  updateRateio: (id: string, patch: Partial<Rateio>) =>
     set((state) => ({
       draft: {
         ...state.draft,
-        rateios: state.draft.rateios.map((r) =>
+        RATEIOS: state.draft.RATEIOS.map((r) =>
           r.id === id ? { ...r, ...patch } : r
         ),
       },
     })),
-  removeRateio: (id) =>
+
+  removeRateio: (id: string) =>
     set((state) => ({
       draft: {
         ...state.draft,
-        rateios: state.draft.rateios.filter((r) => r.id !== id),
+        RATEIOS: state.draft.RATEIOS.filter((r) => r.id !== id),
       },
     })),
 
-  /* Modo de edição */
+  /* Modo de edição -------------------------------------------------------*/
   setModoXml: () => set({ mode: "xml" }),
   setModoManual: () => set({ mode: "manual" }),
 
-  /* Reset completo */
+  /* Reset completo -------------------------------------------------------*/
   reset: () => set({ draft: { ...preNotaInitial }, mode: "manual" }),
 }));

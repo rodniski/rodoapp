@@ -22,6 +22,7 @@ export interface PrenotaRow {
   VENCIMENTO: string; // ISNULL(Z10.Z10_VENCTO, '')
   Z07_DESC: string; // TRIM(ISNULL(Z07.Z07_DESC, ''))
   Z07_CHAVE: string; // TRIM(ISNULL(Z07.Z07_CHAVE, ''))
+  Status: string; // Status
 }
 export type TipoFiltro =
   | "texto"

@@ -58,10 +58,10 @@ export function DataTable<TData, TValue>({
 
   return (
     <TableContext.Provider value={table}>
-      <div className={cn("rounded-md border max-w-full", className)}>
+      <div className={cn("rounded-md border max-w-full ", className)}>
         {/* Tabela com header fixo e largura baseada no conteúdo */}
-        <div className="max-h-[calc(100vh-200px)] overflow-auto scroll-smooth">
-          <Table className="w-full table-auto">
+        <div className="max-h-[calc(100vh-200px)] rounded-xl overflow-auto scroll-smooth">
+          <Table className="w-full table-auto rounded-xl">
             <TableHeader className="sticky top-0 z-20 bg-background shadow-sm">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -78,7 +78,7 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody>
+            <TableBody className="bg-card/90">
               {isLoading ? (
                 Array.from({ length: 10 }).map((_, index) => (
                   <TableRow key={index}>

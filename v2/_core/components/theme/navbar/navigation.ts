@@ -8,6 +8,7 @@ import {
   FileTextIcon,
   GlobeIcon,
   Pencil2Icon,
+  PlusIcon,
   QuestionMarkCircledIcon,
   TableIcon,
   TransformIcon,
@@ -62,22 +63,17 @@ export const prenotaSubGroup: NavSubGroup = {
       description:
         "Cadastre novas notas fiscais manualmente. Insira dados como número, valor, fornecedor e outros detalhes importantes.",
     },
-  ],
-};
-export const assinaturaSubGroup: NavSubGroup = {
-  id: "assinatura",
-  items: [
     {
-      id: "assinatura",
-      label: "Assinatura de Email",
-      href: "http://hesk.rodoparana.com.br/signaturegen",
-      icon: TransformIcon,
+      id: "pedido-inclusao",
+      label: "Incluir Pedido de Compra",
+      href: "/prenota/pedido",
+      icon: PlusIcon,
       description:
-        "Gere assinaturas de email personalizadas. Mantenha uma identidade visual consistente nas comunicações.",
+        "Cadastre novos pedidos de compra. Para aceleração do cadastro de Pré Documentos de Entrada",
+      requiresGroup: ["000013", "000014"],
     },
   ],
 };
-
 // Cria o subgrupo para Controle de Itens
 export const controleSubGroup: NavSubGroup = {
   id: "controle",
@@ -117,7 +113,6 @@ export const ambienteItems: NavSubGroup = {
   id: "ambiente",
   title: "Central da TI",
   items: [
-
     {
       id: "ambiente-intranet",
       label: "Intranet",
@@ -133,6 +128,14 @@ export const ambienteItems: NavSubGroup = {
       icon: QuestionMarkCircledIcon,
       description:
         "Entre em contato com nossa equipe de suporte. Abra chamados e receba assistência técnica.",
+    },
+    {
+      id: "assinatura",
+      label: "Assinatura de Email",
+      href: "http://hesk.rodoparana.com.br/signaturegen",
+      icon: TransformIcon,
+      description:
+        "Gere assinaturas de email personalizadas. Mantenha uma identidade visual consistente nas comunicações.",
     },
   ],
 };
@@ -151,7 +154,7 @@ export const outrosItems: NavSubGroup = {
     {
       id: "outros-meu-rh",
       label: "Meu RH",
-      href: "https://meurh.foxconn.com.br/web/app/RH/PortalMeuRH/#/login",
+      href: "https://datasul.rodoparana.com.br/totvs-login/loginForm",
       icon: AccessibilityIcon,
       description:
         "Portal de Recursos Humanos: acesse e visualize holerites, histórico de ponto, férias e outros dados.",
@@ -179,7 +182,7 @@ export const aplicacoesGroup: NavGroup = {
   label: "Aplicações",
   icon: DashboardIcon,
   description: "Integração de controle de itens e pré notas",
-  subGroups: [prenotaSubGroup, controleSubGroup, assinaturaSubGroup],
+  subGroups: [prenotaSubGroup, controleSubGroup],
 };
 
 export const corporativoGroup: NavGroup = {

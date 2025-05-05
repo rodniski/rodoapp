@@ -17,7 +17,7 @@ import {
 } from "ui";
 import { SunIcon, MoonIcon, Half2Icon } from "@radix-ui/react-icons";
 
-import { useAuth } from "@login/hooks";
+import { useAuth } from "@/app/login/_lib/hooks";
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -99,7 +99,7 @@ export function Navbar() {
             </PopoverTrigger>
             <PopoverContent
               align="center"
-              className="p-0 bg-transparent border-none shadow-none"
+              className="p-0 bg-transparent w-fit border-none shadow-none"
             >
               <ThemeSwitcher />
             </PopoverContent>

@@ -170,3 +170,64 @@ export function parseFloatOrNull(
   }
   return null;
 }
+
+/**
+ * Converte uma string de input (possivelmente formatada como moeda
+ * ou com diferentes separadores decimais/milhar) para um número float.
+ * Prioriza a vírgula como separador decimal se ambos existirem.
+ * Retorna 0 se a conversão falhar ou a string for vazia/nula.
+ *
+ * Exemplos:
+ * "R$ 1.234,56" -> 1234.56
+ * "1.234,56"    -> 1234.56
+ * "1234,56"     -> 1234.56
+ * "1,234.56"    -> 1234.56  (Assume ponto como decimal se for o último)
+ * "1234.56"     -> 1234.56
+ * "1.234"       -> 1234     (Assume ponto como milhar se vírgula não presente)
+ * "1,234"       -> 1.234    (Assume vírgula como decimal neste caso ambíguo)
+ *
+ * @param value A string a ser convertida.
+ * @returns O número float correspondente ou 0.
+ */
+export function parseInputToNumber(value: string | null | undefined): number {
+  if (!value) return 0;
+
+  // 1. Remove caracteres não numéricos, exceto vírgula e ponto
+  //    Também remove o sinal de R$ e espaços.
+  const cleaned = value.replace(/R?\$\s?/g, "").replace(/[^0-9,-]/g, ""); // Mantém sinal negativo (-)
+
+  // 2. Verifica a presença e posição dos separadores
+  const lastComma = cleaned.lastIndexOf(',');
+  const lastPeriod = cleaned.lastIndexOf('.');
+
+  let standardFormatString: string;
+
+  // 3. Decide qual o separador decimal baseado na última ocorrência
+  if (lastComma > -1 && lastPeriod > -1) {
+    // Ambos existem, o último determina o decimal
+    if (lastComma > lastPeriod) {
+      // Vírgula é a última (provável BR): remove pontos (milhar), troca vírgula por ponto (decimal)
+      standardFormatString = cleaned.replace(/\./g, '').replace(',', '.');
+    } else {
+      // Ponto é o último (provável US): remove vírgulas (milhar)
+      standardFormatString = cleaned.replace(/,/g, '');
+    }
+  } else if (lastComma > -1) {
+    // Apenas vírgula existe: pode ser decimal ou milhar (ambíguo em casos como "1,234")
+    // Assumimos vírgula como decimal por padrão BR. Removemos pontos (não deveriam existir aqui).
+    standardFormatString = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (lastPeriod > -1) {
+    // Apenas ponto existe: pode ser decimal ou milhar (ambíguo em "1.234")
+    // Assumimos ponto como decimal. Removemos vírgulas (não deveriam existir).
+    standardFormatString = cleaned.replace(/,/g, '');
+  } else {
+    // Nenhum separador, apenas números (e talvez sinal)
+    standardFormatString = cleaned;
+  }
+
+  // 4. Tenta converter para float
+  const parsed = parseFloat(standardFormatString);
+
+  // 5. Retorna o valor ou 0 se NaN
+  return isNaN(parsed) ? 0 : parsed;
+}

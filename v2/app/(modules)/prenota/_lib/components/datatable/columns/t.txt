@@ -1,0 +1,12 @@
+cara abandone essa logica, nada a ver.
+
+Faz so o seguinte:
+
+Pega o dado que vem do filtro de status
+
+ai faz um case:
+se pendente: 
+"filters": {
+    "F1_XREV": {
+      "A"
+    } 

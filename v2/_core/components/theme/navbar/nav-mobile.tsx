@@ -13,7 +13,7 @@ import {
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useAuth } from "@login/hooks";
+import { useAuth } from "@/app/login/_lib/hooks";
 import { NavUser } from "./user";
 import { useRouter } from "next/navigation";
 

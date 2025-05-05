@@ -3,8 +3,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, HoverCard, HoverCardContent, HoverCardTrigger } from "ui";
-import { useAuthStore } from "@login/stores/auth-store";
-import type { FilialAcesso } from "@login/types";
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
+import type { FilialAcesso } from "@/app/login/_lib/types";
 
 interface FilialHoverCardProps {
   filialNumero: string;

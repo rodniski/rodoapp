@@ -1,10 +1,10 @@
 // app/layout.tsx
 "use client";
-import { Outfit } from "next/font/google";
+import { Roboto } from "next/font/google";
 import { Providers } from "comp/providers";
 import "./globals.css";
 
-const font = Outfit({
+const font = Roboto({
   subsets: ["latin"],
   display: "optional",
 });
