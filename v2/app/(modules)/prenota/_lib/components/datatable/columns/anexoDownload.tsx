@@ -47,7 +47,7 @@ const AnexoDownload: React.FC<AnexoDownloadProps> = ({AnexoPath}) => {
 
     return (
         <HoverCard>
-            <HoverCardTrigger>
+            <HoverCardTrigger className="cursor-pointer w-full h-full flex items-center justify-center">
                 {hasAttachments ? (
                     <FileCheck2 className="text-lime-400" size={24}/>
                 ) : (

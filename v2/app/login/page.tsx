@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
 import { LoginForm } from "@/app/login/_lib/components";
+import Logo from "@/public/logo/logo";
+import {Background} from "comp";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -28,6 +30,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
+      <Background/>
       <LoginForm />
     </div>
   );

@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
         {/* Tabela com header fixo e largura baseada no conteúdo */}
         <div className="max-h-[calc(100vh-200px)] rounded-xl overflow-auto scroll-smooth">
           <Table className="w-full table-auto rounded-xl">
-            <TableHeader className="sticky top-0 z-20 bg-background shadow-sm">
+            <TableHeader className="sticky top-0 z-20 bg-background shadow-sm p-0 m-0">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (

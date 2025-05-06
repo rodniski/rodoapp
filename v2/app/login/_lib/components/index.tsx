@@ -25,6 +25,7 @@ import {
   PasswordInput,
 } from "ui";
 import { useAuth } from "@/app/login/_lib/hooks";
+import Logo from "@/public/logo/logo";
 
 const loginSchema = z.object({
   username: z
@@ -64,9 +65,12 @@ export function LoginForm() {
       className="w-full max-w-md"
     >
       <Card className="p-8 shadow-lg backdrop-blur bg-muted/20">
-        <CardHeader className="text-center mb-6 border-b pb-4">
+        <CardHeader className="flex justify-center items-center gap-5 text-center mb-6 border-b pb-4 text-lg 2xl:text-2xl">
+          <Logo className="size-14" color="var(--primary)"/>
+          <div>
           <CardTitle>Bem-vindo ao RodoApp</CardTitle>
           <CardDescription>Use seu acesso do Protheus para entrar</CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>

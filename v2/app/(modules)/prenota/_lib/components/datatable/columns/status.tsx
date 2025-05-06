@@ -62,12 +62,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ prenota }) => {
           {config.icon}
         </div>
       </TooltipTrigger>
-      {/* O conteúdo do Tooltip pode ser ajustado. Manter o original por enquanto: */}
       <TooltipContent>
         {config.tooltip}
       </TooltipContent>
-      {/* Alternativa mais simples para o tooltip: */}
-      {/* <TooltipContent>{config.tooltip}</TooltipContent> */}
     </Tooltip>
   );
 };

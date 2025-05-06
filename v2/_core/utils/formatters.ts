@@ -76,7 +76,15 @@ export function formatDateBR(date: Date | null | undefined): BRDateString | "" {
   if (!date || !isValid(date)) return "";
   return format(date, "dd/MM/yyyy", { locale: ptBR }) as BRDateString;
 }
-
+export const formatDateForCell = (dateString: string | undefined | null): string => {
+  if (!dateString || dateString.length !== 8 || !/^\d{8}$/.test(dateString)) {
+    return "-";
+  }
+  const year = dateString.substring(0, 4);
+  const month = dateString.substring(4, 6);
+  const day = dateString.substring(6, 8);
+  return `${day}/${month}/${year}`;
+};
 /**
  * Normaliza string de data/hora (ex: "dd/MM/yyyy HH:mm:ss") para apenas "dd/MM/yyyy".
  * Retorna string vazia se a entrada for inválida.

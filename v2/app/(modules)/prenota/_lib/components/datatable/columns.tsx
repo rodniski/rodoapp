@@ -1,26 +1,17 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-
 import {
   FilialHoverCard,
   PriorityBadge,
   VencimentoBadge,
   StatusBadge,
+  Actions,
 } from "@prenota/components";
 import { DataTableColumnHeader } from "ui/data-table";
-import { formatCurrency } from "utils";
+import { formatCurrency, formatDateForCell } from "utils";
 import { PrenotaRow } from "@prenota/types";
-
-const formatDateForCell = (dateString: string | undefined | null): string => {
-  if (!dateString || dateString.length !== 8 || !/^\d{8}$/.test(dateString)) {
-    return "-";
-  }
-  const year = dateString.substring(0, 4);
-  const month = dateString.substring(4, 6);
-  const day = dateString.substring(6, 8);
-  return `${day}/${month}/${year}`;
-};
+import AnexoDownload from "./columns/anexoDownload";
 
 const NotaFiscalCell = ({ data }: { data: any }) => (
   <div className="flex flex-col">
@@ -43,7 +34,6 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <FilialHoverCard
         filialNumero={row.original.F1_FILIAL}
         observation={row.original.F1_XOBS}
-        username={row.original.USUARIO}
       />
     ),
   },
@@ -107,6 +97,7 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       </span>
     ),
   },
+
   {
     accessorKey: "F1_XPRIOR",
     header: ({ column }) => (
@@ -120,5 +111,14 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => <StatusBadge prenota={row.original} />,
+  },
+  {
+    accessorKey: "actions",
+    header: "Ações",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Actions preNota={row.original} />
+      </div>
+    ),
   },
 ];

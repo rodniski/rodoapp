@@ -1,5 +1,4 @@
 interface Config {
-    API_RUST_URL: string;
     API_BORRACHARIA_URL: string;
     API_DEVELOPMENT_URL: string;
     API_PRODUCTION_URL: string;
@@ -8,7 +7,6 @@ interface Config {
 }
 
 export const config: Config = {
-    API_RUST_URL: "http://172.16.99.182:8080",
     API_BORRACHARIA_URL: "http://172.16.0.251:9010/rest/",
     API_DEVELOPMENT_URL: "http://172.16.0.245:8410/rest/",
     API_PRODUCTION_URL: "http://172.16.99.174:8400/rest/",

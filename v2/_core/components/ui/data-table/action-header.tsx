@@ -32,7 +32,9 @@ export function DataTableColumnHeader<TData, TValue>({
 
   // Verificação para garantir que setSorting é uma função
   if (typeof setSorting !== "function") {
-    console.error("setSorting não é uma função. Verifique a implementação do useDataTableStore.");
+    console.error(
+      "setSorting não é uma função. Verifique a implementação do useDataTableStore."
+    );
     return <span>Erro na configuração da tabela</span>; // Feedback visual opcional
   }
 
@@ -47,8 +49,7 @@ export function DataTableColumnHeader<TData, TValue>({
   };
 
   return (
-    <div className="flex items-center justify-between gap-1">
-      <span>{title}</span>
+    <div className="flex items-center justify-start gap-1 p-0 m-0">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -64,20 +65,13 @@ export function DataTableColumnHeader<TData, TValue>({
             <ArrowDownIcon className="mr-2 h-4 w-4" />
             Ordenar descendente
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <PinLeftIcon className="mr-2 h-4 w-4" />
-            Fixar à esquerda
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <PinRightIcon className="mr-2 h-4 w-4" />
-            Fixar à direita
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => column.toggleVisibility()}>
             <EyeClosedIcon className="mr-2 h-4 w-4" />
             Ocultar coluna
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <span>{title}</span>
     </div>
   );
 }
