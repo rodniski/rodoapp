@@ -62,7 +62,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ prenota }) => {
           {config.icon}
         </div>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent className="text-white font-semibold">
         {config.tooltip}
       </TooltipContent>
     </Tooltip>

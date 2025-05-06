@@ -55,7 +55,7 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({ priority }) => {
           {config.icon}
         </div>
       </TooltipTrigger>
-      <TooltipContent>{config.tooltip}</TooltipContent>
+      <TooltipContent className="text-white font-semibold">{config.tooltip}</TooltipContent>
     </Tooltip>
   );
 };

@@ -1,3 +1,4 @@
+// Exemplo de como adicionar 'size' no seu arquivo de colunas (columns.ts)
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -11,19 +12,8 @@ import {
 import { DataTableColumnHeader } from "ui/data-table";
 import { formatCurrency, formatDateForCell } from "utils";
 import { PrenotaRow } from "@prenota/types";
-import AnexoDownload from "./columns/anexoDownload";
 
-const NotaFiscalCell = ({ data }: { data: any }) => (
-  <div className="flex flex-col">
-    <span className="text-xs uw:text-base">{`${data.F1_DOC || "-"} / ${
-      data.F1_SERIE || "-"
-    }`}</span>
-    <span className="text-muted-foreground text-xs uw:text-base">
-      Emitido: {formatDateForCell(data.F1_EMISSAO)}
-    </span>
-  </div>
-);
-
+// --- Definição das Colunas com TAMANHOS ---
 export const columns: ColumnDef<PrenotaRow>[] = [
   {
     accessorKey: "F1_FILIAL",
@@ -31,11 +21,15 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <DataTableColumnHeader column={column} title="Filial" />
     ),
     cell: ({ row }) => (
-      <FilialHoverCard
-        filialNumero={row.original.F1_FILIAL}
-        observation={row.original.F1_XOBS}
-      />
+      <div className="flex items-center justify-center">
+        <FilialHoverCard
+          filialNumero={row.original.F1_FILIAL}
+          observation={row.original.F1_XOBS}
+        />
+      </div>
     ),
+    size: 80, // Largura menor para filial (ex: 80px)
+    minSize: 70, // Não menor que 70px
   },
   {
     accessorKey: "F1_XTIPO",
@@ -43,20 +37,33 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <DataTableColumnHeader column={column} title="Tipo" />
     ),
     cell: ({ row }) => (
-      <div className="capitalize text-xs uw:text-base">
+      <div className="flex flex-col items-center justify-center capitalize text-xs uw:text-base">
         {row.original.F1_XTIPO}
         <div className="text-xs uw:text-base text-muted-foreground">
-          {row.original.F1_XUSRRA}
+          {row.original.USUARIO /* Mapeado de F1_XUSRRA */}
         </div>
       </div>
     ),
+    size: 120, // Um pouco maior para tipo + usuário
   },
   {
-    id: "documento",
+    // Usar accessorKey ajuda TanStack Table a associar tamanho, mesmo com ID customizado
+    accessorKey: "F1_DOC", // Pode usar um accessor relevante
+    id: "documento", // Mantém ID customizado se precisar
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Nota Fiscal" />
     ),
-    cell: ({ row }) => <NotaFiscalCell data={row.original} />,
+    cell: ({ row }) => (
+      <div className="flex flex-col justify-center items-center">
+        <span className="text-xs uw:text-base">{`${
+          row.original.F1_DOC || "-"
+        } / ${row.original.F1_SERIE || "-"}`}</span>
+        <span className="text-muted-foreground text-xs uw:text-base">
+          Emitido: {formatDateForCell(row.original.F1_EMISSAO)}
+        </span>
+      </div>
+    ),
+    size: 130, // Tamanho para Doc/Serie + Data
   },
   {
     accessorKey: "A2_NOME",
@@ -64,20 +71,28 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <DataTableColumnHeader column={column} title="Fornecedor" />
     ),
     cell: ({ row }) => (
-      <div className="capitalize text-xs qhd:text-base break-words inline-block max-w-[300px] qhd:max-w-[350px] whitespace-normal">
+      // Mantém o max-w aqui como um fallback, mas o size da coluna vai ditar
+      <div className="flex flex-col items-center justify-center capitalize text-xs qhd:text-base break-words w-full whitespace-normal">
         {row.original.A2_NOME}
         <div className="text-xs qhd:text-base text-muted-foreground">
-          {row.original.A2_COD} - {row.original.A2_LOJA}
+          Cod: {row.original.A2_COD} - Loja: {row.original.A2_LOJA}
         </div>
       </div>
     ),
+    size: 300, // Larga para o nome do fornecedor
+    minSize: 200, // Tamanho mínimo
   },
   {
     accessorKey: "F1_DTDIGIT",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Inclusão" />
     ),
-    cell: ({ getValue }) => formatDateForCell(getValue() as string),
+    cell: ({ getValue }) => (
+      <div className="flex items-center justify-center">
+        {formatDateForCell(getValue() as string)}
+      </div>
+    ),
+    size: 120, // Tamanho para data
   },
   {
     accessorKey: "VENCIMENTO",
@@ -85,6 +100,7 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <DataTableColumnHeader column={column} title="Vencimento" />
     ),
     cell: ({ row }) => <VencimentoBadge vencimento={row.original.VENCIMENTO} />,
+    size: 110,
   },
   {
     accessorKey: "F1_VALBRUT",
@@ -92,33 +108,48 @@ export const columns: ColumnDef<PrenotaRow>[] = [
       <DataTableColumnHeader column={column} title="Valor (R$)" />
     ),
     cell: ({ getValue }) => (
-      <span className="text-xs uw:text-base block">
+      <div className="flex items-center justify-center text-xs uw:text-base">
         {formatCurrency(getValue() as number)}
-      </span>
+      </div>
     ),
+    size: 120,
   },
-
   {
     accessorKey: "F1_XPRIOR",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Prioridade" />
     ),
-    cell: ({ row }) => <PriorityBadge priority={row.original.F1_XPRIOR} />,
+    cell: ({ row }) => (
+      <div className="flex items-center justify-center">
+        <PriorityBadge priority={row.original.F1_XPRIOR} />
+      </div>
+    ),
+    size: 100,
   },
   {
     accessorKey: "Status",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <StatusBadge prenota={row.original} />,
+    cell: ({ row }) => (
+      <div className="flex items-center justify-center">
+        <StatusBadge prenota={row.original} />
+      </div>
+    ),
+    size: 100,
   },
   {
-    accessorKey: "actions",
-    header: "Ações",
+    id: "actions",
+    header: ({ column }) => (
+      <span className="flex items-center justify-center">Ações</span>
+    ),
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 justify-center">
         <Actions preNota={row.original} />
       </div>
     ),
+    size: 90,
+    minSize: 80,
+    maxSize: 100,
   },
 ];

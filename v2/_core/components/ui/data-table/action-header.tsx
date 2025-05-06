@@ -9,10 +9,8 @@ import {
 import {
   ArrowUpIcon,
   ArrowDownIcon,
-  PinLeftIcon,
-  PinRightIcon,
   EyeClosedIcon,
-  DotsVerticalIcon,
+  CaretSortIcon,
 } from "@radix-ui/react-icons";
 import { Column } from "@tanstack/react-table";
 import { useDataTableStore } from "ui/data-table";
@@ -49,29 +47,27 @@ export function DataTableColumnHeader<TData, TValue>({
   };
 
   return (
-    <div className="flex items-center justify-start gap-1 p-0 m-0">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <DotsVerticalIcon className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="z-50">
-          <DropdownMenuItem onClick={() => updateSorting(false)}>
-            <ArrowUpIcon className="mr-2 h-4 w-4" />
-            Ordenar ascendente
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => updateSorting(true)}>
-            <ArrowDownIcon className="mr-2 h-4 w-4" />
-            Ordenar descendente
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleVisibility()}>
-            <EyeClosedIcon className="mr-2 h-4 w-4" />
-            Ocultar coluna
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <span>{title}</span>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="flex items-center justify-center w-full">
+          <span>{title}</span>
+          <CaretSortIcon className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="z-50">
+        <DropdownMenuItem onClick={() => updateSorting(false)}>
+          <ArrowUpIcon className="mr-2 h-4 w-4" />
+          Ordenar ascendente
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => updateSorting(true)}>
+          <ArrowDownIcon className="mr-2 h-4 w-4" />
+          Ordenar descendente
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => column.toggleVisibility()}>
+          <EyeClosedIcon className="mr-2 h-4 w-4" />
+          Ocultar coluna
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

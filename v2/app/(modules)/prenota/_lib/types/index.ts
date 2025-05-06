@@ -33,11 +33,68 @@ export type TipoFiltro =
   | "select-multiple"
   | "filial-select";
 
-
 export interface CampoFiltro {
   label: string;
   campo: keyof PrenotaRow;
   tipo: TipoFiltro;
-  opcoes?: { label: string; value: string }[] | (() => Promise<{ label: string; value: string }[]>);
+  opcoes?:
+    | { label: string; value: string }[]
+    | (() => Promise<{ label: string; value: string }[]>);
   observacao?: string;
 }
+
+/**
+ * Payload para a solicitação de revisão da Pré-Nota.
+ */
+export interface RevisaoPreNotaPayload {
+  RECSF1: string | number; // RECNO da SF1 (Pré-Nota)
+  REVISAR: string; // Motivo/descrição da solicitação de revisão
+  USER: string; // Usuário que está solicitando
+  EMAILS?: string; // E-mails para cópia, concatenados por ';' (opcional)
+  FINALIZADO: "True" | "False"; // Indica se a revisão finaliza algo (API espera string)
+}
+
+/**
+ * Resposta de SUCESSO da API de Revisão de Pré-Nota.
+ * (Adaptar conforme a resposta real da sua API)
+ */
+export interface RevisaoPreNotaSuccessResponse {
+  Sucesso: true;
+  Mensagem?: string;
+  Documento?: string; // Exemplo de outros campos que podem vir
+  REC?: string; // Exemplo de outros campos que podem vir
+  [k: string]: unknown;
+}
+
+/**
+ * Resposta de ERRO LÓGICO da API de Revisão de Pré-Nota.
+ */
+export interface RevisaoPreNotaErrorResponse {
+  Sucesso: false;
+  Mensagem: string;
+  [k: string]: unknown;
+}
+
+/**
+ * Tipo unificado para a resposta da API de Revisão.
+ */
+export type RevisaoPreNotaApiResponse =
+  | RevisaoPreNotaSuccessResponse
+  | RevisaoPreNotaErrorResponse;
+
+export interface HistoricoEntry {
+  usuario: string;
+  data: string; // Formato "dd/MM/yyyy"
+  hora: string; // Formato "HH:mm:ss"
+  campo: string; // Código ou descrição do campo/ação
+  anterior: string; // Valor anterior ou informação relacionada
+  chave: string; // Chave da entidade (provavelmente o RECSF1)
+  atual: string; // Valor atual ou descrição da ação/log
+  // Adicionar um campo opcional para a data parseada para ordenação
+  timestamp?: Date;
+}
+
+/**
+ * O tipo de resposta esperado da API getHistorico (um array de entradas).
+ */
+export type HistoricoApiResponse = HistoricoEntry[];
