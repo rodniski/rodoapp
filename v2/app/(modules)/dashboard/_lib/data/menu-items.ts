@@ -5,6 +5,7 @@ import {
   Users,
   Computer,
   PlusIcon,
+  BookOpen,
 } from "lucide-react";
 
 import type { Category } from ".";
@@ -94,6 +95,43 @@ export const dashboardData: Category[] = [
             requiresGroup: ["000191"],
           },
         ],
+      },
+      {
+        id: "documentacao",
+        title: "Documentação",
+        description: "Documentação sobre TI, Protheus e Power BI.",
+        icon: BookOpen,
+        subLinks: [
+          {
+            id: "documentacao-introducao",
+            title: "Introdução",
+            url: "/documentacao",
+            description:
+              "Página introdutória de documentação para TI, Protheus e Power BI.",
+            icon: TableIcon,
+          },
+          {
+            id: "documentacao-ti",
+            title: "TI",
+            url: "/documentacao/ti/antiameacas",
+            description: "Documentação sobre processos de TI.",
+            icon: DesktopIcon,
+          },
+          {
+            id: "documentacao-protheus",
+            title: "Protheus",
+            url: "/documentacao/protheus/videoaulas",
+            description: "Documentação sobre como usar Protheus.",
+            icon: DesktopIcon,
+          },
+          {
+            id: "documentacao-powerbi",
+            title: "Power BI",
+            url: "/documentacao/powerbi/acesso",
+            description: "Documentação sobre como usar Power BI.",
+            icon: DesktopIcon,
+          },
+        ]
       },
     ],
   },
