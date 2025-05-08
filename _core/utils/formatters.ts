@@ -47,31 +47,31 @@ export function parseDateBR(
  * @returns Um objeto `Date` (representando meia-noite UTC daquele dia) ou `undefined`.
  */
 export function parseDateYYYYMMDD(
-    dateStr: string | null | undefined
+  dateStr: string | null | undefined
 ): Date | undefined {
-    const trimmedStr = dateStr?.trim();
-    // Validação básica do formato
-    if (!trimmedStr || !/^\d{8}$/.test(trimmedStr)) {
-        return undefined;
-    }
-    const year = parseInt(trimmedStr.substring(0, 4), 10);
-    const month = parseInt(trimmedStr.substring(4, 6), 10) - 1; // Mês é 0-indexado
-    const day = parseInt(trimmedStr.substring(6, 8), 10);
+  const trimmedStr = dateStr?.trim();
+  // Validação básica do formato
+  if (!trimmedStr || !/^\d{8}$/.test(trimmedStr)) {
+    return undefined;
+  }
+  const year = parseInt(trimmedStr.substring(0, 4), 10);
+  const month = parseInt(trimmedStr.substring(4, 6), 10) - 1; // Mês é 0-indexado
+  const day = parseInt(trimmedStr.substring(6, 8), 10);
 
-    // Cria a data em UTC para garantir consistência
-    const date = new Date(Date.UTC(year, month, day));
+  // Cria a data em UTC para garantir consistência
+  const date = new Date(Date.UTC(year, month, day));
 
-    // Validação extra para garantir que os componentes formam uma data real
-    // (ex: evita criar 31/02 que viraria 03/03)
-    if (
-        isNaN(date.getTime()) ||
-        date.getUTCFullYear() !== year ||
-        date.getUTCMonth() !== month ||
-        date.getUTCDate() !== day
-    ) {
-        return undefined; // Data inválida (ex: 31 de Fev)
-    }
-    return date; // Retorna o objeto Date válido
+  // Validação extra para garantir que os componentes formam uma data real
+  // (ex: evita criar 31/02 que viraria 03/03)
+  if (
+    isNaN(date.getTime()) ||
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month ||
+    date.getUTCDate() !== day
+  ) {
+    return undefined; // Data inválida (ex: 31 de Fev)
+  }
+  return date; // Retorna o objeto Date válido
 }
 
 /**
@@ -84,11 +84,11 @@ export function parseDateYYYYMMDD(
 export function formatDateBR(date: Date | null | undefined): BRDateString | "" {
   if (!date || !isValid(date)) return "";
   try {
-      // Formata usando date-fns com locale pt-BR
-      return format(date, "dd/MM/yyyy", { locale: ptBR }) as BRDateString;
+    // Formata usando date-fns com locale pt-BR
+    return format(date, "dd/MM/yyyy", { locale: ptBR }) as BRDateString;
   } catch (error) {
-      console.error("Erro ao formatar data para BR:", error);
-      return ""; // Retorna vazio em caso de erro inesperado
+    console.error("Erro ao formatar data para BR:", error);
+    return ""; // Retorna vazio em caso de erro inesperado
   }
 }
 
@@ -99,7 +99,9 @@ export function formatDateBR(date: Date | null | undefined): BRDateString | "" {
  * @param dateString String da data no formato "yyyyMMdd".
  * @returns A data formatada como "dd/MM/yyyy" ou "-".
  */
-export const formatDateForCell = (dateString: string | undefined | null): string => {
+export const formatDateForCell = (
+  dateString: string | undefined | null
+): string => {
   const parsedDate = parseDateYYYYMMDD(dateString); // Reusa o parser robusto
   if (!parsedDate) return "-"; // Retorna '-' se o parse falhar
   return formatDateBR(parsedDate) || "-"; // Reusa o formatador BR, com fallback '-'
@@ -121,6 +123,35 @@ export function normalizeDateString(
 }
 
 /**
+ * Converte strings de data e hora do Protheus para objetos Date válidos.
+ */
+export function parseProtheusDate(
+  dateStr: string | null,
+  timeStr?: string | null
+): Date | null {
+  if (!dateStr) return null;
+
+  // dd/MM/yyyy HH:mm:ss
+  if (dateStr.includes("/")) {
+    return parseDateBR(`${dateStr} ${timeStr || "00:00:00"}`) || null;
+  }
+
+  // yyyyMMdd HHmmss
+  if (/^\d{8}$/.test(dateStr)) {
+    const date = parseDateYYYYMMDD(dateStr);
+    if (date && timeStr && /^\d{6}$/.test(timeStr)) {
+      const hours = +timeStr.substring(0, 2);
+      const minutes = +timeStr.substring(2, 4);
+      const seconds = +timeStr.substring(4, 6);
+      date.setHours(hours, minutes, seconds);
+    }
+    return date || null;
+  }
+
+  return null;
+}
+
+/**
  * Calcula a diferença em dias entre duas datas.
  * Retorna a diferença como número (positivo se dataFim for futura, negativo se passada).
  * Retorna 0 se as datas forem inválidas ou iguais.
@@ -131,18 +162,17 @@ export function normalizeDateString(
  * @returns Número de dias de diferença.
  */
 export function differenceInCalendarDays(
-    dateFim: Date | null | undefined,
-    dateIni: Date | null | undefined = new Date() // Default é hoje
+  dateFim: Date | null | undefined,
+  dateIni: Date | null | undefined = new Date() // Default é hoje
 ): number {
-    if (!dateFim || !isValid(dateFim) || !dateIni || !isValid(dateIni)) {
-        return 0;
-    }
-    // Usa startOfDay para zerar horas/minutos/segundos no fuso horário local
-    const fimDoDia = startOfDay(dateFim);
-    const inicioDoDia = startOfDay(dateIni);
-    return differenceInDays(fimDoDia, inicioDoDia);
+  if (!dateFim || !isValid(dateFim) || !dateIni || !isValid(dateIni)) {
+    return 0;
+  }
+  // Usa startOfDay para zerar horas/minutos/segundos no fuso horário local
+  const fimDoDia = startOfDay(dateFim);
+  const inicioDoDia = startOfDay(dateIni);
+  return differenceInDays(fimDoDia, inicioDoDia);
 }
-
 
 // --------------------------------------------------------------------------
 // Formatadores / Parsers de Números e Moeda
@@ -185,7 +215,6 @@ export function formatPercentage(
   return `${numValue.toFixed(decimals)}%`;
 }
 
-
 /**
  * Converte um valor (string ou número) para número float.
  * Remove formatação de moeda e trata vírgula como decimal.
@@ -201,9 +230,9 @@ export function parseFloatOrZero(value?: string | number | null): number {
   }
   if (typeof value === "string" && value.trim() !== "") {
     // Remove R$, espaços e pontos (milhar)
-    const cleaned = value.replace(/R?\$\s?/g, '').replace(/\./g, '');
+    const cleaned = value.replace(/R?\$\s?/g, "").replace(/\./g, "");
     // Troca vírgula (decimal BR) por ponto
-    const normalized = cleaned.replace(',', '.');
+    const normalized = cleaned.replace(",", ".");
     const parsed = parseFloat(normalized);
     return isNaN(parsed) ? 0 : parsed;
   }
@@ -220,13 +249,15 @@ export function parseFloatOrZero(value?: string | number | null): number {
  * @param value Valor a ser convertido (string, número, null ou undefined).
  * @returns O número float correspondente ou `null`.
  */
-export function parseFloatOrNull(value: string | number | null | undefined): number | null {
+export function parseFloatOrNull(
+  value: string | number | null | undefined
+): number | null {
   if (typeof value === "number") {
     return isNaN(value) ? null : value; // Retorna null se for NaN
   }
   if (typeof value === "string" && value.trim() !== "") {
-    const cleaned = value.replace(/R?\$\s?/g, '').replace(/\./g, '');
-    const normalized = cleaned.replace(',', '.');
+    const cleaned = value.replace(/R?\$\s?/g, "").replace(/\./g, "");
+    const normalized = cleaned.replace(",", ".");
     const parsed = parseFloat(normalized);
     return isNaN(parsed) ? null : parsed; // Retorna null se falhar o parse
   }
@@ -247,31 +278,32 @@ export function parseInputToNumber(value: string | null | undefined): number {
   if (!value) return 0;
 
   // Remove R$, espaços. Deixa dígitos, ponto, vírgula e sinal de menos inicial.
-  let cleaned = String(value).trim().replace(/R?\$\s?/g, '');
+  let cleaned = String(value)
+    .trim()
+    .replace(/R?\$\s?/g, "");
   // Remove pontos de milhar (exceto se for o único separador e estiver no final)
   // Remove vírgulas de milhar (exceto se for o único separador e estiver no final)
 
-  const hasComma = cleaned.includes(',');
-  const hasPeriod = cleaned.includes('.');
+  const hasComma = cleaned.includes(",");
+  const hasPeriod = cleaned.includes(".");
 
   // Se tem vírgula, trata como decimal BR: remove pontos, troca vírgula
   if (hasComma) {
-    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
   }
   // Se não tem vírgula, mas tem ponto, trata como decimal US: remove vírgulas
   else if (hasPeriod) {
-    cleaned = cleaned.replace(/,/g, '');
+    cleaned = cleaned.replace(/,/g, "");
   }
   // Se não tem nenhum, ou só tem um tipo de separador,
   // a tentativa de parseFloat geralmente funciona.
 
   // Remove caracteres não numéricos restantes, exceto o ponto decimal e o sinal negativo inicial
-  cleaned = cleaned.replace(/[^\d.-]/g, '');
+  cleaned = cleaned.replace(/[^\d.-]/g, "");
 
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? 0 : parsed;
 }
-
 
 // --------------------------------------------------------------------------
 // Formatadores de Documentos
@@ -366,10 +398,15 @@ export function numbersOnly(value: string | null | undefined): string {
 export function parseCurrencyToNumber(
   value: string | null | undefined
 ): number {
-  console.warn("parseCurrencyToNumber está depreciada, use parseFloatOrZero ou parseInputToNumber.");
+  console.warn(
+    "parseCurrencyToNumber está depreciada, use parseFloatOrZero ou parseInputToNumber."
+  );
   if (!value) return 0;
   // Lógica similar a parseFloatOrZero
-  const cleanedValue = value.replace(/R?\$\s?/g, "").replace(/\./g, "").replace(",", ".");
+  const cleanedValue = value
+    .replace(/R?\$\s?/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
   const num = parseFloat(cleanedValue);
   return isNaN(num) ? 0 : num;
 }

@@ -44,6 +44,13 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  /* Shadow variables */
+  --shadow-soft-glow: var(--soft-glow);
+  --shadow-subtle-dark: var(--subtle-dark);
+  --shadow-color-tint: var(--color-tint);
+  --shadow-bottom-dir: var(--bottom-dir);
+  --shadow-inner: var(--inner-shadow);
+
   --breakpoint-lg: 60rem;
   --breakpoint-fhd: 80rem;
   --breakpoint-qhd: 140rem;
@@ -68,7 +75,7 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.99 0.00 0);
+  --background: oklch(0.99 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
@@ -86,6 +93,13 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.623 0.214 259.815);
+
+  /* Shadow definitions for light mode */
+  --soft-glow: 0 0 15px rgba(0, 0, 0, 0.05);
+  --subtle-dark: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --color-tint: 0 4px 20px -5px rgba(59, 130, 246, 0.15);
+  --bottom-dir: 0 10px 20px -15px rgba(0, 0, 0, 0.1);
+  --inner-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 
   --chart-1: hsl(215 75% 65%); /* Azul Claro Brilhante (Saturação Alta) */
   --chart-2: hsl(215 60% 55%); /* Azul Médio Padrão */
@@ -130,6 +144,13 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.488 0.243 264.376);
 
+  /* Shadow definitions for dark mode - subtle soft glow */
+  --soft-glow: 0 0 15px rgba(100, 100, 100, 0.1);
+  --subtle-dark: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --color-tint: 0 4px 20px -5px rgba(59, 130, 246, 0.2);
+  --bottom-dir: 0 10px 20px -15px rgba(0, 0, 0, 0.3);
+  --inner-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+
   --chart-1: hsl(215 80% 75%); /* Azul Claro Brilhante (Mais claro) */
   --chart-2: hsl(215 65% 68%); /* Azul Médio Padrão (Mais claro) */
   --chart-3: hsl(215 50% 80%); /* Azul Pastel Claro (Mais claro) */
@@ -166,4 +187,33 @@
     -webkit-text-fill-color: var(--primary) !important;
     -webkit-background-clip: text !important;
   }
+}
+
+/* Shadow utility classes */
+.shadow-soft-glow {
+  box-shadow: var(--soft-glow);
+}
+
+.shadow-subtle-dark {
+  box-shadow: var(--subtle-dark);
+}
+
+.shadow-color-tint {
+  box-shadow: var(--color-tint);
+}
+
+.shadow-bottom-dir {
+  box-shadow: var(--bottom-dir);
+}
+
+.shadow-inner {
+  box-shadow: var(--inner-shadow);
+}
+
+/* Card with shadow utility classes */
+.card-with-glow {
+  border-radius: var(--radius);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--soft-glow);
 }

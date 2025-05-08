@@ -7,12 +7,12 @@ import {
   DataTablePagination,
   useDataTableStore,
 } from "ui/data-table";
-import { columns, DataTableFilterModal } from "@prenota/components";
-import { usePrenotas } from "@prenota/hooks";
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
 import { Background } from "comp";
 import { Button, Badge } from "ui";
 import { X, RotateCcw } from "lucide-react"; // Importar ícone para reset
+import { useAuthStore } from "@login/stores";
+import { usePrenotas } from "@prenota/tabela";
+import { DataTableFilterModal } from "@prenota/filtro";
 
 // Mapeamento de IDs de filtros para labels amigáveis (ATUALIZADO)
 const filterLabels: Record<string, string> = {

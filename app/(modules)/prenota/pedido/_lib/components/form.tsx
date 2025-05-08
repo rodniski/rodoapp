@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { useFilialOptions } from "utils";
 import { FornecedorDialog } from "./fornecedor";
 import { useAuxStore } from "@login/stores/aux-store";
-import { TIPOS_NF_OPTIONS } from "@prenota/stores";
+import { TIPOS_NF_OPTIONS } from "@/app/(modules)/prenota/_lib/config/constants";
 
 export function IncludePedidoCard() {
   const filialOptions = useFilialOptions();

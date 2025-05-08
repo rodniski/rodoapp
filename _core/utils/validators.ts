@@ -47,4 +47,6 @@ export function isValidCNPJ(cnpj: string | null | undefined): boolean {
   return result === parseInt(digits.charAt(1), 10);
 }
 
-// Poderia adicionar isValidCPF, isValidEmail, etc.
+export function isValidDate(d: any): d is Date {
+  return d instanceof Date && !isNaN(d.getTime());
+}

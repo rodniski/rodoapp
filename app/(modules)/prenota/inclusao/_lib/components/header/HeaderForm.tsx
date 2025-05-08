@@ -31,7 +31,7 @@ import {
 
 import { usePreNotaStore } from "@inclusao/stores";
 import { useAuxStore } from "@/app/login/_lib/stores";
-import { TIPOS_NF_OPTIONS } from "@prenota/stores";
+import { TIPOS_NF_OPTIONS } from "@/app/(modules)/prenota/_lib/config/constants";
 import type { FilialGeral } from "@/app/login/_lib/types";
 
 import { toast } from "sonner";
