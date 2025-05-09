@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { useHistoricoPreNota } from "@/app/(modules)/prenota/_lib/lib/hooks";
+import { useHistoricoPreNota } from "@prenota/actions";
 import type {
   HistoricoChatViewProps,
   MessageProps,
   TimestampProps,
-} from "@/app/(modules)/prenota/_lib/lib/types";
+} from "@prenota/actions";
 import { cn, formatUsername } from "utils";
 import { Separator } from "ui";
 

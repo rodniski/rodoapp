@@ -1,4 +1,4 @@
-export * from './components/action-button';
+export * from './components/footer';
 export * from './components/chat';
 export * from './components/dialog';
 export * from './components/form';

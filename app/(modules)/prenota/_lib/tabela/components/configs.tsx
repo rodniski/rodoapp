@@ -1,6 +1,13 @@
+/* ──────────────────────────────────────────────────────────────────────────
+ * prenota/_config/index.ts
+ * --------------------------------------------------------------------------
+ * • Helpers de filial  (cores + avatar + hook meta)
+ * • Prioridades        (config + helper GetPriorityConfig)
+ * • Status             (cores + ícones)
+ * • Vencimento         (getVencimentoPreset)
+ * ------------------------------------------------------------------------ */
+
 import { useAuthStore } from "@login/stores";
-import { useCallback } from "react";
-import { FilialMeta } from "../config";
 import {
   TriangleUpIcon,
   MinusIcon,
@@ -16,31 +23,37 @@ import {
   formatDateBR,
   differenceInCalendarDays,
 } from "utils";
+import { FilialMeta } from "../config";
+import { Badge } from "ui";
+import { cn } from "utils";
+import { BadgePreset } from "../tabela"; // Assumindo que BadgePreset está definido em @prenota/tabela
 
-export const getFilialColor = (filialName: string) => {
-  if (filialName.startsWith("RODOPARANA"))
-    return "dark:text-sky-400 text-sky-600 bg-muted";
-  if (filialName.startsWith("TIMBER"))
-    return "dark:text-amber-500 text-amber-600 bg-muted";
+/* ╔══════════════════════════════════════════════╗
+   ║ 1 ▸ FILIAIS (cor, avatar, hook de meta)      ║
+   ╚══════════════════════════════════════════════╝ */
+
+const getFilialColor = (nome: string): string => {
+  if (nome.startsWith("RODOPARANA")) {
+    return "bg-sky-100 text-sky-500 dark:bg-sky-900/40 dark:text-sky-300";
+  }
+  if (nome.startsWith("TIMBER")) {
+    return "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300";
+  }
   return "bg-muted text-muted-foreground";
 };
 
-export const getAvatarSrc = (filialName: string) => {
-  if (filialName.startsWith("RODOPARANA")) return "/rodo1.svg";
-  if (filialName.startsWith("TIMBER")) return "/timber.svg";
+const getAvatarSrc = (nome: string): string => {
+  if (nome.startsWith("RODOPARANA")) return "/rodo1.svg";
+  if (nome.startsWith("TIMBER")) return "/timber.svg";
   return "";
 };
 
-export function useFilialMeta(
-  filialNumero: string | null | undefined
-): FilialMeta {
-  const selector = useCallback(
-    (s: ReturnType<typeof useAuthStore.getState>) =>
-      s.filiais.find((f) => f.M0_CODFIL === filialNumero),
-    [filialNumero]
-  );
+/** Hook para obter metadados da filial (cor, avatar, nome completo) */
+function useFilialMeta(filialNumero: string | null | undefined): FilialMeta {
+  const sel = (s: ReturnType<typeof useAuthStore.getState>) =>
+    s.filiais.find((f) => f.M0_CODFIL === filialNumero);
 
-  const filial = useAuthStore(selector);
+  const filial = useAuthStore(sel);
 
   return {
     nome: filial?.M0_FILIAL ?? "Desconhecida",
@@ -51,160 +64,196 @@ export function useFilialMeta(
   };
 }
 
-/* ─────────────── PRIORIDADES ─────────────── */
+/* ╔══════════════════════════════════════════════╗
+   ║ 2 ▸ PRIORIDADES (badge de triângulos)        ║
+   ╚══════════════════════════════════════════════╝ */
 
-export const priorityConfig = {
+const priorityConfig = {
   Alta: {
     color: "text-red-600",
-    icon: <TriangleUpIcon className="size-8" />,
-    tooltip: "Prioridade Alta – requer atenção imediata.",
+    icon: (
+      <span className="text-red-600">
+        <TriangleUpIcon className="size-8" />
+      </span>
+    ),
+    tooltip: "Prioridade Alta – atenção imediata.",
   },
   Media: {
     color: "text-yellow-500",
-    icon: <MinusIcon className="size-8" />,
+    icon: (
+      <span className="text-yellow-500">
+        <MinusIcon className="size-8" />
+      </span>
+    ),
     tooltip: "Prioridade Média – atenção necessária.",
   },
   Baixa: {
     color: "text-green-600",
-    icon: <TriangleDownIcon className="size-8" />,
-    tooltip: "Prioridade Baixa – nenhuma ação imediata.",
+    icon: (
+      <span className="text-green-600">
+        <TriangleDownIcon className="size-8" />
+      </span>
+    ),
+    tooltip: "Prioridade Baixa – sem urgência.",
   },
-
-  /** 〝catch-all〞  para valores não mapeados                   */
   _default: {
     color: "text-muted-foreground",
-    icon: <InfoCircledIcon className="size-6" />,
+    icon: (
+      <span className="text-muted-foreground">
+        <InfoCircledIcon className="size-8" />
+      </span>
+    ),
     tooltip: "Prioridade desconhecida.",
   },
 } as const;
 
-type PriorityKey = keyof typeof priorityConfig; // "Alta" | "Media" | "Baixa" | "_default"
-type KnownPriority = Exclude<PriorityKey, "_default">; // "Alta" | "Media" | "Baixa"
+type PriorityKey = keyof typeof priorityConfig;
+type KnownPriority = Exclude<PriorityKey, "_default">;
 
-/* Helper opcional – evita repetir a lógica no componente */
-export function GetPriorityConfig(p: string | null | undefined) {
-  return priorityConfig[(p ?? "") as KnownPriority] ?? priorityConfig._default;
-}
+/** Helper → devolve o preset correto já fazendo *fallback* */
+const getPriorityPreset = (p?: string | null) =>
+  priorityConfig[(p ?? "") as KnownPriority] ?? priorityConfig._default;
 
-/* ─────────────── STATUS ─────────────── */
+/* ╔══════════════════════════════════════════════╗
+   ║ 3 ▸ STATUS (badge/tooltip de situação)       ║
+   ╚══════════════════════════════════════════════╝ */
 
-// A configuração de status permanece a mesma
-export const StatusConfig = {
+const statusConfig = {
   Pendente: {
     color: "text-sky-500",
-    icon: <TimerIcon className="w-5 h-5" />,
+    icon: (
+      <span className="text-sky-500">
+        <TimerIcon className="w-5 h-5" />
+      </span>
+    ),
     tooltip: "Status: Pendente",
   },
   Classificada: {
     color: "text-lime-500",
-    icon: <CheckCircledIcon className="w-5 h-5" />,
+    icon: (
+      <span className="text-lime-500">
+        <CheckCircledIcon className="w-5 h-5" />
+      </span>
+    ),
     tooltip: "Status: Classificada",
   },
   Revisar: {
     color: "text-amber-500",
-    icon: <ExclamationTriangleIcon className="w-5 h-5" />,
+    icon: (
+      <span className="text-amber-500">
+        <ExclamationTriangleIcon className="w-5 h-5" />
+      </span>
+    ),
     tooltip: "Status: A Revisar",
   },
-  // Mantemos um fallback para caso o valor de Status seja inesperado
   Desconhecido: {
     color: "text-muted-foreground",
-    icon: <InfoCircledIcon className="w-5 h-5" />,
+    icon: (
+      <span className="text-muted-foreground">
+        <InfoCircledIcon className="w-5 h-5" />
+      </span>
+    ),
     tooltip: "Status desconhecido",
   },
 } as const;
 
-/* ─────────── utils/vencimento.ts ─────────── */
+type StatusKey = keyof typeof statusConfig;
 
-/**
- * Preset devolvido pela função utilitária.
- */
-export interface VencimentoPreset {
-  /** Texto que vai dentro do badge (`Sem Venc.`, `14/05/2025` …) */
-  label: string;
-  /** Classe tailwind ou css-module p/ cor do badge */
-  colorClass: string;
-  /** Tooltip que explica a situação */
-  tooltip: string;
-  /** Quantos dias faltam (negativo = já venceu) */
-  diffDays: number | null;
-  /** Flag para estado especial */
-  state: "sem-venc" | "invalido" | "ok";
-}
+/** Helper semelhante ao de prioridade – garante *fallback* seguro */
+const getStatusPreset = (s?: string | null) =>
+  statusConfig[(s ?? "") as StatusKey] ?? statusConfig.Desconhecido;
 
-/**
- * Converte a string de `vencimento` numa estrutura pronta para UI.
- * Aceita “yyyyMMdd” **ou** “dd/MM/yyyy”.
- * Se estiver vazia ou com formato inválido, devolve presets adequados.
- */
-export function getVencimentoPreset(
-  vencimento?: string | null
-): VencimentoPreset {
-  /* 1 ────────── Sem vencimento informado */
-  if (!vencimento?.trim()) {
+/* ╔══════════════════════════════════════════════╗
+   ║ 4 ▸ VENCIMENTO (preset de cor / tooltip)     ║
+   ╚══════════════════════════════════════════════╝ */
+
+function getVencimentoPreset(venc?: string | null): BadgePreset {
+  /* Sem data -------------------------------------------------------------- */
+  if (!venc?.trim()) {
     return {
-      label: "Sem Venc.",
-      colorClass: "text-muted-foreground border-border",
+      color: "text-muted-foreground",
+      icon: (
+        <Badge className="font-medium text-xs text-muted-foreground border-border">
+          Sem Venc.
+        </Badge>
+      ),
       tooltip: "Documento sem data de vencimento.",
-      diffDays: null,
-      state: "sem-venc",
     };
   }
 
-  /* 2 ────────── Parse da data (yyyyMMdd  ↔  dd/MM/yyyy) */
+  /* Parse ----------------------------------------------------------------- */
   const date =
-    parseDateYYYYMMDD(vencimento) ?? // tenta primeiro yyyyMMdd
-    parseDateBR(vencimento); // depois dd/MM/yyyy
+    parseDateYYYYMMDD(venc) ?? // yyyyMMdd
+    parseDateBR(venc); // dd/MM/yyyy
 
   if (!date) {
-    /* formato realmente inválido */
     return {
-      label: "Data Inválida",
-      colorClass: "text-destructive border-destructive/50 bg-destructive/10",
-      tooltip: `Formato de data inválido (${vencimento}).`,
-      diffDays: null,
-      state: "invalido",
+      color: "text-destructive",
+      icon: (
+        <Badge className="font-medium text-xs text-destructive border-destructive/50 bg-destructive/10">
+          Data Inválida
+        </Badge>
+      ),
+      tooltip: `Formato inválido (${venc}).`,
     };
   }
 
-  /* 3 ────────── Data válida → calcula diferença */
-  const diff = differenceInCalendarDays(date); // hoje – vencimento
-  const label = formatDateBR(date); // sempre dd/MM/yyyy
+  /* Diferença de dias ----------------------------------------------------- */
+  const diff = differenceInCalendarDays(date);
+  const label = formatDateBR(date);
 
-  /* 4 ────────── Decide as cores/tooltip */
+  /* Cores + tooltip ------------------------------------------------------- */
   let colorClass = "";
   let tooltip = "";
 
   switch (true) {
-    case diff < 0: // já venceu
+    case diff < 0:
       colorClass = "text-red-700 border-red-500/50 bg-red-500/10";
       tooltip = `Vencido há ${Math.abs(diff)} dia(s)`;
       break;
-
-    case diff <= 2: // hoje / 1-2
+    case diff <= 2:
       colorClass = "text-orange-600 border-orange-400/50 bg-orange-500/10";
       tooltip = diff === 0 ? "Vence hoje" : `Vence em ${diff} dia(s)`;
       break;
-
-    case diff <= 7: // 3-7
+    case diff <= 7:
       colorClass = "text-yellow-600 border-yellow-400/50 bg-yellow-500/10";
       tooltip = `Vence em ${diff} dia(s)`;
       break;
-
-    case diff <= 14: // 8-14
+    case diff <= 14:
       colorClass = "text-green-600 border-green-400/50 bg-green-500/10";
       tooltip = `Vence em ${diff} dia(s)`;
       break;
-
-    default: // 15+
+    default:
       colorClass = "text-teal-600 border-teal-400/50 bg-teal-500/10";
       tooltip = `Vence em ${diff} dia(s)`;
   }
 
   return {
-    label,
-    colorClass,
+    color: colorClass,
+    icon: (
+      <Badge className={cn("font-medium text-xs", colorClass)}>
+        {label}
+      </Badge>
+    ),
     tooltip,
-    diffDays: diff,
-    state: "ok",
   };
 }
+
+/* ╔══════════════════════════════════════════════╗
+   ║ 5 ▸ EXPORTS “NOMINADOS”                      ║
+   ╚══════════════════════════════════════════════╝ */
+
+export {
+  /* filial */
+  getFilialColor,
+  getAvatarSrc,
+  useFilialMeta,
+  /* prioridade */
+  priorityConfig,
+  getPriorityPreset,
+  /* status */
+  statusConfig,
+  getStatusPreset,
+  /* vencimento */
+  getVencimentoPreset,
+};

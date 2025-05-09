@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import {
   DataTable,
@@ -9,21 +9,34 @@ import {
 } from "ui/data-table";
 import { Background } from "comp";
 import { Button, Badge } from "ui";
-import { X, RotateCcw } from "lucide-react"; // Importar ícone para reset
+import { X, RotateCcw } from "lucide-react";
 import { useAuthStore } from "@login/stores";
-import { usePrenotas } from "@prenota/tabela";
+import { columns, usePrenotas } from "@prenota/tabela";
 import { DataTableFilterModal } from "@prenota/filtro";
 
-// Mapeamento de IDs de filtros para labels amigáveis (ATUALIZADO)
+// Interface para tipagem do retorno de usePrenotas
+interface PrenotaResponse {
+  data: Array<{
+    F1_XPRIOR: string | null | undefined;
+    [key: string]: any;
+  }>;
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}
+
+// Mapeamento de IDs de filtros para labels amigáveis
 const filterLabels: Record<string, string> = {
   F1_DOC: "Número do Documento",
   A2_NOME: "Fornecedor",
   F1_DTDIGIT: "Data de Digitação",
   F1_EMISSAO: "Data de Emissão",
-  Status: "Status", // Label unificada para o filtro de Status calculado
+  Status: "Status",
   F1_VALBRUT: "Valor Bruto",
   F1_XOBS: "Observação",
-  // Remover F1_STATUS e F1_XREV se não forem mais usados como filtros diretos
 };
 
 export default function PrenotaPage() {
@@ -37,17 +50,17 @@ export default function PrenotaPage() {
     setFilials,
     setPagination,
     clearFilters,
-    setSorting, // Importar a função para definir a ordenação
-    setFilters, // Importar para remover filtros individuais
+    setSorting,
+    setFilters,
   } = useDataTableStore();
 
   const { filiais: authFiliais, isLoading: authLoading } = useAuthStore();
 
-  // Limpar filtros ao montar a página (opcional, manter se desejado)
-  // useEffect(() => {
-  //   clearFilters();
-  //   setSorting([]); // Também limpar ordenação ao montar, se necessário
-  // }, [clearFilters, setSorting]);
+  // Memoizar activeFilials para evitar recalcular em cada render
+  const activeFilials = useMemo(
+    () => (filials.length > 0 ? filials : authFiliais.map((f) => f.M0_CODFIL)),
+    [filials, authFiliais]
+  );
 
   // Define filiais padrão com base na autenticação
   useEffect(() => {
@@ -57,9 +70,6 @@ export default function PrenotaPage() {
     }
   }, [authFiliais, filials, setFilials]);
 
-  const activeFilials =
-    filials.length > 0 ? filials : authFiliais.map((f) => f.M0_CODFIL);
-
   // Busca os dados com base no estado da store
   const { data, isLoading, isError, error } = usePrenotas({
     page: pageIndex + 1,
@@ -67,12 +77,22 @@ export default function PrenotaPage() {
     sorting,
     filials: activeFilials,
     searchTerm,
-    filters, // Passar os filtros corretamente para o hook
+    filters,
   });
+
+  // Log para depurar dados, especialmente F1_XPRIOR
+  useEffect(() => {
+    if (data?.data) {
+      console.log("Dados brutos de usePrenotas:", data.data);
+      console.log(
+        "Valores de F1_XPRIOR:",
+        data.data.map((row) => row.F1_XPRIOR)
+      );
+    }
+  }, [data?.data]);
 
   // Atualiza a paginação na store quando os dados chegam
   useEffect(() => {
-    // Verifica se data.pagination existe e tem as propriedades essenciais
     if (
       data?.pagination &&
       typeof data.pagination.page === "number" &&
@@ -80,18 +100,16 @@ export default function PrenotaPage() {
       typeof data.pagination.totalCount === "number" &&
       typeof data.pagination.totalPages === "number"
     ) {
-      // Atualiza a store sempre que dados válidos chegarem.
-      // A store ou os componentes que a consomem devem lidar com memoization se necessário.
       setPagination({
-        page: data.pagination.page, // Converte 1-based para 0-based
+        page: data.pagination.page,
         pageSize: data.pagination.pageSize,
         totalCount: data.pagination.totalCount,
         totalPages: data.pagination.totalPages,
       });
     }
-  }, [data?.pagination, setPagination, isLoading, isError, pageSize]);
+  }, [data?.pagination, setPagination]); // Removido isLoading, isError, pageSize das dependências
 
-  // Exibe toasts de erro/sucesso
+  // Exibe toasts de erro
   useEffect(() => {
     if (isError && error) {
       toast.error("Erro ao buscar pré-notas", {
@@ -101,20 +119,17 @@ export default function PrenotaPage() {
     }
   }, [isError, error]);
 
-  // Função para formatar o valor do filtro para exibição (ATUALIZADO)
+  // Formata o valor do filtro para exibição
   const formatFilterValue = (field: string, value: any): string => {
-    // Trata o filtro de Status (que agora é um array de strings)
     if (field === "Status" && Array.isArray(value)) {
       return value.join(", ");
     }
-    // Mantém a lógica para outros tipos
     if (typeof value === "string") {
       return value;
     }
     if (Array.isArray(value)) {
       return value.join(", ");
     }
-    // Formata range de datas
     if (
       typeof value === "object" &&
       value !== null &&
@@ -130,22 +145,19 @@ export default function PrenotaPage() {
       if (from) return `a partir de ${from}`;
       if (to) return `até ${to}`;
     }
-    return String(value); // Fallback
+    return String(value);
   };
 
-  // Função para remover um filtro específico (ATUALIZADO)
+  // Remove um filtro específico
   const removeFilter = (fieldToRemove: string) => {
-    // Cria uma cópia dos filtros atuais
     const newFilters = { ...filters };
-    // Remove o filtro específico
     delete newFilters[fieldToRemove];
-    // Atualiza o estado na store
     setFilters(newFilters);
   };
 
-  // Função para resetar a ordenação (NOVO)
+  // Reseta a ordenação
   const resetSorting = () => {
-    setSorting([]); // Define a ordenação como um array vazio para resetar
+    setSorting([]);
   };
 
   const showClearButton = Object.keys(filters).length > 0 || filials.length > 0;
@@ -161,7 +173,6 @@ export default function PrenotaPage() {
           <div className="flex flex-wrap items-center gap-2">
             {Object.entries(filters).map(
               ([field, value]) =>
-                // Renderiza o badge apenas se o valor do filtro não for vazio/nulo
                 value !== null &&
                 value !== undefined &&
                 value !== "" &&
@@ -169,17 +180,16 @@ export default function PrenotaPage() {
                   <Badge
                     key={field}
                     variant="secondary"
-                    className="flex items-center gap-1 pl-2 pr-1 py-1" // Ajuste de padding
+                    className="flex items-center gap-1 pl-2 pr-1 py-1"
                   >
                     <span className="text-sm font-normal">
                       {filterLabels[field] || field}:{" "}
                       {formatFilterValue(field, value)}
                     </span>
-                    {/* Botão para remover filtro individual */}
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="p-0 h-5 w-5 hover:bg-destructive/20 rounded-full" // Ajuste de estilo
+                      className="p-0 h-5 w-5 hover:bg-destructive/20 rounded-full"
                       onClick={() => removeFilter(field)}
                       aria-label={`Remover filtro ${
                         filterLabels[field] || field
@@ -190,7 +200,6 @@ export default function PrenotaPage() {
                   </Badge>
                 )
             )}
-            {/* Badge para Filiais Selecionadas */}
             {filials.length > 0 && (
               <Badge variant="secondary" className="text-sm font-normal">
                 {filials.length}{" "}
@@ -199,7 +208,6 @@ export default function PrenotaPage() {
                   : "filiais selecionadas"}
               </Badge>
             )}
-            {/* Botão Limpar Todos (Filtros e Filiais) */}
             {showClearButton && (
               <Button
                 variant="outline"
@@ -211,7 +219,6 @@ export default function PrenotaPage() {
                 <X className="mr-1 h-4 w-4" /> Limpar Filtros
               </Button>
             )}
-            {/* Botão Resetar Ordenação (NOVO) */}
             {showResetSortButton && (
               <Button
                 variant="outline"
@@ -225,17 +232,16 @@ export default function PrenotaPage() {
             )}
           </div>
           {/* Botão para Abrir Modal de Filtros */}
-          <DataTableFilterModal />
+          <DataTableFilterModal aria-label="Abrir modal de filtros" />
         </div>
 
         {/* Tabela de Dados */}
         <DataTable
           columns={columns}
           data={data?.data || []}
-          isLoading={authLoading || isLoading} // Combina loading da autenticação e dos dados
-          className="w-full backdrop-blur-2xl bg-card/60 rounded-xl border" // Adiciona borda sutil
+          isLoading={authLoading || isLoading}
+          className="w-full backdrop-blur-2xl bg-card/60 rounded-xl border"
         >
-          {/* Paginação da Tabela */}
           <DataTablePagination />
         </DataTable>
       </div>

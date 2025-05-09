@@ -9,7 +9,7 @@ export * from './delete/config/hook.delete';
 export * from './dropdown/components/dropdown';
 export * from './dropdown/components/menu-item';
 export * from './dropdown/config/type.dropdown';
-export * from './revisar/components/action-button';
+export * from './revisar/components/footer';
 export * from './revisar/components/chat';
 export * from './revisar/components/dialog';
 export * from './revisar/components/form';

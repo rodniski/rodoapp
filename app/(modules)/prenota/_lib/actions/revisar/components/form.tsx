@@ -1,7 +1,8 @@
+/* prenota/revisar/FormularioRevisaoFields.tsx ------------------------- */
 "use client";
 
+import { FormFooter, type FormularioRevisaoFieldsProps } from "@prenota/actions";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import React from "react";
 import {
   Label,
   Textarea,
@@ -12,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "ui";
-import { FormularioRevisaoFieldsProps } from "@/app/(modules)/prenota/_lib/lib/types";
 
 const FormField: React.FC<{
   label: string;
@@ -21,35 +21,25 @@ const FormField: React.FC<{
   children: React.ReactNode;
 }> = ({ label, required, tooltip, children }) => (
   <div className="space-y-1.5">
-    <Label>
-      <div className="flex gap-1 items-center">
-        <span>{label}</span>
-        {required && <span className="text-destructive">*</span>}
-        {tooltip && (
-          <Tooltip>
-            <TooltipTrigger className="flex gap-1 items-center cursor-default">
-              <InfoCircledIcon className="text-primary size-4" />
-              {!required && (
-                <span className="text-xs text-muted-foreground">
-                  (Opcional)
-                </span>
-              )}
-            </TooltipTrigger>
-            <TooltipContent
-              side="right"
-              className="text-accent-foreground bg-accent"
-            >
-              {tooltip}
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
+    <Label className="flex gap-1 items-center">
+      {label}
+      {required && <span className="text-destructive">*</span>}
+      {tooltip && (
+        <Tooltip>
+          <TooltipTrigger className="cursor-default ml-1">
+            <InfoCircledIcon className="size-3.5 text-primary" />
+          </TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      )}
     </Label>
     {children}
   </div>
 );
 
-const FormularioRevisaoFields: React.FC<FormularioRevisaoFieldsProps> = ({
+export const FormularioRevisaoFields: React.FC<
+  FormularioRevisaoFieldsProps
+> = ({
   revisarText,
   setRevisarText,
   emailTags,
@@ -58,35 +48,40 @@ const FormularioRevisaoFields: React.FC<FormularioRevisaoFieldsProps> = ({
   rec,
 }) => (
   <div className="space-y-6">
-    <DialogHeader className="p-4 shrink-0 border-b border-border">
-      <DialogTitle>Adicionar Revisão para Pré-Nota REC: {rec}</DialogTitle>
+    <DialogHeader className="p-4 border-b">
+      <DialogTitle>Adicionar Revisão • REC {rec}</DialogTitle>
     </DialogHeader>
 
     <FormField label="Descrição da Revisão" required>
       <Textarea
-        id="revisarTextDialog"
         name="revisarText"
+        placeholder="Descreva o motivo da solicitação…"
         value={revisarText}
         onChange={(e) => setRevisarText(e.target.value)}
-        placeholder="Descreva detalhadamente o motivo da solicitação de revisão..."
         disabled={isPending}
         required
-        className="flex-grow resize-none min-h-[100px] flex-1 h-full"
+        className="min-h-[110px] resize-none"
       />
     </FormField>
+
     <FormField
-      label="E-mails de Cópia"
-      tooltip="Adicione e-mails com Enter, Tab ou Vírgula"
+      label="E-mails em cópia"
+      tooltip="Digite e pressione Enter ou vírgula para adicionar."
     >
       <InputTags
-        id="emailsDialog"
         value={emailTags}
         onChange={setEmailTags}
-        placeholder="Digite um e-mail e pressione Enter/vírgula..."
+        placeholder="nome@empresa.com"
         disabled={isPending}
       />
     </FormField>
+
+    <FormFooter
+      isPending={isPending}
+      actionInProgress={actionInProgress}
+      username={username}
+      revisarText={revisarText}
+      handleFinalizarDiretamente={handleFinalizarDiretamente}
+    />
   </div>
 );
-
-export { FormularioRevisaoFields };

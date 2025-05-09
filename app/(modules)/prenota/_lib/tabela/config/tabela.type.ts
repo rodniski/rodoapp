@@ -68,8 +68,29 @@ export interface FetchParams {
 }
 
 
+/* ╔══════════════════════════════════════════════╗
+   ║ 3 ▸ Visuais                                  ║
+   ╚══════════════════════════════════════════════╝ */
+
+/**
+ * Essas estruturas são _visuais_ (cores, ícones, tooltips) e
+ * moram no módulo de configurações de UI.  Re-exportamos aqui
+ * só para facilitar o import único quando preciso.
+ */
 export interface FilialMeta {
   nome: string;
-  cor: string;        // classe Tailwind ex.: "bg-blue-500 text-white"
-  avatarSrc: string;  // URL do avatar ou ""
+  cor: string; // classe Tailwind ex.: "bg-blue-500 text-white"
+  avatarSrc: string; // URL do avatar ou ""
+}
+export interface VencimentoPreset {
+  label: string;
+  colorClass: string;
+  tooltip: string;
+  diffDays: number | null;
+  state: "sem-venc" | "invalido" | "ok";
+}
+export interface BadgePreset {
+  color: string; // classes tailwind (text-… ou bg-…) - usado apenas no icon
+  icon: React.ReactNode; // qualquer nó: ícone, badge, texto…
+  tooltip: string; // texto do tooltip
 }

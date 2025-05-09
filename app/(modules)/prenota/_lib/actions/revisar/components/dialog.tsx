@@ -1,91 +1,18 @@
 "use client";
 
+import { Dialog, DialogContent } from "ui";
+import { getCurrentUsername } from "utils";
 import React, { useState } from "react";
-import type {
-  PrenotaRow,
+import {
   RevisaoPreNotaPayload,
   RevisarDialogProps,
-  ActionButtonProps,
-} from "@/app/(modules)/prenota/_lib/lib/types";
-import { useRevisaoPreNota } from "@/app/(modules)/prenota/_lib/lib/hooks";
-import { UpdateIcon } from "@radix-ui/react-icons";
-import { getCurrentUsername } from "utils";
-import {
-  HistoricoChatView,
+  useRevisaoPreNota,
   FormularioRevisaoFields,
-} from "@/app/(modules)/prenota/_lib/lib/components";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "ui";
+  HistoricoChatView,
+} from "@prenota/actions";
 
 const username = getCurrentUsername();
 
-const ActionButton: React.FC<ActionButtonProps> = ({
-  label,
-  loadingLabel,
-  isLoading,
-  disabled,
-  onClick,
-  type = "button",
-  variant = "default",
-  form,
-}) => (
-  <Button
-    type={type}
-    variant={variant}
-    onClick={onClick}
-    disabled={disabled}
-    form={form}
-    className="w-full sm:w-auto min-w-[160px]"
-  >
-    {isLoading ? (
-      <>
-        <UpdateIcon className="size-4 animate-spin mr-2" />
-        {loadingLabel}
-      </>
-    ) : (
-      label
-    )}
-  </Button>
-);
-
-const FormSection: React.FC<{
-  prenota: PrenotaRow;
-  revisarText: string;
-  setRevisarText: React.Dispatch<React.SetStateAction<string>>;
-  emailTags: string[];
-  setEmailTags: React.Dispatch<React.SetStateAction<string[]>>;
-  isPending: boolean;
-  onSubmit: (e?: React.FormEvent<HTMLFormElement>) => void;
-}> = ({
-  prenota,
-  revisarText,
-  setRevisarText,
-  emailTags,
-  setEmailTags,
-  isPending,
-  onSubmit,
-}) => (
-  <form
-    id="revisaoFormDialog"
-    onSubmit={onSubmit}
-    className="flex flex-col flex-1 w-full px-2 overflow-hidden"
-  >
-    <FormularioRevisaoFields
-      revisarText={revisarText}
-      setRevisarText={setRevisarText}
-      emailTags={emailTags}
-      setEmailTags={setEmailTags}
-      isPending={isPending}
-      rec={prenota.REC}
-    />
-  </form>
-);
 
 export const RevisarDialog: React.FC<RevisarDialogProps> = ({
   prenotaSelecionada,
@@ -167,37 +94,15 @@ export const RevisarDialog: React.FC<RevisarDialogProps> = ({
             />
           </div>
           <div className="flex flex-col flex-1 w-full">
-            <FormSection
-              prenota={prenotaSelecionada}
+            <FormularioRevisaoFields
               revisarText={revisarText}
               setRevisarText={setRevisarText}
               emailTags={emailTags}
               setEmailTags={setEmailTags}
               isPending={isPending}
-              onSubmit={handleFormSubmit}
+              rec={prenotaSelecionada.REC}
             />
-            <DialogFooter className="shrink-0 p-4 mt-auto border-t border-border">
-              <div className="flex justify-between w-full gap-2">
-                <ActionButton
-                  label="Finalizar Revisão"
-                  loadingLabel="Finalizando..."
-                  isLoading={isPending && actionInProgress === "finalize"}
-                  disabled={isPending || !username.trim()}
-                  onClick={handleFinalizarDiretamente}
-                  variant="destructive"
-                />
-                <ActionButton
-                  label="Enviar Observação"
-                  loadingLabel="Enviando..."
-                  isLoading={isPending && actionInProgress === "form"}
-                  disabled={
-                    isPending || !revisarText.trim() || !username.trim()
-                  }
-                  type="submit"
-                  form="revisaoFormDialog"
-                />
-              </div>
-            </DialogFooter>
+
           </div>
         </div>
       </DialogContent>

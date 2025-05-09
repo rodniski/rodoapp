@@ -1,123 +1,120 @@
-/* ─────────────────────────  revisar.types.ts  ──────────────────────────
- * Todas as _types_ referentes ao **fluxo “Revisar Pré-nota”** ficam aqui.
- * Blocos:
- *   1. Contratos de API  (payload / response)
- *   2. Modelos de domínio (histórico, etc.)
- *   3. Props de componentes React (UI)
- * ----------------------------------------------------------------------*/
+/* ─────────────────────────  prenota/revisar/revisar.types.ts  ─────────────────────
+ * Tipos centrales do **fluxo “Revisar Pré-nota”**.
+ * Organização:
+ *   1.  Contratos de API  (request & response)
+ *   2.  Modelos de domínio (histórico Z05)
+ *   3.  Props de componentes / hooks
+ * ------------------------------------------------------------------------------- */
 
-import type { PrenotaRow } from "@prenota/tabela"; // ajuste o caminho, se necessário
-import type React from "react";
+import type { PrenotaRow } from "@prenota/tabela";
+import type { Dispatch, SetStateAction, ReactNode, FormEvent } from "react";
 
-/* ╔═══════════════════════╗
-   ║ 1 ▸ CONTRATOS DE API  ║
-   ╚═══════════════════════╝ */
+/* ╭──────────────────────╮
+   │ 1. CONTRATOS DE API  │
+   ╰──────────────────────╯ */
 
-/** Payload do `POST /api/revisar-pre-nota` */
 export interface RevisaoPreNotaPayload {
-  /** `SF1.R_E_C_N_O_` da pré-nota */
   RECSF1: string | number;
-  /** Motivo / descrição enviada ao financeiro */
   REVISAR: string;
-  /** Usuário (login) que solicitou */
   USER: string;
-  /** E-mails em cópia (separados por ‘;’) */
-  EMAILS?: string;
-  /** flag “True” / “False” exigida pela API */
+  EMAILS?: string; // separados por ‘;’
   FINALIZADO: "True" | "False";
 }
 
-/** Resposta de sucesso lógico */
 export interface RevisaoPreNotaSuccessResponse {
   Sucesso: true;
   Mensagem?: string;
   Documento?: string;
   REC?: string;
-  [k: string]: unknown; // campos extras da API
+  [k: string]: unknown;
 }
 
-/** Resposta de erro lógico (`Sucesso: false`) */
 export interface RevisaoPreNotaErrorResponse {
   Sucesso: false;
   Mensagem: string;
-  [k: string]: unknown; // campos extras da API
+  [k: string]: unknown;
 }
 
-/** União final retornada pelo serviço */
 export type RevisaoPreNotaApiResponse =
   | RevisaoPreNotaSuccessResponse
   | RevisaoPreNotaErrorResponse;
 
-/* ╔════════════════════════════╗
-   ║ 2 ▸ MODELOS DE DOMÍNIO     ║
-   ╚════════════════════════════╝ */
+/* ╭────────────────────────╮
+   │ 2. MODELOS DE DOMÍNIO  │
+   ╰────────────────────────╯ */
 
-/** Entrada crua do log (Z05) – saída exata da API */
 export interface RawHistoricoEntry {
   usuario: string;
-  data: string; // “dd/MM/yyyy”
-  hora: string; // “HH:mm:ss”
+  data: string; // dd/MM/yyyy
+  hora: string; // HH:mm:ss
   campo: string;
   anterior: string;
   chave: string;
   atual: string;
 }
 
-/** Entrada com `Date` parseado (útil para sort) */
 export interface HistoricoEntry extends RawHistoricoEntry {
-  /** `data` + `hora` convertido em `Date` no client */
+  /** `data`+`hora` convertido para `Date` no client (facilita ordenação) */
   timestamp?: Date;
 }
 
-/* ╔════════════════════════════════════════╗
-   ║ 3 ▸ PROPS DOS COMPONENTES (React)      ║
-   ╚════════════════════════════════════════╝ */
+/* ╭──────────────────────────────────────────────╮
+   │ 3. PROPS (COMPONENTES - HOOKS - CONTEXTOS)  │
+   ╰──────────────────────────────────────────────╯ */
 
-/* ———  Chat de histórico ——— */
+/* —— chat / histórico —— */
 export interface HistoricoChatViewProps {
   recId: string | number | null | undefined;
   currentLoggedInUsername: string;
 }
 
-/* ———  Dialog “Revisar” ——— */
+/* —— dialog principal —— */
 export interface RevisarDialogProps {
   prenotaSelecionada: PrenotaRow | null;
   isOpen: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-/* ———  Campo de formulário genérico ——— */
+/* —— utilitário de campo genérico —— */
 export interface FormFieldProps {
   label: string;
   required?: boolean;
   optional?: boolean;
   tooltip?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-/* ———  Conjunto de campos do formulário de revisão ——— */
-export interface FormularioRevisaoFieldsProps {
+/* —— blocos de formulário —— */
+interface RevisaoFormCore {
   revisarText: string;
-  setRevisarText: React.Dispatch<React.SetStateAction<string>>;
+  setRevisarText: Dispatch<SetStateAction<string>>;
   emailTags: string[];
-  setEmailTags: React.Dispatch<React.SetStateAction<string[]>>;
+  setEmailTags: Dispatch<SetStateAction<string[]>>;
   isPending: boolean;
+}
+
+/** miolo (somente campos) */
+export interface FormularioRevisaoFieldsProps extends RevisaoFormCore {
   rec: string | number | undefined;
 }
 
-/* ———  Botão reutilizável de ação ——— */
-export interface ActionButtonProps {
-  label: string;
-  loadingLabel: string;
-  isLoading: boolean;
-  disabled: boolean;
-  onClick?: () => void;
-  type?: "button" | "submit";
-  variant?: "default" | "destructive";
-  form?: string;
+/** `<form>` completo (inclui a prenota e o submit) */
+export interface RevisaoFormProps extends RevisaoFormCore {
+  prenota: PrenotaRow;
+  onSubmit: (e?: FormEvent<HTMLFormElement>) => void;
 }
 
-/* ———  Mensagens do “chat” de revisão ——— */
+/* —— rodapé do diálogo —— */
+export interface FormFooterProps {
+  isPending: boolean;
+  /** `"form"` enviando observação | `"finalize"` encerrando revisão */
+  actionInProgress: "form" | "finalize" | null;
+  username: string;
+  revisarText: string;
+  handleFinalizarDiretamente: () => void;
+}
+
+/* —— mensagem do chat —— */
 export interface MessageProps {
   entry: HistoricoEntry;
   isCurrentUser: boolean;
@@ -129,7 +126,7 @@ export interface TimestampProps {
   isCurrentUser: boolean;
 }
 
-/* ———  Query-key do hook de histórico ——— */
+/* —— react-query key —— */
 export type HistoricoPreNotaQueryKey = readonly [
   "historicoPreNota",
   string | null | undefined
