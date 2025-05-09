@@ -7,7 +7,7 @@ interface Config {
 }
 
 export const config: Config = {
-    API_BORRACHARIA_URL: "http://172.16.0.251:9010/rest/",
+    API_BORRACHARIA_URL: "http://172.16.0.251:6002/rest/",
     API_DEVELOPMENT_URL: "http://172.16.0.245:8410/rest/",
     API_PRODUCTION_URL: "http://172.16.99.174:8400/rest/",
     CONEXAO_NFE_BASE_URL: "https://api.conexaonfe.com.br/v1",

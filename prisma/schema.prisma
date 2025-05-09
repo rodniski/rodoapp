@@ -1,10 +1,36 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "sqlserver"
   url      = env("DATABASE_URL")
+}
+
+// Modelo para a tabela de Produtos (SB1)
+model SB1010 {
+  R_E_C_N_O_ Int    @id @default(autoincrement()) @map("R_E_C_N_O_")
+  B1_FILIAL  String @map("B1_FILIAL")
+  B1_COD     String @map("B1_COD")
+  B1_DESC    String @map("B1_DESC")
+
+  // Campos básicos para listagem e informação
+  B1_TIPO   String? @map("B1_TIPO") // Tipo do Produto (ex: PA, MP, ME, SV)
+  B1_UM     String? @map("B1_UM") // Unidade de Medida Principal
+  B1_GRUPO  String? @map("B1_GRUPO") // Grupo de Produtos
+  B1_PRV1   Float?  @map("B1_PRV1") // Preço de Venda 1
+  B1_LOCPAD String? @map("B1_LOCPAD") // Armazém Padrão do Produto
+  B1_MARCA  String? @map("B1_MARCA") // Marca do Produto
+
+  // Campos de controle
+  B1_MSBLQL  String? @map("B1_MSBLQL") // Produto Bloqueado? ('1'-Sim / '2'-Não)
+  D_E_L_E_T_ String? @default("") @map("D_E_L_E_T_") // Flag de Deleção (não mostrar deletados "normalmente")
+
+  // Adicionar índices para campos frequentemente buscados pode melhorar a performance
+  @@index([B1_FILIAL, B1_COD], name: "idx_sb1_filial_cod")
+  @@index([B1_DESC], name: "idx_sb1_desc")
+  @@map("SB1010") // Mapeia para o nome da tabela física no banco (ajuste se necessário SB1 ou SB1010, etc.)
 }
 
 //
@@ -46,7 +72,7 @@ model SF1010 {
 // Tabela SD1010 - Itens da Nota
 //
 model SD1010 {
-  R_E_C_N_O_ Int    @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int    @id @default(autoincrement())
   D1_FILIAL  String
   D1_DOC     String
   D1_SERIE   String
@@ -89,40 +115,10 @@ model SA2010 {
 }
 
 //
-// Tabela SB1010 - Cadastro de Produtos
-//
-model SB1010 {
-  R_E_C_N_O_ Int    @id @default(autoincrement()) // REC
-  B1_FILIAL  String // Filial do Produto
-  B1_COD     String // Código do Produto
-  B1_DESC    String // Descrição do Produto
-
-  // Campos básicos para listagem e informação
-  B1_TIPO   String? // Tipo do Produto (ex: PA, MP, ME, SV)
-  B1_UM     String? // Unidade de Medida Principal
-  B1_GRUPO  String? // Grupo de Produtos
-  B1_PRV1   Float? // Preço de Venda 1
-  B1_LOCPAD String? // Armazém Padrão do Produto
-  B1_MARCA  String? // Marca do Produto
-
-  // Campos de controle
-  B1_MSBLQL  String? // Produto Bloqueado? ('1'-Sim / '2'-Não)
-  D_E_L_E_T_ String? @default("") // Flag de Deleção
-
-  // Relacionamentos
-  ItensPedidoCompra SC7010[] // Itens de Pedido de Compra que utilizam este produto
-
-  @@unique([B1_FILIAL, B1_COD]) // Chave única para Filial + Código do Produto
-  @@index([B1_GRUPO]) // Índice para otimizar buscas por Grupo
-  @@index([B1_TIPO]) // Índice para otimizar buscas por Tipo
-  @@index([B1_DESC]) // Índice para otimizar buscas por Descrição
-}
-
-//
 // Tabela SC7010 - Pedidos de Compra
 //
 model SC7010 {
-  R_E_C_N_O_ Int     @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int     @id @default(autoincrement())
   C7_FILIAL  String
   C7_NUM     String
   C7_ITEM    String
@@ -133,19 +129,14 @@ model SC7010 {
 
   D_E_L_E_T_ String? @default("")
 
-  // Relacionamento com Produtos (SB1)
-  // Assume que C7_FILIAL e C7_PRODUTO formam a chave estrangeira para SB1010
-  Produto SB1010? @relation(fields: [C7_FILIAL, C7_PRODUTO], references: [B1_FILIAL, B1_COD], map: "FK_SC7010_SB1010")
-
   @@unique([C7_FILIAL, C7_NUM, C7_ITEM, C7_PRODUTO])
-  @@index([C7_FILIAL, C7_PRODUTO]) // Índice para a chave estrangeira do produto
 }
 
 //
 // Tabela SE2010 - Títulos a Pagar
 //
 model SE2010 {
-  R_E_C_N_O_ Int    @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int    @id @default(autoincrement())
   E2_FILIAL  String
   E2_NUM     String
   E2_PREFIXO String
@@ -167,7 +158,7 @@ model SE2010 {
 // Tabela Z05010 - Histórico de alterações (logs)
 //
 model Z05010 {
-  R_E_C_N_O_ Int    @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int    @id @default(autoincrement())
   Z05_FILIAL String
   Z05_CHAVE  String
 
@@ -185,7 +176,7 @@ model Z05010 {
 // Tabela SYS_USR - Usuários do sistema
 //
 model SYS_USR {
-  R_E_C_N_O_ Int     @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int     @id @default(autoincrement())
   USR_ID     String
   USR_NOME   String
   USR_CODIGO String
@@ -196,7 +187,7 @@ model SYS_USR {
 // Tabela Z10010 - Títulos (resumo)
 //
 model Z10010 {
-  R_E_C_N_O_ Int     @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int     @id @default(autoincrement())
   Z10_TIPO   String
   Z10_CHAVE  String
   Z10_VENCTO String?
@@ -207,7 +198,7 @@ model Z10010 {
 // Tabela Z07010 - Observações
 //
 model Z07010 {
-  R_E_C_N_O_ Int     @id @default(autoincrement()) // REC
+  R_E_C_N_O_ Int     @id @default(autoincrement())
   Z07_CHAVE  String
   Z07_DESC   String?
   D_E_L_E_T_ String? @default("")
