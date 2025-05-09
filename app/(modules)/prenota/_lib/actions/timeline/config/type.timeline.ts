@@ -59,6 +59,24 @@ export type TimelineEventoParsed = Omit<TimelineEvento, "inicio" | "fim"> & {
   fim: Date | null;
 };
 
+/** Formato de tarefa para o gráfico de Gantt (Frappe Gantt) */
+export interface GanttTask {
+  id: string; // Identificador único
+  name: string; // Nome exibido (ex.: "000253762-21 - nfEmitida_recebida")
+  start: string; // Data de início (YYYY-MM-DD)
+  end: string; // Data de fim (YYYY-MM-DD)
+  progress: number; // Progresso (0-100)
+  dependencies: string; // Dependências (vazio por enquanto)
+  custom_class?: string; // Classe CSS para estilização
+  details: {
+    // Detalhes para popup/tooltip
+    nome: string | null;
+    obs: string | null;
+    valor: number | null;
+    marcos: TimelineMarco[] | null;
+  };
+}
+
 /* ╔══════════════════════════════════════════════╗
    ║ 3 ▸ ITEM DA TIMELINE VERTICAL (UI React)     ║
    ╚══════════════════════════════════════════════╝ */

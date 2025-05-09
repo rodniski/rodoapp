@@ -20,6 +20,7 @@ import {
 } from "ui";
 import {
   ExclamationTriangleIcon,
+  Pencil2Icon,
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 
@@ -77,7 +78,7 @@ export const Actions: React.FC<ActionsProps> = ({
 
           <MenuItem
             label="Solicitar Revisão"
-            icon={<ExclamationTriangleIcon className="h-4 w-4" />}
+            icon={<ExclamationTriangleIcon className="size-4" />}
             onClick={() => setIsHistoricoOpen(true)}
           />
           <GanttDialog
@@ -85,7 +86,11 @@ export const Actions: React.FC<ActionsProps> = ({
             isOpen={isTimelineOpen}
             onOpenChange={setIsTimelineOpen}
           />
-          <MenuItem label="Editar Nota" icon={null} disabled />
+          <MenuItem
+            label="Editar Nota"
+            icon={<Pencil2Icon className="size-4" />}
+            disabled
+          />
 
           <DropdownMenuSeparator />
 

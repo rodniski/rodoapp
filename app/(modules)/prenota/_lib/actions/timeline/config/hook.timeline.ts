@@ -1,6 +1,6 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import { fetchTimeline } from "./api.timeline";
-import type { FullTimelineSqlRow } from "@/app/(modules)/prenota/_lib/lib/types";
+import type { TimelineResponse } from "@prenota/actions";
+import { fetchTimeline } from "@prenota/actions";
 
 /**
  * Hook personalizado para buscar e gerenciar dados da timeline de uma pré-nota.
@@ -9,7 +9,7 @@ import type { FullTimelineSqlRow } from "@/app/(modules)/prenota/_lib/lib/types"
  */
 export function useTimeline(
   recsf1: string | number | null
-): UseQueryResult<FullTimelineSqlRow[], Error> {
+): UseQueryResult<TimelineResponse, Error> {
   const recsf1AsString = recsf1?.toString().trim();
   const queryKey = ["timeline", recsf1AsString];
 
