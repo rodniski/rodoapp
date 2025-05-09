@@ -13,20 +13,7 @@ import { X, RotateCcw } from "lucide-react";
 import { useAuthStore } from "@login/stores";
 import { columns, usePrenotas } from "@prenota/tabela";
 import { DataTableFilterModal } from "@prenota/filtro";
-
-// Interface para tipagem do retorno de usePrenotas
-interface PrenotaResponse {
-  data: Array<{
-    F1_XPRIOR: string | null | undefined;
-    [key: string]: any;
-  }>;
-  pagination: {
-    page: number;
-    pageSize: number;
-    totalCount: number;
-    totalPages: number;
-  };
-}
+import type { PrenotaRow } from "@prenota/tabela";
 
 // Mapeamento de IDs de filtros para labels amigáveis
 const filterLabels: Record<string, string> = {
@@ -86,7 +73,7 @@ export default function PrenotaPage() {
       console.log("Dados brutos de usePrenotas:", data.data);
       console.log(
         "Valores de F1_XPRIOR:",
-        data.data.map((row) => row.F1_XPRIOR)
+        data.data.map((row: PrenotaRow) => row.F1_XPRIOR)
       );
     }
   }, [data?.data]);
@@ -160,7 +147,7 @@ export default function PrenotaPage() {
     setSorting([]);
   };
 
-  const showClearButton = Object.keys(filters).length > 0 || filials.length > 0;
+  const showClearButton = Object.keys(filters).length > 0;
   const showResetSortButton = sorting.length > 0;
 
   return (
@@ -199,14 +186,6 @@ export default function PrenotaPage() {
                     </Button>
                   </Badge>
                 )
-            )}
-            {filials.length > 0 && (
-              <Badge variant="secondary" className="text-sm font-normal">
-                {filials.length}{" "}
-                {filials.length === 1
-                  ? "filial selecionada"
-                  : "filiais selecionadas"}
-              </Badge>
             )}
             {showClearButton && (
               <Button
