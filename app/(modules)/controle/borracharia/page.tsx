@@ -1,15 +1,45 @@
 "use client";
 
+import { Background } from "@/_core/components";
+import { DataTable, useDataTableStore } from "@/_core/components/ui/data-table";
+import { BorPagination } from "./_lib/components/borPagination";
+import { useMovPortaria } from "@borracharia/hooks";
+import { columnsBorracharia } from "./_lib/components/borColumns";
+import { DataTableFilterModal } from "./_lib/components/filtro/filters";
+
 export default function ControlePage() {
+  const {
+    pageIndex,
+    pageSize,
+    filters
+  } = useDataTableStore();
+
+  const { data, isLoading } = useMovPortaria({ type: "borracharia", page: pageIndex + 1, pageSize, filters });
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
-        <div className="absolute -right-36 -top-36 h-[500px] w-[500px] dark:bg-emerald-500/20 bg-emerald-500/10 rounded-full blur-[100px]" />
-        <div className="absolute -bottom-36 -left-36 h-[500px] w-[500px] dark:bg-lime-500/20 bg-lime-500/10 rounded-full blur-[100px]" />
-      </div>
-      <div className="relative z-10 text-2xl font-bold flex items-center justify-center">
-        Controle de Saídas - Borracharia
+    <div className="flex flex-col items-center justify-center !max-h-[calc(100vh-60px)] p-4">
+      {/* Fundo */}
+      <Background />
+      {/* Container */}
+      <div className="relative flex flex-col h-full w-full p-6">
+        <h1 className="text-4xl my-1 flex items-center justify-between">
+          Central de Carregamento de Pneus           
+          {/* Botão para Abrir Modal de Filtros */}
+          <div className="mx-2 text-2xl">
+            <DataTableFilterModal aria-label="Abrir modal de filtros" />
+          </div>
+        </h1>
+        {/* Tabela de dados */}
+        <DataTable
+          columns={columnsBorracharia}
+          data={data || []}
+          isLoading={isLoading} 
+          enableSorting={true}
+          sortingConfig={{ allowMultiSort: false }}
+          className="w-full backdrop-blur-2xl bg-card/60 rounded-xl border"
+        >
+          <BorPagination dataLength={data?.length} />
+        </DataTable>
       </div>
     </div>
   );

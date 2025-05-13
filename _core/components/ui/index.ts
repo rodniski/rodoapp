@@ -36,6 +36,7 @@ export * from './menubar';
 export * from './mode-toggle';
 export * from './mouse-move-effect';
 export * from './navigation-menu';
+export * from './numeric-input';
 export * from './pagination';
 export * from './password-input';
 export * from './popover';
