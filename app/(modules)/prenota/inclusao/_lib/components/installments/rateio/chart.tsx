@@ -1,11 +1,11 @@
-// _lib/components/stepper/header/RateioChartView.tsx (Final - Filtro Interativo "Power BI")
+// _lib/components/stepper/header/RateioChartView.tsx
 "use client";
 
 import React, { useMemo, useCallback, useState } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 import {
   ChartContainer,
-  ChartConfig,
+  ChartConfig, // Este tipo provavelmente define label como React.ReactNode
   ChartTooltip,
   ChartTooltipContent,
   CardFooter,
@@ -17,13 +17,10 @@ import {
 } from "ui"; // Seu UI Kit
 import { usePreNotaStore } from "@inclusao/stores";
 import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores";
-import { formatCurrency } from "utils"; // Seu utilitário de formatação
-// Tipos atualizados com Z10_*
+import { formatCurrency } from "utils";
 import type { Rateio as RateioType } from "@inclusao/types";
 
 // --- Constantes e Tipos ---
-
-// Paleta ÚNICA de 10 cores
 const VIVID_PALETTE = [
   "var(--chart-1)", "var(--chart-2)", "var(--chart-3)",
   "var(--chart-4)", "var(--chart-5)", "var(--chart-6)",
@@ -31,7 +28,6 @@ const VIVID_PALETTE = [
   "var(--chart-10)",
 ];
 
-// Funções de cores (forward/reverse)
 function getColorForward(idx: number): string {
   return VIVID_PALETTE[idx % VIVID_PALETTE.length];
 }
@@ -41,7 +37,6 @@ function getColorReverse(idx: number): string {
     return VIVID_PALETTE[reverseIndex];
 }
 
-// Estrutura interna para o gráfico
 interface ChartDataPoint {
   code: string;
   name: string;
@@ -50,22 +45,20 @@ interface ChartDataPoint {
   tipo: "Filial" | "Centro de Custo";
 }
 
-// --- Componente ---
 export function RateioChartView() {
-  // --- Estado para Filtro ---
   const [filter, setFilter] = useState<{ type: 'Filial' | 'Centro de Custo' | null; code: string | null }>({ type: null, code: null });
 
-  // --- Stores ---
-  const rateios = usePreNotaStore((state) => state.draft.rateios);
+  const rateiosDoStore = usePreNotaStore((state) => state.draft.RATEIOS);
   const filiais = useLoginAuxStore((state) => state.filiais);
   const centrosCusto = useLoginAuxStore((state) => state.centroCusto);
 
-  // --- Funções de Label ---
+  const rateios = useMemo(() => rateiosDoStore || [], [rateiosDoStore]);
+
   const getFilialLabel = useCallback(
     (code: string | undefined): string => {
       if (!code) return "N/A"; const trimmedCode = code.trim();
-      const f = filiais.find((filial) => (filial.numero ?? filial.M0_CODFIL)?.trim() === trimmedCode);
-      const name = (f?.filial ?? f?.M0_FILIAL)?.trim() || "Desconhecida";
+      const f = filiais.find((filial) => (filial.numero ?? filial.filial)?.trim() === trimmedCode);
+      const name = (f?.filial ?? "Desconhecida");
       return `${trimmedCode} - ${name}`;
     }, [filiais]
   );
@@ -78,82 +71,74 @@ export function RateioChartView() {
     }, [centrosCusto]
   );
 
-  // --- Processamento de Dados ---
-
-  // Função de Agrupamento (reutilizável)
   const groupData = useCallback((
-    keyField: "Z10_FILRAT" | "Z10_CC",
+    keyField: "FIL" | "cc",
     labelResolver: (code: string | undefined) => string,
-    sourceData: RateioType[], // Recebe a fonte de dados (completa ou filtrada)
+    sourceData: RateioType[],
     colorDirection: 'forward' | 'reverse'
   ): ChartDataPoint[] => {
+    if (!Array.isArray(sourceData)) {
+        console.warn("groupData: sourceData não é um array ou é undefined", sourceData);
+        return [];
+    }
     const groupedValues = sourceData.reduce<Map<string, number>>(
       (map, rateio) => {
         const code = (rateio[keyField] as string | undefined)?.trim();
-        const valor = rateio.Z10_VALOR || 0;
+        const valor = rateio.valor || 0;
         if (code && valor > 0) map.set(code, (map.get(code) || 0) + valor);
         return map;
       }, new Map<string, number>()
     );
-    const isFilial = keyField === "Z10_FILRAT";
+    const isFilial = keyField === "FIL";
     const colorGetter = colorDirection === 'forward' ? getColorForward : getColorReverse;
     return Array.from(groupedValues.entries())
-        .sort(([, valueA], [, valueB]) => valueB - valueA) // Ordena por valor desc
+        .sort(([, valueA], [, valueB]) => valueB - valueA)
         .map(([code, value], index) => ({
             code, name: labelResolver(code), value, fill: colorGetter(index),
             tipo: isFilial ? "Filial" : "Centro de Custo",
           }) as ChartDataPoint
         );
-  }, []); // Vazio pois a função em si não depende de estado externo aqui
+  }, []);
 
-  // 1. Calcula os dados COMPLETOS primeiro (para cores e referências)
   const { fullDataFilial, fullDataCc } = useMemo(() => {
-      const dFilial = groupData("Z10_FILRAT", getFilialLabel, rateios, 'forward');
-      const dCc = groupData("Z10_CC", getCentroCustoLabel, rateios, 'reverse');
+      const dFilial = groupData("FIL", getFilialLabel, rateios, 'forward');
+      const dCc = groupData("cc", getCentroCustoLabel, rateios, 'reverse');
       return { fullDataFilial: dFilial, fullDataCc: dCc };
   }, [rateios, getFilialLabel, getCentroCustoLabel, groupData]);
 
-  // 2. Calcula os dados para EXIBIÇÃO, aplicando o filtro
   const { dataFilial, dataCc } = useMemo(() => {
       if (filter.type === 'Filial' && filter.code) {
           const selectedFilialData = fullDataFilial.find(d => d.code === filter.code);
-          const rateiosFiltrados = rateios.filter(r => r.Z10_FILRAT === filter.code);
-          const filteredDataCc = groupData("Z10_CC", getCentroCustoLabel, rateiosFiltrados, 'reverse');
-          // Retorna APENAS a filial selecionada e os CCs correspondentes
+          const rateiosFiltrados = rateios.filter(r => r.FIL === filter.code);
+          const filteredDataCc = groupData("cc", getCentroCustoLabel, rateiosFiltrados, 'reverse');
           return { dataFilial: selectedFilialData ? [selectedFilialData] : [], dataCc: filteredDataCc };
       } else if (filter.type === 'Centro de Custo' && filter.code) {
           const selectedCcData = fullDataCc.find(d => d.code === filter.code);
-          const rateiosFiltrados = rateios.filter(r => r.Z10_CC === filter.code);
-          const filteredDataFilial = groupData("Z10_FILRAT", getFilialLabel, rateiosFiltrados, 'forward');
-           // Retorna APENAS o CC selecionado e as Filiais correspondentes
+          const rateiosFiltrados = rateios.filter(r => r.cc === filter.code);
+          const filteredDataFilial = groupData("FIL", getFilialLabel, rateiosFiltrados, 'forward');
           return { dataFilial: filteredDataFilial, dataCc: selectedCcData ? [selectedCcData] : [] };
       } else {
-          // Sem filtro, retorna os dados completos
           return { dataFilial: fullDataFilial, dataCc: fullDataCc };
       }
   }, [filter, rateios, fullDataFilial, fullDataCc, getFilialLabel, getCentroCustoLabel, groupData]);
 
-
-  // --- Total Original (para cálculo de %) ---
   const totalRateioOriginal = useMemo(() => {
-    return rateios.reduce((sum, rateio) => sum + (rateio.Z10_VALOR || 0), 0);
+    return rateios.reduce((sum, rateio) => sum + (rateio.valor || 0), 0);
   }, [rateios]);
   const totalRateioForPercent = totalRateioOriginal === 0 ? 1 : totalRateioOriginal;
 
-  // --- Configuração do Gráfico (baseada nos dados completos) ---
   const chartConfig = useMemo((): ChartConfig => {
     const configEntries = [...fullDataFilial, ...fullDataCc].map((d) => [
-      d.code, { label: d.name, color: d.fill },
+      d.code, { label: d.name, color: d.fill }, // d.name é string
     ]);
-    configEntries.push(["Filial", { label: "Filial", color: getColorForward(0) }]);
-    configEntries.push(["Centro de Custo", { label: "Centro de Custo", color: getColorForward(0) }]);
+    // Adicionando entradas para os tipos de agrupamento principais
+    configEntries.push(["Filial", { label: "Filial", color: getColorForward(VIVID_PALETTE.length) }]); // Usa uma cor não usada ou a primeira
+    configEntries.push(["Centro de Custo", { label: "Centro de Custo", color: getColorReverse(VIVID_PALETTE.length) }]);
     return Object.fromEntries(configEntries);
   }, [fullDataFilial, fullDataCc]);
 
-  // Verifica se há dados PARA EXIBIR (após filtro)
   const hasDataToShow = dataFilial.length > 0 || dataCc.length > 0;
 
-  // --- Handlers de Interação ---
   const handleSliceClick = useCallback((data: ChartDataPoint, event: React.MouseEvent) => {
     event.stopPropagation();
     setFilter((currentFilter) => {
@@ -165,25 +150,40 @@ export function RateioChartView() {
   }, []);
 
   const handleBackgroundClick = useCallback((event: React.MouseEvent) => {
-      if (event.target === event.currentTarget) { // Garante clique no fundo
+      if (event.target === event.currentTarget) {
         setFilter({ type: null, code: null });
       }
   }, []);
 
-  // --- Descrição Dinâmica ---
+  // --- Descrição Dinâmica CORRIGIDA ---
   const cardDescription = useMemo(() => {
-      let filterLabel = filter.code;
-      if(filter.code) {
-          const configEntry = chartConfig[filter.code];
-          if (configEntry) filterLabel = configEntry.label; // Pega o nome formatado
+    let targetDisplayName: string | null = null; // Variável para armazenar o nome formatado para exibição
+
+    if (filter.code) {
+      const configEntry = chartConfig[filter.code];
+      if (configEntry) {
+        // Se configEntry.label for string, usa-o diretamente.
+        // Caso contrário (se for outro ReactNode), usa filter.code como fallback.
+        if (typeof configEntry.label === 'string') {
+          targetDisplayName = configEntry.label;
+        } else {
+          // Fallback para o código se o label não for uma string simples
+          targetDisplayName = filter.code;
+          // Opcional: logar um aviso se o label não for string, para debug
+          // console.warn(`Label para o código '${filter.code}' não é uma string, usando o código como display name.`);
+        }
+      } else {
+        // Se o código não estiver no chartConfig, usa o próprio código
+        targetDisplayName = filter.code;
       }
-      if (filter.type === 'Filial') return `Distribuição de C. Custo para: ${filterLabel}`;
-      if (filter.type === 'Centro de Custo') return `Distribuição de Filial para: ${filterLabel}`;
-      return "Visão Geral: Filial (exterior) e Centro de Custo (interior)"; // Descrição padrão
+    }
+
+    if (filter.type === 'Filial') return `Distribuição de C. Custo para: ${targetDisplayName || 'N/A'}`;
+    if (filter.type === 'Centro de Custo') return `Distribuição de Filial para: ${targetDisplayName || 'N/A'}`;
+    return "Visão Geral: Filial (exterior) e Centro de Custo (interior)";
   }, [filter, chartConfig]);
 
 
-  // --- Renderização ---
   return (
     <Card className="flex flex-col h-full bg-input/30" onClick={handleBackgroundClick}>
       <CardHeader className="pb-2 cursor-pointer" onClick={handleBackgroundClick} title="Limpar filtro">
@@ -205,7 +205,6 @@ export function RateioChartView() {
                     labelFormatter={(label, payload) => {
                       if (!payload?.[0]?.payload) return label;
                       const data = payload[0].payload as ChartDataPoint;
-                       // Mostra percentual relativo ao TOTAL ORIGINAL para dar contexto
                       const percentOfOriginalTotal = ( (data.value / totalRateioForPercent) * 100 ).toFixed(2);
                       return (
                         <div className="flex gap-2 items-start">
@@ -215,20 +214,19 @@ export function RateioChartView() {
                              <span className="font-semibold text-primary">{data.name}</span>
                             <div className="flex justify-between items-center gap-2 text-foreground">
                               <span>{formatCurrency(data.value)}</span>
-                              <span>({percentOfOriginalTotal}% do Total)</span> {/* Indica que % é do total */}
+                              <span>({percentOfOriginalTotal}% do Total)</span>
                             </div>
                           </div>
                         </div>
                       );
                     }}
-                    formatter={() => <React.Fragment />} // Impede formatter padrão
+                    formatter={() => <React.Fragment />}
                     className="min-w-[180px] rounded-md border bg-popover p-2 shadow-md text-popover-foreground h-17"
                   />
                 }
               />
-              {/* Pie EXTERNO: Filiais */}
               <Pie
-                data={dataFilial} // <<< Dados podem ser [itemSelecionado] ou todos
+                data={dataFilial}
                 dataKey="value" nameKey="name"
                 cx="50%" cy="50%" outerRadius={160} innerRadius={110}
                 strokeWidth={1}
@@ -239,14 +237,12 @@ export function RateioChartView() {
                     fill={entry.fill}
                     onClick={(e) => handleSliceClick(entry, e)}
                     style={{ cursor: 'pointer' }}
-                    stroke={'hsl(var(--border))'} // Borda padrão simples
-                    // Sem highlight extra, o próprio filtro/colapso é o indicador
+                    stroke={'hsl(var(--border))'}
                   />
                 ))}
               </Pie>
-              {/* Pie INTERNO: Centros de Custo */}
               <Pie
-                data={dataCc} // <<< Dados podem ser filtrados ou [itemSelecionado] ou todos
+                data={dataCc}
                 dataKey="value" nameKey="name"
                 cx="50%" cy="50%" outerRadius={95} innerRadius={40}
                 strokeWidth={1}
@@ -257,7 +253,7 @@ export function RateioChartView() {
                     fill={entry.fill}
                     onClick={(e) => handleSliceClick(entry, e)}
                     style={{ cursor: 'pointer' }}
-                    stroke={'hsl(var(--border))'} // Borda padrão simples
+                    stroke={'hsl(var(--border))'}
                   />
                 ))}
               </Pie>
@@ -275,9 +271,8 @@ export function RateioChartView() {
              <span>{formatCurrency(totalRateioOriginal)}</span>
          </div>
          <div className="text-muted-foreground">
-             {/* Usa os dados COMPLETOS para a contagem total no rodapé */}
-            {filter.code
-             ? `Exibindo detalhes para: ${chartConfig[filter.code]?.label ?? filter.code}`
+            {filter.code && chartConfig[filter.code] // Verifica se filter.code e a entrada em chartConfig existem
+             ? `Exibindo detalhes para: ${typeof chartConfig[filter.code]!.label === 'string' ? chartConfig[filter.code]!.label : filter.code}`
              : `Distribuído entre ${fullDataFilial.length} Filia${fullDataFilial.length === 1 ? 'l' : 'is'} e ${fullDataCc.length} Centro${fullDataCc.length === 1 ? '' : 's'} de Custo.`
             }
          </div>

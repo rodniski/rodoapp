@@ -3,8 +3,8 @@
 import React from "react";
 // Ajuste os imports dos seus componentes e UI lib se necessário
 import { AttachmentsCard } from "./AttachmentsCard";
-import { RateioCard, CondicaoPagamentoForm } from ".";
-import { Card, Tabs, TabsList, TabsTrigger, TabsContent } from "ui";
+import { RateioCard } from ".";
+import { Card } from "ui";
 
 /**
  * Componente de layout para a seção de Anexos, Rateio e Cond. Pagamento.

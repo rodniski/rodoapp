@@ -1,13 +1,6 @@
 /**
  * HeaderForm.tsx
- * -------------------------------------------------------------------
- * • RHF (v7) + Zod v4 validam campo-a-campo.
- * • Toda alteração do formulário é refletida no Zustand (`setHeader`),
- *   mas sem loops infinitos: usamos `form.watch()` com subscribe.
- * • Quando o modo muda para **xml** o formulário é recarregado
- *   (cabeçalho veio do arquivo) – apenas nessa transição.
- * ------------------------------------------------------------------*/
-
+ */
 "use client";
 
 import React, { useEffect, useMemo, useRef } from "react";
@@ -30,13 +23,13 @@ import {
 } from "@inclusao/components";
 
 import { usePreNotaStore } from "@inclusao/stores";
-import { useAuxStore } from "@/app/login/_lib/stores";
-import { TIPOS_NF_OPTIONS } from "@/app/(modules)/prenota/_lib/config/constants";
-import type { FilialGeral } from "@/app/login/_lib/types";
-
+import type { FilialGeral } from "@login/types";
+import { useAuxStore } from "@login/stores";
+import { TIPOS_NF_OPTIONS } from "@prenota/config";
+import type { PreNotaHeader } from "@inclusao/types";
 import { toast } from "sonner";
-import { isValid } from "date-fns";
-import { formatDateBR, parseDateBR } from "utils";
+import { isValid, isDate } from "date-fns";
+import { formatDateBR, parseDateBR } from "utils";  
 
 /* ---------- RHF + Zod ------------------------------------------------*/
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,21 +38,58 @@ import {
   headerSchema,
   type HeaderSchemaParsed,
 } from "@inclusao/validation/prenota.schema";
-import { IncludePedidoDialog } from "./incluir-pedido";
 
-/* ==================================================================== */
+// Tipo para o DatePicker
+interface DateRange {
+  from: Date | undefined;
+  to?: Date | undefined;
+}
+function isDateRange(date: any): date is DateRange {
+  return typeof date === "object" && date !== null && "from" in date;
+}
+
+// Helper para garantir que o valor seja compatível com PreNotaHeader['DTINC']
+function ensurePreNotaDateStringType(
+  value: string | undefined
+): PreNotaHeader["DTINC"] {
+  if (value === "") {
+    return ""; // Retorna string vazia se a entrada for string vazia
+  }
+  if (value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+    // Se já for uma string no formato correto, faz o cast para o tipo específico.
+    return value as `${number}/${number}/${number}`;
+  }
+  // Se for undefined ou uma string em formato inválido, retorna ""
+  // para alinhar com PreNotaHeader['DTINC'] que permite string vazia.
+  // Se PreNotaHeader['DTINC'] permitisse undefined, poderíamos retornar undefined aqui.
+  // Como permite "", "" é um fallback seguro.
+  return "";
+}
+
 export const HeaderForm = () => {
-  /* Zustand ----------------------------------------------------------- */
-  const store = usePreNotaStore.getState();
-  const headerDraft = store.draft.header; // snapshot
-  const mode = store.mode;
+  const headerDraftFromStore = usePreNotaStore((state) => state.draft.header);
+  const mode = usePreNotaStore((state) => state.mode);
+  const setHeaderAction = usePreNotaStore((state) => state.setHeader);
   const isXmlMode = mode === "xml";
 
-  /* RHF ----------------------------------------------------------------*/
   const methods = useForm<HeaderSchemaParsed>({
     resolver: zodResolver(headerSchema),
     mode: "onChange",
-    defaultValues: headerDraft,
+    defaultValues: {
+      ...headerDraftFromStore,
+      // Garante que os campos opcionais no Zod que são strings em PreNotaHeader
+      // sejam inicializados com "" se forem null/undefined no store.
+      DTINC: headerDraftFromStore.DTINC || "",
+      CHVNF: headerDraftFromStore.CHVNF || "",
+      OBS: headerDraftFromStore.OBS || "",
+      CGCPIX: headerDraftFromStore.CGCPIX || "",
+      CHAVEPIX: headerDraftFromStore.CHAVEPIX || "",
+      JUSTIFICATIVA: headerDraftFromStore.JUSTIFICATIVA || "",
+      tiporodo: headerDraftFromStore.tiporodo || "",
+      TIPO: headerDraftFromStore.TIPO || "N",
+      prioridade: headerDraftFromStore.prioridade || "",
+      OLDSERIE: headerDraftFromStore.OLDSERIE || "",
+    },
   });
 
   const {
@@ -69,31 +99,70 @@ export const HeaderForm = () => {
     reset,
     watch,
     setValue,
+    trigger,
   } = methods;
 
-  /* Re-hidrata só quando o modo mudar (ex.: manual → xml) --------------*/
-  const prevMode = useRef<typeof mode>(mode); // 👈 valor inicial obrigatório
-
+  const prevMode = useRef<typeof mode>(mode);
   useEffect(() => {
     if (prevMode.current !== mode) {
-      /* o draft do Zustand foi alterado (ex.: carregou XML) */
-      reset(usePreNotaStore.getState().draft.header);
-      prevMode.current = mode; // atualiza ref
+      const newDraftHeader = usePreNotaStore.getState().draft.header;
+      console.log(
+        "[HeaderForm] Modo mudou. Resetando RHF com header do Zustand:",
+        newDraftHeader
+      );
+      reset({
+        ...newDraftHeader,
+        DTINC: newDraftHeader.DTINC || "",
+        CHVNF: newDraftHeader.CHVNF || "",
+        OBS: newDraftHeader.OBS || "",
+        CGCPIX: newDraftHeader.CGCPIX || "",
+        CHAVEPIX: newDraftHeader.CHAVEPIX || "",
+        JUSTIFICATIVA: newDraftHeader.JUSTIFICATIVA || "",
+        tiporodo: newDraftHeader.tiporodo || "",
+        TIPO: newDraftHeader.TIPO || "N",
+        prioridade: newDraftHeader.prioridade || "",
+        OLDSERIE: newDraftHeader.OLDSERIE || "",
+      });
+      prevMode.current = mode;
     }
   }, [mode, reset]);
 
-  /* Propaga alterações pro Zustand (sem loop de render) ----------------*/
+  /* Sincroniza RHF -> Zustand */
   useEffect(() => {
-    /** inscreve-se nas mudanças do formulário */
-    const subscription = watch((vals) => {
-      usePreNotaStore.getState().setHeader(vals);
+    const subscription = watch((valuesFromRHF) => {
+      // console.log("[HeaderForm] RHF mudou (raw):", valuesFromRHF);
+
+      const headerForStore: Partial<PreNotaHeader> = {
+        // Campos obrigatórios que são string em ambos e não mudam de tipo
+        FILIAL: valuesFromRHF.FILIAL,
+        OPCAO: valuesFromRHF.OPCAO, // Literal 3
+        TIPO: valuesFromRHF.TIPO, // Enum "N" | "S"
+        FORNECEDOR: valuesFromRHF.FORNECEDOR,
+        LOJA: valuesFromRHF.LOJA,
+        DOC: valuesFromRHF.DOC,
+        SERIE: valuesFromRHF.SERIE,
+        ESPECIE: valuesFromRHF.ESPECIE,
+        CONDFIN: valuesFromRHF.CONDFIN,
+        USERAPP: valuesFromRHF.USERAPP,
+
+        OLDSERIE: valuesFromRHF.OLDSERIE ?? "",
+        CHVNF: valuesFromRHF.CHVNF ?? "",
+        OBS: valuesFromRHF.OBS ?? "",
+        JUSTIFICATIVA: valuesFromRHF.JUSTIFICATIVA ?? "",
+        CGCPIX: valuesFromRHF.CGCPIX ?? "",
+        CHAVEPIX: valuesFromRHF.CHAVEPIX ?? "",
+        tiporodo: valuesFromRHF.tiporodo ?? "",
+        prioridade: valuesFromRHF.prioridade ?? "",
+
+        // Campo DTINC com tratamento especial de tipo
+        DTINC: ensurePreNotaDateStringType(valuesFromRHF.DTINC), // Usa a função helper corrigida
+      };
+      // console.log("[HeaderForm] Atualizando Zustand com (mapeado):", headerForStore);
+      setHeaderAction(headerForStore);
     });
-
-    /* clean-up correto (React exige retornar função) */
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, setHeaderAction]);
 
-  /* Combobox Filial ----------------------------------------------------*/
   const filiais = useAuxStore((s) => s.filiais);
   const filialOptions = useMemo(
     () =>
@@ -104,18 +173,20 @@ export const HeaderForm = () => {
     [filiais]
   );
 
-  /* Date helper --------------------------------------------------------*/
-  const parsedDate = parseDateBR(watch("DTINC"));
-  const dateValue = parsedDate && isValid(parsedDate) ? parsedDate : undefined;
+  const watchedDtInc = watch("DTINC"); // Este é string "DD/MM/YYYY" ou ""
+  const dateValueForPicker = useMemo(() => {
+    // Converte para Date | undefined para o DatePicker
+    if (!watchedDtInc) return undefined;
+    const parsed = parseDateBR(watchedDtInc);
+    return parsed && isValid(parsed) ? parsed : undefined;
+  }, [watchedDtInc]);
 
-  /* ------------------------------------------------------------------- */
   return (
     <FormProvider {...methods}>
       <form
         onSubmit={(e) => e.preventDefault()}
         className="h-full w-full flex flex-col items-center justify-center gap-5 pt-[70px]"
       >
-        {/* 1 ▸ Importação XML / Fornecedor ------------------------------*/}
         <Card className="w-full max-w-5xl">
           <CardHeader>
             <CardTitle>Importar Nota Fiscal</CardTitle>
@@ -129,40 +200,47 @@ export const HeaderForm = () => {
               <Label required className="text-sm font-medium">
                 Fornecedor
               </Label>
-              <FornecedorDialog />
+              <FornecedorDialog setValueRHF={setValue} triggerRHF={trigger} />
             </div>
           </CardContent>
         </Card>
 
-        {/* 2 ▸ Demais campos -------------------------------------------*/}
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* ESQUERDA */}
           <Card>
             <CardContent className="flex flex-col gap-6 pt-6">
-              {/* Pedido de compra */}
               <div className="flex flex-col gap-2">
-                <Label required className="text-sm font-medium">
-                  Pedido de Compra
-                </Label>
+                <Label className="text-sm font-medium">Pedido de Compra</Label>
                 <Controller
                   control={control}
                   name="PEDIDO"
                   render={({ field }) => (
                     <PedidoDialog
-                      value={field.value}
+                      value={field.value ?? ""}
                       onChange={(numeroPedido, condicao) => {
-                        field.onChange(numeroPedido);
-                        setValue("CONDFIN", condicao, { shouldValidate: true });
+                        setValue("PEDIDO", numeroPedido || "", {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                        if (condicao) {
+                          setValue("CONDFIN", condicao, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        }
                       }}
                     />
                   )}
                 />
+                {errors.PEDIDO && (
+                  <p className="text-xs text-destructive">
+                    {errors.PEDIDO.message}
+                  </p>
+                )}
               </div>
-              {/* Tipo + Prioridade */}
               <div className="flex gap-3 items-end">
                 <div className="flex-1 flex flex-col gap-2">
-                  <Label required className="text-sm font-medium">
-                    Tipo de NF
+                  <Label className="text-sm font-medium">
+                    Tipo de Operação
                   </Label>
                   <Controller
                     control={control}
@@ -170,9 +248,9 @@ export const HeaderForm = () => {
                     render={({ field }) => (
                       <Combobox
                         items={TIPOS_NF_OPTIONS}
-                        selectedValue={field.value}
-                        onSelect={field.onChange}
-                        placeholder="Selecione o tipo"
+                        selectedValue={field.value ?? ""}
+                        onSelect={(value) => field.onChange(value ?? "")}
+                        placeholder="Selecione o tipo de operação"
                       />
                     )}
                   />
@@ -183,32 +261,44 @@ export const HeaderForm = () => {
                   )}
                 </div>
                 <div className="flex-1 flex flex-col gap-2">
-                  <Label required className="text-sm font-medium">
-                    Prioridade
-                  </Label>
+                  <Label className="text-sm font-medium">Prioridade</Label>
                   <Controller
                     control={control}
                     name="prioridade"
                     render={({ field }) => (
                       <PrioridadePopover
-                        prioridade={field.value}
-                        justificativa={watch("JUSTIFICATIVA")}
-                        onChange={(prioridade, justificativa) => {
-                          field.onChange(prioridade);
-                          setValue("JUSTIFICATIVA", justificativa || "");
+                        prioridade={field.value ?? ""}
+                        justificativa={watch("JUSTIFICATIVA") ?? ""}
+                        onChange={(prioridadeValue, justificativa) => {
+                          const prioridadeCorrigida =
+                            prioridadeValue === "Média"
+                              ? "Media"
+                              : prioridadeValue;
+                          setValue(
+                            "prioridade",
+                            prioridadeCorrigida as HeaderSchemaParsed["prioridade"],
+                            { shouldValidate: true, shouldDirty: true }
+                          );
+                          setValue("JUSTIFICATIVA", justificativa || "", {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
                         }}
                       />
                     )}
                   />
+                  {errors.prioridade && (
+                    <p className="text-xs text-destructive">
+                      {errors.prioridade.message}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* DIREITA */}
           <Card>
             <CardContent className="flex flex-col gap-6 pt-6">
-              {/* Documento + Série */}
               <div className="flex gap-3 items-end">
                 <div className="flex-1 flex flex-col gap-2">
                   <Label required className="text-sm font-medium">
@@ -242,7 +332,6 @@ export const HeaderForm = () => {
                 </div>
               </div>
 
-              {/* Emissão + Filial */}
               <div className="flex gap-3 items-end">
                 <div className="flex-1 flex flex-col gap-2">
                   <Label required className="text-sm font-medium">
@@ -250,17 +339,34 @@ export const HeaderForm = () => {
                   </Label>
                   <Controller
                     control={control}
-                    name="DTINC"
-                    render={({ field }) => (
+                    name="DTINC" // No RHF, este é string "DD/MM/YYYY" ou "" (validado pelo Zod)
+                    render={(
+                      { field } // field.value é string "DD/MM/YYYY" ou ""
+                    ) => (
                       <DatePicker
                         disabled={isXmlMode}
-                        value={dateValue}
+                        value={dateValueForPicker} // Para o DatePicker, passamos Date | undefined
                         placeholder="dd/mm/aaaa"
-                        onChange={(d) =>
-                          field.onChange(
-                            d && isValid(d) ? formatDateBR(d as Date) : ""
-                          )
-                        }
+                        onChange={(date) => {
+                          // date aqui pode ser Date | DateRange | null | undefined
+                          let dateToFormat: Date | undefined = undefined;
+                          if (isDateRange(date)) {
+                            console.warn(
+                              "DatePicker retornou DateRange, usando 'from'. Verifique a configuração do DatePicker."
+                            );
+                            dateToFormat = date.from;
+                          } else if (isDate(date)) {
+                            dateToFormat = date;
+                          }
+                          // Atualiza RHF com string formatada "DD/MM/YYYY" ou ""
+                          setValue(
+                            "DTINC",
+                            dateToFormat && isValid(dateToFormat)
+                              ? formatDateBR(dateToFormat)
+                              : "",
+                            { shouldValidate: true, shouldDirty: true }
+                          );
+                        }}
                       />
                     )}
                   />
@@ -282,10 +388,11 @@ export const HeaderForm = () => {
                         items={filialOptions}
                         disabled={isXmlMode}
                         placeholder="Selecione a filial"
-                        selectedValue={field.value}
-                        onSelect={(v) => {
-                          field.onChange(v);
-                          v && toast.success(`Filial alterada → ${v}`);
+                        selectedValue={field.value ?? ""}
+                        onSelect={(value) => {
+                          field.onChange(value ?? "");
+                          if (value)
+                            toast.success(`Filial alterada → ${value}`);
                         }}
                       />
                     )}
@@ -301,14 +408,20 @@ export const HeaderForm = () => {
           </Card>
         </div>
 
-        {/* 3 ▸ Observações ---------------------------------------------*/}
         <Card className="w-full max-w-5xl">
-          <CardContent>
-            <Label className="text-sm font-medium pb-3">Observações</Label>
+          <CardContent className="pt-6">
+            <Label className="text-sm font-medium pb-2 block">
+              Observações
+            </Label>
             <Textarea
               placeholder="Adicione observações…"
               {...register("OBS")}
             />
+            {errors.OBS && (
+              <p className="text-xs text-destructive pt-1">
+                {errors.OBS.message}
+              </p>
+            )}
           </CardContent>
         </Card>
       </form>

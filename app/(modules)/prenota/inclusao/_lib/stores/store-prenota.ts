@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------------
- *  _lib/stores/store-prenota.ts
- *  Zustand store principal do domínio Pré-Nota
+ * _lib/stores/store-prenota.ts
+ * Zustand store principal do domínio Pré-Nota
  * --------------------------------------------------------------------------*/
 
 import { create } from "zustand";
@@ -11,12 +11,27 @@ import type {
   Parcela,
   Rateio,
   PreNotaHeader,
-} from "@inclusao/types";
-import { preNotaInitial } from "@inclusao/types";
+  PreNotaDraft, // Importar PreNotaDraft para o estado inicial
+} from "@inclusao/types"; // Ajuste o caminho se os tipos estiverem em outro local
+// Importar preNotaInitial original e getCurrentUsername
+import { preNotaInitial as originalPreNotaInitialConstant } from "@inclusao/types"; // Renomeado para evitar conflito
+import { getCurrentUsername } from "utils/finders"; // Ajuste o caminho para sua função
+
+// Função para criar o estado inicial dinamicamente com o USERAPP
+const createInitialPreNotaDraft = (): PreNotaDraft => {
+  // Faz uma cópia profunda do objeto constante para evitar mutações acidentais
+  const initialDraft = structuredClone(originalPreNotaInitialConstant);
+  initialDraft.header.USERAPP = getCurrentUsername(); // Preenche USERAPP
+  return initialDraft;
+};
+
+// Usa a função para definir o estado inicial que será usado no store
+const preNotaInitialWithUser: PreNotaDraft = createInitialPreNotaDraft();
+
 
 export const usePreNotaStore = create<PreNotaState>((set) => ({
   // Estado inicial
-  draft: { ...preNotaInitial },
+  draft: { ...preNotaInitialWithUser }, // Usa o estado inicial com USERAPP
   mode: "manual",
 
   /* Header ---------------------------------------------------------------*/
@@ -124,5 +139,8 @@ export const usePreNotaStore = create<PreNotaState>((set) => ({
   setModoManual: () => set({ mode: "manual" }),
 
   /* Reset completo -------------------------------------------------------*/
-  reset: () => set({ draft: { ...preNotaInitial }, mode: "manual" }),
+  reset: () => set({
+    draft: createInitialPreNotaDraft(), // Usa a função para resetar com USERAPP atualizado
+    mode: "manual"
+  }),
 }));
