@@ -25,6 +25,15 @@ export interface PortariaItem {
   QtdEntregue: number;
   Saldo: number;
 }
+export interface UseMovPortariaOptions {
+    type: "borracharia" | "portaria" | "historico";
+    filial?: string;
+    conferido?: "S" | "N";
+    enabled?: boolean;
+    page?: number;
+    pageSize?: number;
+    filters?: Record<string, any>;
+}
 
 //* Parâmetros para a API de Portaria
 export interface PortariaParams {

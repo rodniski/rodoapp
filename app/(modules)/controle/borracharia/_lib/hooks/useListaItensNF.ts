@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { config } from "config";
-import { ItemNF } from "@/app/(modules)/controle/borracharia/_lib/types";
+import { ItemNF } from "@borracharia/types";
 
 interface ListaItensNFParams {
     Filial: string;

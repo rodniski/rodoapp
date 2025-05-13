@@ -58,7 +58,7 @@ const BorDeliver: React.FC<BorDeliverProps> = ({ item }) => {
                 </DialogHeader>
 
                 <div className="flex gap-8">
-                    <div className="w-[830px]">
+                    <div className="w-[450px]">
                         <NFDetails item={item} />
                         <DeliveryForm
                             respRet={respRet}
@@ -83,7 +83,7 @@ const BorDeliver: React.FC<BorDeliverProps> = ({ item }) => {
                     />
                 </div>
 
-                <DialogFooter className="w-full flex justify-between">
+                <DialogFooter className="w-[1140px] flex justify-between">
                     <AnimatedButton
                         variant="destructive"
                         onClick={() => setIsOpen(false)}
