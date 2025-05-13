@@ -19,7 +19,7 @@ interface DashboardCardProps {
 // Variants apenas para a animação de troca da descrição
 const descContentVariants = {
   hidden: { opacity: 0, x: -20 }, // Inicia da esquerda, invisível
-  visible: { opacity: 1, x: 0 }, // Termina na posição normal, visível
+  visible: { opacity: 1, x: 0 },   // Termina na posição normal, visível
   // exit: { opacity: 0, x: 20 } // Opcional: animar para a direita ao sair
 };
 
@@ -35,21 +35,21 @@ export function DashboardCard({
   const [activeSubLink, setActiveSubLink] = useState<string | null>(null);
 
   const { grupos } = useAuth(); // Se 'grupos' for undefined ou null, adicione tratamento apropriado.
-  // Ex: const { grupos = [] } = useAuth();
+                                // Ex: const { grupos = [] } = useAuth();
 
   // Função para verificar grupos MODIFICADA para incluir admin '000000'
   function hasAnyGroup(requiredGroups: string[] | undefined) {
     // Certifique-se de que 'grupos' existe antes de chamar 'some'
     if (!grupos || grupos.length === 0) {
-      // Se o usuário não tem grupos e o item requer grupos, negar acesso.
-      // Se o item não requer grupos, permitir acesso.
-      return !requiredGroups || requiredGroups.length === 0;
+        // Se o usuário não tem grupos e o item requer grupos, negar acesso.
+        // Se o item não requer grupos, permitir acesso.
+        return !requiredGroups || requiredGroups.length === 0;
     }
 
     // 1. Verificar se o usuário pertence ao grupo de admin '000000'
     //    Ajuste 'ug.Grupo' se a estrutura do objeto de grupo for diferente.
     //    Isto assume que 'grupos' é um array de objetos como [{ Grupo: 'algumId' }, ...]
-    const isAdmin = grupos.some((ug) => ug && ug.Grupo === "000000");
+    const isAdmin = grupos.some((ug) => ug && ug.Grupo === '000000');
     if (isAdmin) {
       return true; // Se for admin, concede acesso independentemente dos requiredGroups
     }
@@ -59,9 +59,7 @@ export function DashboardCard({
       return true; // Se não há grupos requeridos para o subLink, permite o acesso
     }
     // Verifica se o usuário (não-admin) possui algum dos grupos requeridos
-    return requiredGroups.some((rg) =>
-      grupos.some((ug) => ug && ug.Grupo === rg)
-    );
+    return requiredGroups.some((rg) => grupos.some((ug) => ug && ug.Grupo === rg));
   }
 
   const hasSubLinks = !!card.subLinks?.length;
