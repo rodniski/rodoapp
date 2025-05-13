@@ -11,13 +11,14 @@ import {
   Button,
   ScrollArea,
 } from "ui";
-import { NumericFormat } from "react-number-format";
+import { NumericFormat, type NumberFormatValues } from "react-number-format";
 import { Trash2, Save } from "lucide-react";
 import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores";
 import { usePreNotaStore, useValorTotalXml } from "@inclusao/stores";
 import type { Rateio as RateioType } from "@inclusao/types";
 import { Combobox, ComboboxItem } from "ui";
 import { formatCurrency } from "utils";
+import { toast } from "sonner";
 
 const formatPercent = (value: number): string => `${(value ?? 0).toFixed(2)}%`;
 
@@ -34,47 +35,44 @@ export function RateioTable({}: RateioTableProps) {
   const [editingRateios, setEditingRateios] = useState<RateioType[]>([]);
   const [dirtyRows, setDirtyRows] = useState<Set<string>>(new Set());
 
-  // Helper to get the ID (using 'id' as the primary key)
   const getRateioId = useCallback((rateio: RateioType): string => {
     if (typeof rateio.id !== "string" || !rateio.id) {
-      console.warn("Rateio sem 'id' válido encontrado:", rateio);
-      return `fallback_${Math.random()}`;
+      console.warn("Rateio sem 'id' válido encontrado, usando fallback:", rateio);
+      return `fallback_${rateio.seq || Math.random().toString(36).substring(2)}`;
     }
     return rateio.id;
   }, []);
 
   const storeRateiosMap = useMemo(() => {
     const map = new Map<string, RateioType>();
-    storeRateios.forEach((item) => {
+    (storeRateios || []).forEach((item) => {
       const id = getRateioId(item);
-      if (id) {
-        map.set(id, item);
-      }
+      map.set(id, item);
     });
     return map;
   }, [storeRateios, getRateioId]);
 
   useEffect(() => {
-    setEditingRateios(structuredClone(storeRateios));
+    setEditingRateios(structuredClone(storeRateios || []));
     setDirtyRows(new Set());
   }, [storeRateios]);
 
   const totalGeral = useMemo(() => totalGeralXml ?? 0, [totalGeralXml]);
 
-  const totalDivisaoSalva = useMemo(
-    () => storeRateios.reduce((acc, row) => acc + (row.valor || 0), 0),
+  const totalDivisaoSalvaNoStore = useMemo(
+    () => (storeRateios || []).reduce((acc, row) => acc + (row.valor || 0), 0),
     [storeRateios]
   );
-  const porcentagemDivisaoSalva = useMemo(
+  const porcentagemDivisaoSalvaNoStore = useMemo(
     () =>
       totalGeral > 0
-        ? parseFloat(((totalDivisaoSalva / totalGeral) * 100).toFixed(2))
+        ? parseFloat(((totalDivisaoSalvaNoStore / totalGeral) * 100).toFixed(2))
         : 0,
-    [totalGeral, totalDivisaoSalva]
+    [totalGeral, totalDivisaoSalvaNoStore]
   );
-  const totalRestante = useMemo(
-    () => Math.max(0, parseFloat((totalGeral - totalDivisaoSalva).toFixed(2))),
-    [totalGeral, totalDivisaoSalva]
+  const totalRestanteGlobal = useMemo(
+    () => Math.max(0, parseFloat((totalGeral - totalDivisaoSalvaNoStore).toFixed(2))),
+    [totalGeral, totalDivisaoSalvaNoStore]
   );
 
   const filialItems: ComboboxItem[] = useMemo(
@@ -101,78 +99,94 @@ export function RateioTable({}: RateioTableProps) {
     (
       id: string,
       field: "FIL" | "cc" | "valor" | "percent",
-      value: string | number | null
+      value: string | number | null // Agora aceita null
     ) => {
-      setEditingRateios((currentRateios) => {
-        const index = currentRateios.findIndex((r) => getRateioId(r) === id);
-        if (index === -1) return currentRateios;
+      setEditingRateios((currentEditingRateios) => {
+        const index = currentEditingRateios.findIndex((r) => getRateioId(r) === id);
+        if (index === -1) return currentEditingRateios;
 
-        const updatedRateios = [...currentRateios];
-        const rateioToUpdate = { ...updatedRateios[index] };
-        let finalUpdates: Partial<RateioType> = {};
+        const rateiosEditados = [...currentEditingRateios];
+        const rateioParaAtualizar = { ...rateiosEditados[index] };
+        let atualizacoesFinais: Partial<RateioType> = {};
+
+        const rateioOriginalDoStore = storeRateiosMap.get(id);
+        const valorOriginalNoStore = rateioOriginalDoStore?.valor ?? 0;
 
         if (field === "FIL" || field === "cc") {
-          finalUpdates = { [field]: (value as string | null) ?? "" };
+          atualizacoesFinais = { [field]: (value as string | null) ?? "" };
         } else if (field === "valor") {
-          const numericValue = typeof value === "number" ? value : 0;
-          const calculatedPerc =
-            totalGeral > 0
-              ? parseFloat(((numericValue / totalGeral) * 100).toFixed(2))
-              : 0;
-          finalUpdates = {
-            valor: parseFloat(numericValue.toFixed(2)),
-            percent: Math.min(100, Math.max(0, calculatedPerc)),
+          // Se value for null (vindo do NumericFormat quando undefined), trata como 0
+          let valorNumerico = typeof value === "number" ? parseFloat(value.toFixed(2)) : 0;
+          valorNumerico = Math.max(0, valorNumerico);
+
+          const percentualCalculado = totalGeral > 0 ? parseFloat(((valorNumerico / totalGeral) * 100).toFixed(2)) : 0;
+          atualizacoesFinais = {
+            valor: valorNumerico,
+            percent: Math.min(100, Math.max(0, percentualCalculado)),
           };
         } else if (field === "percent") {
-          const numericPercent =
-            typeof value === "number" ? Math.min(100, Math.max(0, value)) : 0;
-          const calculatedValor = parseFloat(
-            ((numericPercent / 100) * totalGeral).toFixed(2)
-          );
-          finalUpdates = {
-            percent: numericPercent,
-            valor: calculatedValor,
+          let percentualNumerico = typeof value === "number" ? parseFloat(value.toFixed(2)) : 0;
+          percentualNumerico = Math.min(100, Math.max(0, percentualNumerico));
+
+          let valorCalculado = parseFloat(((percentualNumerico / 100) * totalGeral).toFixed(2));
+          const maxValorParaEsteItemComBaseNoPercentual = parseFloat((valorOriginalNoStore + totalRestanteGlobal).toFixed(2));
+          valorCalculado = Math.min(valorCalculado, maxValorParaEsteItemComBaseNoPercentual);
+          valorCalculado = Math.max(0, valorCalculado);
+
+          atualizacoesFinais = {
+            percent: percentualNumerico,
+            valor: valorCalculado,
           };
         }
-        updatedRateios[index] = { ...rateioToUpdate, ...finalUpdates };
-        return updatedRateios;
+        rateiosEditados[index] = { ...rateioParaAtualizar, ...atualizacoesFinais };
+        return rateiosEditados;
       });
       setDirtyRows((prev) => new Set(prev).add(id));
     },
-    [totalGeral, getRateioId]
+    [totalGeral, getRateioId, storeRateiosMap, totalRestanteGlobal]
   );
 
   const handleSaveChanges = useCallback(
     (id: string) => {
-      const rateioToSave = editingRateios.find((r) => getRateioId(r) === id);
-      if (rateioToSave) {
+      const rateioParaSalvar = editingRateios.find((r) => getRateioId(r) === id);
+      if (rateioParaSalvar) {
+        const valorFinal = parseFloat((rateioParaSalvar.valor ?? 0).toFixed(2));
+        const percentFinal = parseFloat((rateioParaSalvar.percent ?? 0).toFixed(2));
+
+        const rateioOriginalDoStore = storeRateiosMap.get(id);
+        const valorOriginalNoStore = rateioOriginalDoStore?.valor ?? 0;
+        const maxValorPossivelParaEsteItem = parseFloat((valorOriginalNoStore + totalRestanteGlobal).toFixed(2));
+
+        if (valorFinal > maxValorPossivelParaEsteItem + 0.001) {
+            toast.error(`Erro ao salvar: O valor ${formatCurrency(valorFinal)} excede o máximo permitido para este item (${formatCurrency(maxValorPossivelParaEsteItem)}).`);
+            return;
+        }
+
         updateRateio(id, {
-          FIL: rateioToSave.FIL,
-          cc: rateioToSave.cc,
-          valor: rateioToSave.valor,
-          percent: rateioToSave.percent,
+          FIL: rateioParaSalvar.FIL,
+          cc: rateioParaSalvar.cc,
+          valor: valorFinal,
+          percent: percentFinal,
         });
         setDirtyRows((prev) => {
           const next = new Set(prev);
           next.delete(id);
           return next;
         });
+        toast.success("Rateio atualizado com sucesso!");
+      } else {
+        toast.error("Erro ao encontrar rateio para salvar.");
       }
     },
-    [editingRateios, updateRateio, getRateioId]
+    [editingRateios, updateRateio, getRateioId, storeRateiosMap, totalRestanteGlobal]
   );
 
   const handleRemove = useCallback(
     (id: string) => {
       removeRateio(id);
-      setEditingRateios((prev) => prev.filter((r) => getRateioId(r) !== id));
-      setDirtyRows((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
+      toast.success("Rateio removido.");
     },
-    [removeRateio, getRateioId]
+    [removeRateio]
   );
 
   return (
@@ -181,57 +195,32 @@ export function RateioTable({}: RateioTableProps) {
         <Table className="border-b">
           <TableHeader className="py-2 bg-card sticky top-0 z-10">
             <TableRow>
-              <TableHead
-                className="px-2 text-center"
-                style={{ width: "200px" }}
-              >
-                Filial
-              </TableHead>
-              <TableHead
-                className="px-2 text-center"
-                style={{ width: "250px" }}
-              >
-                Centro de Custo
-              </TableHead>
-              <TableHead
-                className="px-2 text-center"
-                style={{ width: "150px" }}
-              >
-                Valor (R$)
-              </TableHead>
-              <TableHead
-                className="px-2 text-center"
-                style={{ width: "150px" }}
-              >
-                Porcentagem (%)
-              </TableHead>
-              <TableHead
-                className="px-2 text-center"
-                style={{ width: "100px" }}
-              >
-                Ações
-              </TableHead>
+              <TableHead className="px-2 text-center" style={{ width: "200px" }}>Filial</TableHead>
+              <TableHead className="px-2 text-center" style={{ width: "250px" }}>Centro de Custo</TableHead>
+              <TableHead className="px-2 text-center" style={{ width: "150px" }}>Valor (R$)</TableHead>
+              <TableHead className="px-2 text-center" style={{ width: "150px" }}>Porcentagem (%)</TableHead>
+              <TableHead className="px-2 text-center" style={{ width: "100px" }}>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {editingRateios.map((localRow) => {
+            {(editingRateios || []).map((localRow) => {
               const rowId = getRateioId(localRow);
               const isDirty = dirtyRows.has(rowId);
-              const storeRow = storeRateiosMap.get(rowId);
+              
+              const rateioOriginalDoStore = storeRateiosMap.get(rowId);
+              const valorOriginalNoStore = rateioOriginalDoStore?.valor ?? 0;
 
-              const displayFilial = isDirty ? localRow.FIL : storeRow?.FIL;
-              const displayCC = isDirty ? localRow.cc : storeRow?.cc;
-              const displayValor = isDirty ? localRow.valor : storeRow?.valor;
-              const displayPerc = isDirty
-                ? localRow.percent
-                : storeRow?.percent;
+              const maxValorEditavelParaEsteItem = parseFloat((valorOriginalNoStore + totalRestanteGlobal).toFixed(2));
+              const maxPercentualEditavelParaEsteItem = totalGeral > 0 
+                ? parseFloat(Math.min(100, ((maxValorEditavelParaEsteItem / totalGeral) * 100)).toFixed(2))
+                : (maxValorEditavelParaEsteItem > 0 ? 100 : 0);
 
               return (
                 <TableRow key={rowId}>
                   <TableCell className="px-2 py-1 text-center align-middle">
                     <Combobox
                       items={filialItems}
-                      selectedValue={displayFilial || null}
+                      selectedValue={localRow.FIL || null}
                       onSelect={(selectedValue) =>
                         handleLocalChange(rowId, "FIL", selectedValue)
                       }
@@ -242,7 +231,7 @@ export function RateioTable({}: RateioTableProps) {
                   <TableCell className="px-2 py-1 text-center align-middle">
                     <Combobox
                       items={centroCustoItems}
-                      selectedValue={displayCC || null}
+                      selectedValue={localRow.cc || null}
                       onSelect={(selectedValue) =>
                         handleLocalChange(rowId, "cc", selectedValue)
                       }
@@ -252,41 +241,47 @@ export function RateioTable({}: RateioTableProps) {
                   </TableCell>
                   <TableCell className="px-2 py-1 text-center align-middle">
                     <NumericFormat
-                      value={displayValor ?? 0}
+                      value={localRow.valor ?? 0}
                       onValueChange={(values) =>
-                        handleLocalChange(
-                          rowId,
-                          "valor",
-                          values.floatValue ?? 0
-                        )
+                        // CORREÇÃO: Passar null se floatValue for undefined
+                        handleLocalChange(rowId, "valor", values.floatValue === undefined ? null : values.floatValue)
                       }
+                      isAllowed={(values: NumberFormatValues) => {
+                        const { floatValue } = values;
+                        if (floatValue === undefined) return true;
+                        return floatValue >= 0 && floatValue <= maxValorEditavelParaEsteItem;
+                      }}
                       decimalScale={2}
+                      fixedDecimalScale
                       allowNegative={false}
                       thousandSeparator="."
                       decimalSeparator=","
                       prefix="R$ "
-                      className="text-center text-xs h-8 w-full rounded-md border border-input bg-muted px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="text-center text-xs h-8 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="R$ 0,00"
-                      disabled={totalGeral <= 0 || !storeRow}
+                      disabled={totalGeral <= 0 && valorOriginalNoStore <= 0}
                     />
                   </TableCell>
                   <TableCell className="px-2 py-1 text-center align-middle">
                     <NumericFormat
-                      value={displayPerc ?? 0}
+                      value={localRow.percent ?? 0}
                       onValueChange={(values) => {
-                        const limitedPercent = Math.min(
-                          values.floatValue ?? 0,
-                          100
-                        );
-                        handleLocalChange(rowId, "percent", limitedPercent);
+                        // CORREÇÃO: Passar null se floatValue for undefined
+                        handleLocalChange(rowId, "percent", values.floatValue === undefined ? null : values.floatValue);
+                      }}
+                      isAllowed={(values: NumberFormatValues) => {
+                        const { floatValue } = values;
+                        if (floatValue === undefined) return true;
+                        return floatValue >= 0 && floatValue <= maxPercentualEditavelParaEsteItem;
                       }}
                       decimalScale={2}
+                      fixedDecimalScale
                       allowNegative={false}
                       decimalSeparator=","
                       suffix=" %"
-                      className="text-center text-xs h-8 w-full rounded-md border border-input bg-muted px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="text-center text-xs h-8 w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="0,00 %"
-                      disabled={totalGeral <= 0 || !storeRow}
+                      disabled={totalGeral <= 0 && valorOriginalNoStore <= 0}
                     />
                   </TableCell>
                   <TableCell className="px-2 py-1 text-center align-middle">
@@ -295,10 +290,10 @@ export function RateioTable({}: RateioTableProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-lime-500 hover:text-lime-600"
+                          className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-100"
                           onClick={() => handleSaveChanges(rowId)}
                           aria-label="Salvar alterações do rateio"
-                          disabled={!storeRow}
+                          title="Salvar alterações"
                         >
                           <Save className="w-4 h-4" />
                         </Button>
@@ -306,12 +301,12 @@ export function RateioTable({}: RateioTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
                         onClick={() => handleRemove(rowId)}
                         aria-label="Remover rateio"
-                        disabled={!storeRow}
+                        title="Remover rateio"
                       >
-                        <Trash2 className="w-4 h-4 text-destructive" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -330,21 +325,23 @@ export function RateioTable({}: RateioTableProps) {
               <span className="font-medium">{formatCurrency(totalGeral)}</span>
             </div>
             <div className="flex flex-col items-start">
-              <span>Rateado:</span>
+              <span>Rateado (Store):</span>
               <span className="font-medium">
-                {formatCurrency(totalDivisaoSalva)} (
-                {formatPercent(porcentagemDivisaoSalva)})
+                {formatCurrency(totalDivisaoSalvaNoStore)} (
+                {formatPercent(porcentagemDivisaoSalvaNoStore)})
               </span>
             </div>
           </div>
           <div className="flex flex-col items-start">
-            <span>Restante:</span>
+            <span>Restante (Global):</span>
             <span
               className={`font-medium ${
-                totalRestante < 0.01 ? "text-green-600" : ""
+                totalRestanteGlobal < 0.01 && totalRestanteGlobal >= 0
+                  ? "text-green-600"
+                  : totalRestanteGlobal < 0 ? "text-red-600" : ""
               }`}
             >
-              {formatCurrency(totalRestante)}
+              {formatCurrency(totalRestanteGlobal)}
             </span>
           </div>
         </div>

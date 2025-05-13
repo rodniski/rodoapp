@@ -17,7 +17,7 @@ import {
   useFornecedorSearchResult,
 } from "@inclusao/stores";
 import type { Pedido, Fornecedor } from "@inclusao/api";
-import type { PreNotaItem } from "@inclusao/types";
+
 
 interface PedidoResumo {
   numero: string;

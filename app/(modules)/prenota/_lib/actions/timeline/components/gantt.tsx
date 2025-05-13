@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { addDays, isAfter } from "date-fns";
+import { addDays } from "date-fns";
 import { cn } from "utils";
 import { GanttChart, type Task } from "ui";
-import { useTimeline } from "../config/hook.timeline";
+import { useTimeline } from "@prenota/actions";
+import type { TimelineEvento } from "@prenota/actions";
 
 interface PrenotaGanttProps {
   recsf1: string | number;
@@ -28,108 +29,69 @@ export function PrenotaGantt({ recsf1, className }: PrenotaGanttProps) {
       return new Date(year, month, day);
     };
 
-    const nullToUndefined = (value: string | null): string | undefined =>
-      value ?? undefined;
-
-    for (const row of rawTasks) {
-      const emissao = parseProtheusDate(row.EMISSAO_NF);
-      const lancamento = parseProtheusDate(row.DATA_LANCAMENTO_REAL);
-      const classificacao = parseProtheusDate(row.DATA_CLASSIFICACAO);
-      const vencimento = parseProtheusDate(row.VENCIMENTO);
-      const pagamento = parseProtheusDate(row.DATA_BAIXA);
-
-      // Fase 1: Pedido → Emissão
-      if (row.PEDIDO && lancamento && emissao) {
-        tasksList.push({
-          id: `pedido-emissao-${row.REC_F1}`,
-          name: `Pedido ${row.PEDIDO}`,
-          startDate: lancamento,
-          endDate: emissao,
-          progress: 100,
-          status: "completed",
-          assignee: nullToUndefined(row.USUARIO_PEDIDO),
-          custom_class: "task-pedido",
-        });
+    const mapStatus = (status: TimelineEvento["status"]): Task["status"] => {
+      switch (status) {
+        case "concluido":
+          return "completed";
+        case "in-progress":
+          return "in-progress";
+        case "atrasado":
+          return "delayed";
+        case "pendente":
+        default:
+          return "not-started";
       }
+    };
 
-      // Fase 2: Emissão → Pré-nota
-      if (emissao && lancamento) {
-        tasksList.push({
-          id: `emissao-prenota-${row.REC_F1}`,
-          name: `Pré-Nota: ${row.NOTA}/${row.SERIE}`,
-          startDate: emissao,
-          endDate: lancamento,
-          progress: 100,
-          status: "completed",
-          custom_class: "task-prenota",
-        });
-      }
+    // Mapeamento de TimelineStage para nomes legíveis
+    const stageNames: Record<TimelineEvento["tipo"], string> = {
+      pedido_nfEmitida: "Pedido Enviado → NF Emitida",
+      nfEmitida_recebida: "NF Emitida → Recebida",
+      recebida_classificada: "NF Recebida → Classificada",
+      nfEmitida_pago: "NF Emitida → Pago/Vencido",
+    };
 
-      // Fase 3: Pré-nota → Classificação
-      if (lancamento) {
-        tasksList.push({
-          id: `prenota-class-${row.REC_F1}`,
-          name: `Classificação`,
-          startDate: lancamento,
-          endDate: classificacao ?? addDays(lancamento, 1),
-          progress: classificacao ? 100 : 50,
-          status: classificacao ? "completed" : "in-progress",
-          custom_class: "task-classificacao",
-        });
-      }
+    for (const event of rawTasks) {
+      const startDate = parseProtheusDate(event.inicio);
+      const endDate = parseProtheusDate(event.fim) ?? addDays(startDate || today, 1);
 
-      // Marco: Histórico
-      const logDate = parseProtheusDate(row.DATA_HISTORICO);
-      if (logDate && row.OBSERVACAO_HISTORICO) {
-        tasksList.push({
-          id: `log-${row.REC_F1}-${tasksList.length}`,
-          name: `Log: ${row.OBSERVACAO_HISTORICO}`,
-          startDate: logDate,
-          endDate: logDate,
-          progress: 100,
-          status: "completed",
-          assignee: nullToUndefined(row.USUARIO_HISTORICO),
-          custom_class: "milestone-log",
-        });
-      }
+      if (!startDate) continue; // Pula eventos sem data de início válida
 
-      // Fase 4: Emissão → Vencimento final
-      if (emissao && vencimento) {
-        tasksList.push({
-          id: `emissao-venc-${row.REC_F1}`,
-          name: `Aguardando Pagamento`,
-          startDate: emissao,
-          endDate: vencimento,
-          progress: pagamento ? 100 : 50,
-          status: pagamento ? "completed" : "in-progress",
-          custom_class: "task-vencimento",
-        });
-      }
+      // Tarefa principal para cada evento
+      tasksList.push({
+        id: `${event.tipo}-${event.codigo}`,
+        name: `${stageNames[event.tipo]}`,
+        startDate,
+        endDate,
+        progress:
+          event.status === "concluido"
+            ? 100
+            : event.status === "in-progress"
+            ? 50
+            : event.status === "atrasado"
+            ? 75
+            : 0,
+        status: mapStatus(event.status),
+        assignee: event.nome ?? undefined,
+        custom_class: `task-${event.tipo}`,
+      });
 
-      // Marco: Vencimento
-      if (vencimento) {
-        const isDelayed = isAfter(today, vencimento) && !pagamento;
-        tasksList.push({
-          id: `vencimento-${row.REC_F1}`,
-          name: `Vencimento`,
-          startDate: vencimento,
-          endDate: vencimento,
-          progress: 100,
-          status: isDelayed ? "delayed" : "completed",
-          custom_class: "milestone-vencimento",
-        });
-      }
+      // Marcos (se houver)
+      if (event.marcos?.length) {
+        event.marcos.forEach((marco, index) => {
+          const marcoDate = parseProtheusDate(marco.data);
+          if (!marcoDate) return;
 
-      // Marco: Pagamento
-      if (pagamento) {
-        tasksList.push({
-          id: `pagamento-${row.REC_F1}`,
-          name: `Pagamento`,
-          startDate: pagamento,
-          endDate: pagamento,
-          progress: 100,
-          status: "completed",
-          custom_class: "milestone-pago",
+          tasksList.push({
+            id: `marco-${event.codigo}-${index}`,
+            name: marco.descricao || marco.campo || "Marco",
+            startDate: marcoDate,
+            endDate: marcoDate,
+            progress: 100,
+            status: "completed",
+            assignee: marco.usuario ?? undefined,
+            custom_class: "milestone-marco",
+          });
         });
       }
     }

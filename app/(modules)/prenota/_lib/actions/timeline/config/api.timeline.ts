@@ -1,14 +1,12 @@
-import type { FullTimelineSqlRow } from "@/app/(modules)/prenota/_lib/lib/types";
+import type { TimelineResponse } from "@prenota/actions";
 
 /**
  * Busca a timeline completa de uma pré-nota via API.
  * @param recsf1 - ID da pré-nota (R_E_C_N_O_)
- * @returns Dados brutos da timeline
+ * @returns Dados da timeline (TimelineEvento[])
  * @throws Error se a requisição falhar
  */
-export async function fetchTimeline(
-  recsf1: string
-): Promise<FullTimelineSqlRow[]> {
+export async function fetchTimeline(recsf1: string): Promise<TimelineResponse> {
   const recsf1Trimmed = recsf1.trim();
   if (!recsf1Trimmed) {
     console.warn("[fetchTimeline] RECSF1 inválido.");
@@ -24,11 +22,12 @@ export async function fetchTimeline(
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
-    if (!response.ok)
+    if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const data = await response.json();
+    }
+    const data: TimelineResponse = await response.json();
     console.log(`${logPrefix} ${data.length || 0} linhas recebidas.`);
-    return data.map((row: any) => ({ ...row, REC_F1: Number(row.REC_F1) }));
+    return data;
   } catch (error) {
     console.error(`${logPrefix} Erro:`, error);
     throw error;

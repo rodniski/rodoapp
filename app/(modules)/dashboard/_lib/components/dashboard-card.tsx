@@ -34,17 +34,39 @@ export function DashboardCard({
   // Estado para rastrear qual badge está com hover
   const [activeSubLink, setActiveSubLink] = useState<string | null>(null);
 
-  const { grupos } = useAuth();
+  const { grupos } = useAuth(); // Se 'grupos' for undefined ou null, adicione tratamento apropriado.
+                                // Ex: const { grupos = [] } = useAuth();
 
-  // Função para verificar grupos (mantida)
+  // Função para verificar grupos MODIFICADA para incluir admin '000000'
   function hasAnyGroup(requiredGroups: string[] | undefined) {
-    if (!requiredGroups || requiredGroups.length === 0) return true;
-    return requiredGroups.some((rg) => grupos.some((ug) => ug.Grupo === rg));
+    // Certifique-se de que 'grupos' existe antes de chamar 'some'
+    if (!grupos || grupos.length === 0) {
+        // Se o usuário não tem grupos e o item requer grupos, negar acesso.
+        // Se o item não requer grupos, permitir acesso.
+        return !requiredGroups || requiredGroups.length === 0;
+    }
+
+    // 1. Verificar se o usuário pertence ao grupo de admin '000000'
+    //    Ajuste 'ug.Grupo' se a estrutura do objeto de grupo for diferente.
+    //    Isto assume que 'grupos' é um array de objetos como [{ Grupo: 'algumId' }, ...]
+    const isAdmin = grupos.some((ug) => ug && ug.Grupo === '000000');
+    if (isAdmin) {
+      return true; // Se for admin, concede acesso independentemente dos requiredGroups
+    }
+
+    // 2. Lógica original para usuários não-admin
+    if (!requiredGroups || requiredGroups.length === 0) {
+      return true; // Se não há grupos requeridos para o subLink, permite o acesso
+    }
+    // Verifica se o usuário (não-admin) possui algum dos grupos requeridos
+    return requiredGroups.some((rg) => grupos.some((ug) => ug && ug.Grupo === rg));
   }
 
   const hasSubLinks = !!card.subLinks?.length;
-  // Filtra sublinks visíveis (mantido)
-  const visibleSubLinks = card.subLinks?.filter((sub) => hasAnyGroup(sub.requiresGroup));
+  // Filtra sublinks visíveis (agora considera o admin)
+  const visibleSubLinks = card.subLinks?.filter((sub) =>
+    hasAnyGroup(sub.requiresGroup)
+  );
 
   // Handler de clique no card (mantido)
   const handleCardClick = () => {
@@ -55,7 +77,8 @@ export function DashboardCard({
 
   // Determina a descrição a ser exibida
   const currentDescription = activeSubLink
-    ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.description ?? card.description
+    ? card.subLinks?.find((sl) => sl.id === activeSubLink)?.description ??
+      card.description
     : card.description;
 
   return (
@@ -72,7 +95,7 @@ export function DashboardCard({
           borderWidth={2}
           spread={60}
           glow
-          disabled={false}
+          disabled={false} // Mantido como false, ajuste se necessário
           proximity={64}
           inactiveZone={0.01}
         />
@@ -101,9 +124,8 @@ export function DashboardCard({
             )}
           </div>
 
-          {/* BADGES: Container estático (sem motion aqui) */}
+          {/* BADGES: Container estático */}
           {hasSubLinks && visibleSubLinks && visibleSubLinks.length > 0 && (
-            // Remover motion.div daqui ou remover as props de animação dele
             <div className="flex flex-wrap gap-2 mt-2">
               {visibleSubLinks.map((sub) => (
                 <Badge
@@ -114,19 +136,17 @@ export function DashboardCard({
                   onMouseEnter={() => setActiveSubLink(sub.id)}
                   onMouseLeave={() => setActiveSubLink(null)}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(sub.url, sub.external ? "_blank" : "_self");
+                    e.stopPropagation(); // Impede que o handleCardClick seja chamado
+                    window.open(sub.url, "_blank"); // Abre o link do subLink/badge
                   }}
                 >
                   {sub.title}
-                  {sub.external && <ExternalLink className="inline-block ml-1 size-3" />}
                 </Badge>
               ))}
             </div>
           )}
 
           {/* DESCRIÇÃO: Container estático, conteúdo animado */}
-          {/* Remover motion.div daqui ou remover as props de animação dele */}
           <div className="mt-auto pt-2 min-h-14 overflow-hidden relative">
             {/* AnimatePresence para animar a troca de texto */}
             <AnimatePresence mode="wait">

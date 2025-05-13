@@ -22,33 +22,33 @@ export default function PrenotaPage() {
   const draft = usePreNotaStore((s) => s.draft);
 
   // Validação do cabeçalho
-  const headerValid = headerSchema.safeParse(draft.header).success;
+  const headerValidationResult = headerSchema.safeParse(draft.header);
+  const headerValid =
+    headerValidationResult.success &&
+    !!draft.header.tiporodo &&
+    draft.header.tiporodo.trim() !== "" &&
+    !!draft.header.prioridade &&
+    draft.header.prioridade.trim() !== "";
 
   // Validação da etapa 2: exige ao menos 1 parcela, 1 anexo e 1 rateio
-  const step2Valid = z
-    .object({
-      parcelas: z.array(parcelaSchema).min(1, "Adicione ao menos 1 parcela"),
-      anexos: z.array(anexoSchema).min(1, "Adicione ao menos 1 anexo"),
-      rateio: z.array(rateioSchema).min(1, "Adicione ao menos 1 rateio"),
-    })
-    .safeParse({
-      parcelas: draft.PAGAMENTOS,
-      anexos: draft.ARQUIVOS,
-      rateio: draft.RATEIOS, // Corrigido
-    }).success;
-
-  // Validação da etapa 3: exige ao menos 1 item
-  const itemsValid = z
-    .array(itemSchema)
-    .min(1, "Adicione ao menos 1 item")
-    .safeParse(draft.itens).success;
-
-  console.log({
+  const step2Schema = z.object({
+    parcelas: z.array(parcelaSchema).min(1, "Adicione ao menos 1 parcela"),
+    anexos: z.array(anexoSchema).min(1, "Adicione ao menos 1 anexo"),
+    rateios: z.array(rateioSchema).min(1, "Adicione ao menos 1 rateio"),
+  });
+  const step2ValidationResult = step2Schema.safeParse({
     parcelas: draft.PAGAMENTOS,
     anexos: draft.ARQUIVOS,
-    rateio: draft.RATEIOS,
-    step2Valid,
+    rateios: draft.RATEIOS,
   });
+  const step2Valid = step2ValidationResult.success;
+
+  // Validação da etapa 3: exige ao menos 1 item
+  const itemsValidationResult = z
+    .array(itemSchema)
+    .min(1, "Adicione ao menos 1 item")
+    .safeParse(draft.itens);
+  const itemsValid = itemsValidationResult.success;
 
   return (
     <div className="relative flex flex-col items-center justify-center h-full overflow-hidden">

@@ -7,12 +7,10 @@ const GRUPO_FILIAL_API_URL = `${config.API_BORRACHARIA_URL}MovPortaria/GrupoFili
 
 export async function getUserGrupoFilial(
     username: string,
-    accessToken: string
   ): Promise<GrupoFilial[]> {
     try {
       const response = await axios.get<GrupoFilial[]>(
         `${GRUPO_FILIAL_API_URL}?Usuario=${encodeURIComponent(username)}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       return response.data;
     } catch (error) {

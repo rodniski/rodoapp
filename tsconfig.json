@@ -41,6 +41,7 @@
       "@modules/*": ["./app/(modules)/*"],
       "@login/*": ["./app/login/_lib/*"],
       "@prenota/*": ["./app/(modules)/prenota/_lib/*"],
+      "@pedido/*": ["./app/(modules)/prenota/pedido/_lib/*"],
       "@inclusao/*": ["./app/(modules)/prenota/inclusao/_lib/*"],
       "@controle/*": ["./app/(modules)/controle/_lib/*"],
       "@borracharia/*": ["./app/(modules)/controle/borracharia/_lib/*"],

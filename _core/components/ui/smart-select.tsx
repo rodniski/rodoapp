@@ -10,7 +10,7 @@ import {
   CommandList,
   CommandEmpty,
   CommandGroup,
-  CommandItem /* todos de “ui” */,
+  CommandItem,
   Badge,
   Button,
 } from "ui";
@@ -18,27 +18,19 @@ import { Check, ChevronsUpDown, XCircle } from "lucide-react";
 import { cn } from "utils";
 import type { ComboboxItem } from "ui";
 
-/* ╭──────────────────────────────────────────╮
-   │ 1 ▸ INTERFACES                           │
-   ╰──────────────────────────────────────────╯ */
-/* ─────────── props comuns ─────────── */
 interface BaseProps {
-  options: ComboboxItem[];
+  options?: ComboboxItem[];
   placeholder?: string;
   className?: string;
   badgeClassName?: string;
 }
 
-/* ─────────── seleção única ─────────── */
 export interface SingleSelectProps extends BaseProps {
-  /** identifica o “modo” da prop union */
   multiple?: false;
-  /** string (ou null) quando for _single_ */
   value: string | null;
   onChange: (val: string | null) => void;
 }
 
-/* ─────────── seleção múltipla ─────────── */
 export interface MultiSelectProps extends BaseProps {
   multiple: true;
   value: string[];
@@ -49,16 +41,14 @@ export type SmartSelectProps = SingleSelectProps | MultiSelectProps;
 
 export function SmartSelect(props: SmartSelectProps) {
   const {
-    options,
+    options = [],
     placeholder = "Selecione…",
     className,
     badgeClassName,
   } = props;
 
-  /* estado do pop-over */
   const [open, setOpen] = React.useState(false);
 
-  /* helpers p/ saber seleções */
   const isMulti = props.multiple === true;
   const selectedValues: string[] = isMulti
     ? props.value
@@ -71,7 +61,6 @@ export function SmartSelect(props: SmartSelectProps) {
     [options, selectedValues]
   );
 
-  /* toggle (add/remove) */
   const handleSelect = (v: string) => {
     if (isMulti) {
       const already = props.value.includes(v);
@@ -80,14 +69,12 @@ export function SmartSelect(props: SmartSelectProps) {
         : [...props.value, v];
       props.onChange(next);
     } else {
-      /* single — fecha pop-over e devolve string (ou null para “limpar”) */
       const next = props.value === v ? null : v;
       props.onChange(next);
       setOpen(false);
     }
   };
 
-  /* limpar */
   const clear = (e: React.MouseEvent) => {
     e.stopPropagation();
     isMulti ? props.onChange([]) : props.onChange(null);
@@ -98,7 +85,6 @@ export function SmartSelect(props: SmartSelectProps) {
       <PopoverTrigger asChild>
         <div
           role="combobox"
-          ref={null}
           className={cn(
             "inline-flex h-9 w-full items-center justify-between rounded-md border border-input bg-muted/30 px-2 text-sm shadow-sm focus:outline-none",
             className

@@ -1,10 +1,36 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "sqlserver"
   url      = env("DATABASE_URL")
+}
+
+// Modelo para a tabela de Produtos (SB1)
+model SB1010 {
+  R_E_C_N_O_ Int    @id @default(autoincrement()) @map("R_E_C_N_O_")
+  B1_FILIAL  String @map("B1_FILIAL")
+  B1_COD     String @map("B1_COD")
+  B1_DESC    String @map("B1_DESC")
+
+  // Campos básicos para listagem e informação
+  B1_TIPO   String? @map("B1_TIPO") // Tipo do Produto (ex: PA, MP, ME, SV)
+  B1_UM     String? @map("B1_UM") // Unidade de Medida Principal
+  B1_GRUPO  String? @map("B1_GRUPO") // Grupo de Produtos
+  B1_PRV1   Float?  @map("B1_PRV1") // Preço de Venda 1
+  B1_LOCPAD String? @map("B1_LOCPAD") // Armazém Padrão do Produto
+  B1_MARCA  String? @map("B1_MARCA") // Marca do Produto
+
+  // Campos de controle
+  B1_MSBLQL  String? @map("B1_MSBLQL") // Produto Bloqueado? ('1'-Sim / '2'-Não)
+  D_E_L_E_T_ String? @default("") @map("D_E_L_E_T_") // Flag de Deleção (não mostrar deletados "normalmente")
+
+  // Adicionar índices para campos frequentemente buscados pode melhorar a performance
+  @@index([B1_FILIAL, B1_COD], name: "idx_sb1_filial_cod")
+  @@index([B1_DESC], name: "idx_sb1_desc")
+  @@map("SB1010") // Mapeia para o nome da tabela física no banco (ajuste se necessário SB1 ou SB1010, etc.)
 }
 
 //
@@ -92,7 +118,7 @@ model SA2010 {
 // Tabela SC7010 - Pedidos de Compra
 //
 model SC7010 {
-  R_E_C_N_O_ Int    @id @default(autoincrement())
+  R_E_C_N_O_ Int     @id @default(autoincrement())
   C7_FILIAL  String
   C7_NUM     String
   C7_ITEM    String

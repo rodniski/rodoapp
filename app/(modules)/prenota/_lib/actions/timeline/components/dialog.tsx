@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -14,6 +13,7 @@ import {
   DropdownMenuItem,
 } from "ui";
 import { LapTimerIcon } from "@radix-ui/react-icons";
+import { useTimeline } from "../config/hook.timeline";
 
 interface GanttDialogProps {
   recsf1: number;
@@ -26,28 +26,37 @@ export function GanttDialog({
   isOpen,
   onOpenChange,
 }: GanttDialogProps) {
+  const { data: timelineData, isLoading: isTimelineLoading } = useTimeline(recsf1);
+
+  // Pega o código da nota (ex.: "000253762-21") do primeiro evento, se disponível
+  const notaCodigo = timelineData?.[0]?.codigo || "Carregando...";
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger>
-        <DropdownMenuItem className="flex justify-between cursor-pointer">
+      <DialogTrigger className="w-full">
+        <DropdownMenuItem
+          onSelect={(e) => e.preventDefault()}
+          className="flex justify-between w-full cursor-pointer"
+        >
           <span>Timeline da Pré-Nota</span>
-          <LapTimerIcon className="h-4 w-4 text-muted-foreground" />
+          <LapTimerIcon className="size-4 text-muted-foreground" />
         </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent className="w-full max-w-[90vw] sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
-            Linha do Tempo da Pré-Nota
+            Linha do Tempo da Pré-Nota {notaCodigo}
           </DialogTitle>
-          <DialogDescription>
-            Acompanhe os principais eventos da pré-nota{" "}
-            <strong>{recsf1}</strong>: criação, classificação, vencimento,
-            pagamento e logs de histórico.
-          </DialogDescription>
         </DialogHeader>
 
         <div className="mt-4">
-          <PrenotaGantt recsf1={recsf1} />
+          {isTimelineLoading ? (
+            <div className="flex items-center justify-center p-6">
+              Carregando timeline...
+            </div>
+          ) : (
+            <PrenotaGantt recsf1={recsf1} />
+          )}
         </div>
 
         <DialogFooter className="mt-6">

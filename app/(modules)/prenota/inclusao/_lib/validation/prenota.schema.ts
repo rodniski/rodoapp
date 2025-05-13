@@ -19,7 +19,8 @@ export const parcelaSchema = z.object({
   Parcela: z.string().regex(/^\d{3}$/, "Parcela deve ter 3 dígitos"),
   Vencimento: z
     .string()
-    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data deve estar no formato DD/MM/YYYY"),
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data deve estar no formato DD/MM/YYYY")
+    .or(z.literal("")), // Permite string vazia
   Valor: z
     .number({
       required_error: "Valor da parcela é obrigatório",
@@ -61,53 +62,72 @@ export const rateioInputSchema = z.object({
   percent: z
     .number({ invalid_type_error: "Percentual inválido" })
     .min(0, "Percentual não pode ser negativo")
-    .max(100, "Percentual não pode exceder 100"),
+    .max(100, "Percentual não pode exceder 100")
+    .optional()
+    .default(0), // Tornando opcional com default
   valor: z
     .number({ invalid_type_error: "Valor inválido" })
-    .positive("Valor deve ser maior que zero")
-    .max(999999999.99, "Valor muito alto"),
+    .min(0, "Valor não pode ser negativo") // Permitindo 0
+    .max(999999999.99, "Valor muito alto")
+    .optional()
+    .default(0), // Tornando opcional com default
 });
 
 /* 5 ▸ Item */
+// Este é o tipo PreNotaItem do seu @inclusao/types
+// export interface PreNotaItem {
+//   ITEM: string;
+//   PRODUTO: string;
+//   QUANTIDADE: number;
+//   VALUNIT: number;
+//   PRODFOR: string;
+//   DESCFOR: string;
+//   ORIGEMXML: string;
+//   TOTAL: number;
+//   PC: string;
+//   ITEMPC: string;
+//   B1_UM: string;
+//   SEGUN: string;
+//   TPFATO: string;
+//   CONV: number;
+//   ORIGEM: string;
+//   B1_DESC?: string;
+// }
+// Vamos criar um schema Zod que corresponda a PreNotaItem
 export const itemSchema = z.object({
-  ITEM: z.string().regex(/^\d{5}$/, "Item deve ter 5 dígitos"), // Ajustado para "00001" do body
-  PRODUTO: z
-    .string({ required_error: "Produto é obrigatório" })
-    .min(1, "Produto é obrigatório"),
-  QUANTIDADE: z
-    .number({
-      required_error: "Quantidade é obrigatória",
-      invalid_type_error: "Quantidade inválida",
-    })
-    .positive("Quantidade deve ser positiva"),
-  VALUNIT: z
-    .number({
-      required_error: "Valor unitário é obrigatório",
-      invalid_type_error: "Valor unitário inválido",
-    })
-    .positive("Valor unitário deve ser positivo"),
-  TOTAL: z
-    .number({
-      required_error: "Valor total é obrigatório",
-      invalid_type_error: "Valor total inválido",
-    })
-    .positive("Valor total deve ser positivo"),
-  PRODFOR: z.string().min(1, "Código do produto do fornecedor é obrigatório"),
-  DESCFOR: z.string().min(1, "Descrição do fornecedor é obrigatória"),
-  ORIGEMXML: z.string().min(1, "Origem XML é obrigatória"),
+  ITEM: z.string().min(1, "Item é obrigatório"),
+  PRODUTO: z.string().min(1, "Produto é obrigatório"),
+  QUANTIDADE: z.number().positive("Quantidade deve ser positiva"),
+  VALUNIT: z.number().min(0, "Valor unitário não pode ser negativo"), // Permitindo 0
+  PRODFOR: z.string().optional(), // Tornando opcional se puder ser vazio
+  DESCFOR: z.string().optional(), // Tornando opcional
+  ORIGEMXML: z.string().optional().default("N"),
+  TOTAL: z.number().min(0, "Total não pode ser negativo"), // Permitindo 0
   PC: z.string().optional(),
   ITEMPC: z.string().optional(),
-  B1_UM: z
-    .string({ required_error: "Unidade de medida é obrigatória" })
-    .min(1, "Unidade de medida é obrigatória"),
-  SEGUN: z.string().optional(),
-  TPFATO: z.string().optional(),
-  CONV: z.number().int().min(1, "Conversão deve ser um inteiro positivo"),
+  B1_UM: z.string().min(1, "Unidade de medida é obrigatória"),
+  SEGUN: z.string().optional().default(""),
+  TPFATO: z.string().optional().default(""),
+  CONV: z
+    .number()
+    .int()
+    .min(1, "Conversão deve ser um inteiro positivo")
+    .optional()
+    .default(1),
   ORIGEM: z.string().min(1, "Origem é obrigatória"),
   B1_DESC: z.string().optional(),
+  DESC_PROD: z.string().optional(), // Adicionado para descrição do produto no item
 });
 
 /* 6 ▸ Header */
+// Tipo para DateString que o store espera
+const dateStringSchema = z.union([
+  z.literal(""),
+  z
+    .string()
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data deve estar no formato DD/MM/YYYY"),
+]);
+
 export const headerSchema = z
   .object({
     FILIAL: z.string().min(1, "Filial é obrigatória"),
@@ -134,28 +154,34 @@ export const headerSchema = z
     USERAPP: z
       .string({ required_error: "Usuário da aplicação é obrigatório" })
       .min(1, "Usuário é obrigatório"),
-    tiporodo: z
-      .enum([
+    tiporodo: z.enum(
+      [
         "Revenda",
         "Despesa/Imobilizado",
         "Materia Prima",
         "Collection",
         "Garantia Concebida",
         "",
-      ])
-      .optional(),
-    prioridade: z.enum(["Alta", "Media", "Baixa", ""]).optional(),
+      ],
+      { errorMap: () => ({ message: "Tipo de rodovia inválido." }) }
+    ), // Mensagem de erro genérica
+    prioridade: z.enum(["Alta", "Media", "Baixa", ""], {
+      errorMap: () => ({ message: "Prioridade inválida." }),
+    }), // Sem acento em "Media"
     JUSTIFICATIVA: z.string().optional(),
-    DTINC: z
+    DTINC: dateStringSchema, // Usa o schema customizado para DateString
+    CHVNF: z
       .string()
-      .regex(
-        /^\d{2}\/\d{2}\/\d{4}$/,
-        "Data de inclusão deve estar no formato DD/MM/YYYY"
-      ),
-    CHVNF: z.string().length(44, "Chave NF-e deve ter 44 dígitos").optional(),
+      .length(44, "Chave NF-e deve ter 44 dígitos")
+      .optional()
+      .or(z.literal("")), // Permite opcional ou string vazia
     OBS: z.string().optional(),
     CGCPIX: z.string().optional(),
     CHAVEPIX: z.string().optional(),
+    PEDIDO: z.string().optional(), // <<< --- ADICIONADO PEDIDO
+    // Adicione outros campos se o seu tipo PreNotaHeader tiver mais que não estão aqui
+    // Ex: OLDSERIE, se for parte do formulário e do schema
+    OLDSERIE: z.string().optional(), // Exemplo, se necessário
   })
   .superRefine((obj, ctx) => {
     if (
@@ -177,14 +203,13 @@ export const prenotaDraftSchema = z
   .object({
     header: headerSchema,
     itens: z.array(itemSchema).min(1, "Adicione pelo menos 1 item na nota"),
-    PAGAMENTOS: z.array(parcelaSchema).min(1, "Adicione pelo menos 1 parcela"), // Ajustado para PAGAMENTOS
-    ARQUIVOS: z.array(anexoSchema).min(1, "Adicione pelo menos 1 anexo"), // Ajustado para ARQUIVOS
-    RATEIOS: z.array(rateioSchema).min(1, "Adicione pelo menos 1 rateio"), // Ajustado para RATEIOS
+    PAGAMENTOS: z.array(parcelaSchema).min(1, "Adicione pelo menos 1 parcela"),
+    ARQUIVOS: z.array(anexoSchema).min(1, "Adicione pelo menos 1 anexo"),
+    RATEIOS: z.array(rateioSchema).min(1, "Adicione pelo menos 1 rateio"),
   })
   .superRefine((val, ctx) => {
     const totalNF = val.itens.reduce((s, i) => s + (i.TOTAL ?? 0), 0);
 
-    // Validação das parcelas
     const somaParc = val.PAGAMENTOS.reduce((s, p) => s + (p.Valor ?? 0), 0);
     if (Math.abs(somaParc - totalNF) > 0.01) {
       ctx.addIssue({
@@ -198,7 +223,6 @@ export const prenotaDraftSchema = z
       });
     }
 
-    // Validação dos rateios
     const somaRateiosValor = val.RATEIOS.reduce(
       (s, r) => s + (r.valor ?? 0),
       0
@@ -215,9 +239,9 @@ export const prenotaDraftSchema = z
       });
     }
 
-    // Validação da soma dos percentuais dos rateios
     const somaPerc = val.RATEIOS.reduce((s, r) => s + (r.percent ?? 0), 0);
-    if (Math.abs(somaPerc - 100) > 0.01) {
+    if (val.RATEIOS.length > 0 && Math.abs(somaPerc - 100) > 0.01) {
+      // Só valida se houver rateios
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["RATEIOS"],

@@ -3,7 +3,7 @@
 import { useDeletePrenota, DeletePrenotaButtonProps } from "@prenota/actions";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
-import { Button } from "ui";
+import { Button, DropdownMenuItem } from "ui";
 import React from "react";
 
 export const DeletePrenotaButton: React.FC<DeletePrenotaButtonProps> = ({
@@ -28,18 +28,17 @@ export const DeletePrenotaButton: React.FC<DeletePrenotaButtonProps> = ({
   };
 
   return (
-    <Button
-      variant="ghost"
-      className="w-full justify-start text-destructive focus:text-destructive focus:bg-destructive/10"
+    <DropdownMenuItem
       disabled={isPending}
       onClick={handleClick}
+    className="flex justify-between w-full cursor-pointer text-destructive"
     >
-      {isPending ? (
-        <div className="animate-spin h-4 w-4 border-2 rounded-full border-destructive border-t-transparent mr-2" />
-      ) : (
-        <TrashIcon className="h-4 w-4 mr-2" />
-      )}
       Excluir
-    </Button>
+      {isPending ? (
+        <div className="animate-spin size-4 " />
+      ) : (
+        <TrashIcon className="size-4 text-destructive" />
+      )}
+    </DropdownMenuItem>
   );
 };

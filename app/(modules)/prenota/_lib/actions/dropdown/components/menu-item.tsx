@@ -12,7 +12,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   <DropdownMenuItem
     onClick={onClick}
     disabled={disabled}
-    className={`flex justify-between cursor-pointer ${className || ""}`}
+    className={`flex justify-between w-full cursor-pointer ${className || ""}`}
   >
     <span>{label}</span>
     {icon}
