@@ -11,8 +11,8 @@ import {
   useFetchXmlDetails,
   useSearchFornecedorPedidos,
 } from "@inclusao/hooks";
-import { findFilialCodigo, getCurrentUsername } from "utils"; 
-import { populateStoresFromXml } from "."; 
+import { findFilialCodigo, getCurrentUsername } from "utils";
+import { populateStoresFromXml } from ".";
 import { usePreNotaAuxStore } from "@inclusao/stores";
 
 const HOOK_NAME = "useSearchXmlOrchestrator";
@@ -32,13 +32,10 @@ export function useSearchXml(): UseSearchXmlReturn {
   // Usamos apenas as funções trigger deles aqui
   const {
     fetchDetails,
-    isLoading: isLoadingXml,
     error: errorXml,
   } = useFetchXmlDetails();
   const {
     searchFornecedor: lookupSupplierData,
-    isLoading: isLoadingSupplier,
-    error: errorSupplier,
   } = useSearchFornecedorPedidos();
 
   // Função principal orquestradora
@@ -71,7 +68,6 @@ export function useSearchXml(): UseSearchXmlReturn {
         // o aux store (searchResult) seja populado antes da próxima etapa.
         const fornecedorResult = await lookupSupplierData({
           busca: xmlData.cnpjEmitente,
-          reca2: "",
         });
         // Não tratamos erro aqui diretamente, populateStoresFromXml lidará com fornecedor nulo/vazio
 
