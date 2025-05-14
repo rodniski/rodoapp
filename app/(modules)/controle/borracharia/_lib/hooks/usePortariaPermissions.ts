@@ -1,32 +1,41 @@
-import {useGrupoFilial} from '.';
+/* ───────────────────────────  usePortariaPermissions.ts  ───────────────────────────
+ * Hook para gerenciar permissões de acesso à portaria no RodoApp.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Verifica permissões para borracharia, portaria e histórico
+ *  ├────────────┤  com base nos grupos do usuário, usando hasAccessToGrupo
+ *  │  FUNCIONAL │  do finders.ts. Suporta verificação de admin e filial
+ *  │            │  específica (M0_CODFIL: "0101").
+ *  └────────────┘
+ *  Integra com useAuthStore para acesso aos grupos.
+ * -----------------------------------------------------------------------*/
+
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
+import { hasAccessToGrupo } from "utils";
 
 type PortariaAccess = {
-    canAccessBorracharia: boolean;
-    canAccessPortaria: boolean;
-    canAccessHistorico: boolean;
+  canAccessBorracharia: boolean;
+  canAccessPortaria: boolean;
+  canAccessHistorico: boolean;
 };
 
 export const usePortariaPermissions = () => {
-    const {data: gruposFiliais, isLoading} = useGrupoFilial();
+  const { grupos, isLoading } = useAuthStore((s) => ({
+    grupos: s.grupos,
+    isLoading: s.isLoading,
+  }));
 
-    const hasAccessToGrupo = (grupo: string): boolean => {
-        return gruposFiliais?.some(g =>
-            g.Grupo === grupo &&
-            g.Filial.some(f => f.Loja === '0101')
-        ) ?? false;
-    };
+  const isAdmin = hasAccessToGrupo("000000");
 
-    const isAdmin = gruposFiliais?.some(g => g.Grupo === '000000') ?? false;
+  const permissions: PortariaAccess = {
+    canAccessBorracharia: isAdmin || hasAccessToGrupo("000172", "0101"),
+    canAccessPortaria: isAdmin || hasAccessToGrupo("000171", "0101"),
+    canAccessHistorico: true,
+  };
 
-    const permissions: PortariaAccess = {
-        canAccessBorracharia: isAdmin || hasAccessToGrupo('000172'),
-        canAccessPortaria: isAdmin || hasAccessToGrupo('000171'),
-        canAccessHistorico: true,
-    };
-
-    return {
-        permissions,
-        isLoading,
-        isAdmin,
-    };
+  return {
+    permissions,
+    isLoading,
+    isAdmin,
+  };
 };

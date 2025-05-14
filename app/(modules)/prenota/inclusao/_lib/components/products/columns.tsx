@@ -68,7 +68,7 @@ export const columns: ColumnDef<PreNotaItem>[] = [
       const item = row.original; // Item da store aux
       const isLinked = !!item.PRODUTO;
       // <<< SUBSTITUA 'UNIDADE_XML' PELO NOME CORRETO >>>
-      const xmlUnit = item.UNIDADE_XML;
+      const xmlUnit = item.B1_UM;
       const protheusUnit = item.B1_UM;
       return isLinked ? protheusUnit ?? "-" : xmlUnit ?? "-";
     },

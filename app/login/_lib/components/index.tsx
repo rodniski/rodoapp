@@ -1,3 +1,14 @@
+/* ───────────────────────────  LoginForm.tsx  ───────────────────────────
+ * Formulário de login para o RodoApp.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Permite autenticação com usuário (nome.sobrenome) e
+ *  ├────────────┤  senha, com validação Zod e feedback via toast (Promise-based).
+ *  │  FUNCIONAL │  Usa react-hook-form, sonner, e custom hook useAuth.
+ *  └────────────┘
+ *  Integra com Protheus e suporta "Lembrar-me" para persistência.
+ * -----------------------------------------------------------------------*/
+
 "use client";
 
 import React from "react";
@@ -24,7 +35,7 @@ import {
   Checkbox,
   PasswordInput,
 } from "ui";
-import { useAuth } from "@/app/login/_lib/hooks";
+import { useAuth } from "@login/hooks";
 import Logo from "@/public/logo/logo";
 
 const loginSchema = z.object({
@@ -48,13 +59,28 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     form.clearErrors("root");
-    const ok = await login(data.username, data.password);
-    if (!ok) {
-      form.setError("root", { message: "Usuário ou senha inválidos." });
-      toast.error("Credenciais inválidas");
-      return;
-    }
-    toast.success("Login bem-sucedido! Redirecionando…");
+
+    // Wrap the login call in a Promise for toast.promise
+    const loginPromise = new Promise<boolean>((resolve, reject) => {
+      login(data.username, data.password)
+        .then((ok) => {
+          if (ok) {
+            resolve(true);
+          } else {
+            reject(new Error("Usuário ou senha inválidos."));
+          }
+        })
+        .catch((error) => reject(error));
+    });
+
+    toast.promise(loginPromise, {
+      loading: "Entrando...",
+      success: "Login bem-sucedido! Redirecionando…",
+      error: (error: Error) => {
+        form.setError("root", { message: error.message });
+        return error.message;
+      },
+    });
   };
 
   return (
@@ -66,10 +92,12 @@ export function LoginForm() {
     >
       <Card className="p-8 shadow-lg backdrop-blur bg-muted/20">
         <CardHeader className="flex justify-center items-center gap-5 text-center mb-6 border-b pb-4 text-lg 2xl:text-2xl">
-          <Logo className="size-14" color="var(--primary)"/>
+          <Logo className="size-14" color="var(--primary)" />
           <div>
-          <CardTitle>Bem-vindo ao RodoApp</CardTitle>
-          <CardDescription>Use seu acesso do Protheus para entrar</CardDescription>
+            <CardTitle>Bem-vindo ao RodoApp</CardTitle>
+            <CardDescription>
+              Use seu acesso do Protheus para entrar
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>

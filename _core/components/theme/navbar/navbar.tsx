@@ -24,7 +24,7 @@ export function Navbar() {
   const { theme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
-
+  const firstPage = pathname === "/";
   // usa nosso hook, não useSession()
   const { isLoading, isAuthenticated } = useAuth();
 
@@ -109,6 +109,8 @@ export function Navbar() {
             <span>Carregando...</span>
           ) : isAuthenticated ? (
             <NavUser />
+          ) : firstPage ? (
+            ""
           ) : (
             <Button size="lg" onClick={() => router.push("/login")}>
               Entrar
