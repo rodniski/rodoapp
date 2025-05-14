@@ -59,7 +59,6 @@ export function FormProgressHoverCard() {
 
     return results;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [header, PAGAMENTOS, RATEIOS, itens, ARQUIVOS]);
 
 

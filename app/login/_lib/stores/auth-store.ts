@@ -3,8 +3,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { AuthState } from "@/app/login/_lib/types";
-import type { UserSession } from "@/app/login/_lib/types";
+import type { UserSession, AuthState } from "@login/types";
 
 // Criação do store com Zustand e persistência
 export const useAuthStore = create<AuthState>()(
@@ -15,6 +14,7 @@ export const useAuthStore = create<AuthState>()(
       grupos: [], // <- Queremos popular ESTE array
       isAuthenticated: false,
       isLoading: false,
+      error: null,
 
       // Modifique esta ação (ou a que recebe os dados da API de login)
       setUser: (userDataFromApi: UserSession | null) => {
@@ -63,6 +63,7 @@ export const useAuthStore = create<AuthState>()(
         filiais: state.filiais, // <- Salva o array raiz
         grupos: state.grupos, // <- Salva o array raiz
         isAuthenticated: state.isAuthenticated,
+        error: state.error,
       }),
     }
   )

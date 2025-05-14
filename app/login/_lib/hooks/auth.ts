@@ -1,188 +1,209 @@
-// @login/hooks/useAuth.ts (Com trim no username e nos dados das APIs)
+// @login/hooks/useAuth.ts (Com trim no username e nos dados das APIs e tratamento de erro aprimorado)
 import { useCallback } from "react";
 import {
   authenticateUser,
   getUserGrupoFilial,
   fetchCargaInicio,
   fetchFiliais,
-} from "@/app/login/_lib/api"; // Ajuste path API
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store"; // Ajuste path Store
-import { useAuxStore } from "@/app/login/_lib/stores/aux-store"; // Ajuste path Store
-// Ajuste path Types e importe todos os tipos necessários
+} from "@login/api";
+import { useAuxStore, useAuthStore } from "@login/stores";
 import type {
   AuthResponse,
   GrupoFilial,
-  FilialGeral, // Tipo para fetchFiliais
+  FilialGeral,
   CargaInicio,
   UserSession,
-  FilialAcesso, // Assumindo que CargaInicio.Filiais usa este tipo ou similar
-  UnidadeMedida, // Tipo para CargaInicio.UnidadeMedida
-  Condicao, // Tipo para CargaInicio.Condicoes (exemplo de nome)
-  CentroCusto, // Tipo para CargaInicio.CentoCusto (exemplo de nome)
-} from "@/app/login/_lib/types";
+  FilialAcesso,
+  UnidadeMedida,
+  Condicao,
+  CentroCusto,
+} from "@login/types";
 import { toast } from "sonner";
+import { trimStringProperties } from "utils";
+import { useUserGruposHandler } from "./grupo";
+
+// Constantes para referências estáveis de arrays vazios
+const EMPTY_GRUPOS_ARRAY: GrupoFilial[] = [];
+const EMPTY_FILIAIS_ACESSO_ARRAY: FilialAcesso[] = [];
 
 export function useAuth() {
-  const { setUser, logout } = useAuthStore();
-  const { loadInitialData } = useAuxStore();
+  const setUser = useAuthStore((state) => state.setUser);
+  const logoutFromStore = useAuthStore((state) => state.logout);
+  const loadInitialData = useAuxStore((state) => state.loadInitialData);
 
-  // Função auxiliar para limpar strings em um objeto (evita erros com null/undefined)
-  const trimStringProperties = <T extends object>(obj: T): T => {
-    if (!obj) return obj;
-    const newObj = { ...obj };
-    for (const key in newObj) {
-      if (typeof newObj[key] === "string") {
-        (newObj as any)[key] = (newObj[key] as string).trim();
-      }
-    }
-    return newObj;
-  };
+  // Instancia o hook para manipulação de grupos
+  const { fetchAndStoreUserGrupos } = useUserGruposHandler();
 
   const login = useCallback(
     async (username: string, password: string): Promise<boolean> => {
-      // 1. Limpa Username e Valida
       const trimmedUsername = username.trim();
-      const originalPassword = password; // Não fazer trim na senha
+      const originalPassword = password;
+
       if (!trimmedUsername) {
-        toast.error("[Auth] Username não pode ser vazio.");
-        useAuthStore.setState({ isLoading: false }); // Seta erro
+        toast.error("Nome de usuário não pode ser vazio.");
         return false;
       }
 
       console.group(`[Auth] Iniciando login para: ${trimmedUsername}`);
-      useAuthStore.setState({ isLoading: true }); // Limpa erro anterior
+      useAuthStore.setState({ isLoading: true, error: null });
 
       try {
-        // 2. Autentica
+        // 1. Autentica Usuário
         console.log("[Auth] Autenticando...");
-        const auth: AuthResponse = await authenticateUser(
+        const rawAuthResponse = await authenticateUser(
           trimmedUsername,
           originalPassword
         );
-        console.log("[Auth] Autenticado.");
+        const authResponse = trimStringProperties(rawAuthResponse);
+        console.log("[Auth] Usuário autenticado.");
 
-        // 3. Busca Grupos
-        let grupos: GrupoFilial[] = [];
-        try {
-          console.log("[Auth] Buscando grupos...");
-          const rawGrupos = await getUserGrupoFilial(
-            trimmedUsername,
-            auth.access_token
+        // 2. Busca e Armazena Grupos do Usuário usando o hook dedicado
+        // O hook useUserGruposHandler já lida com o loading, erro e salvamento na useAuthStore.
+        console.log(
+          "[Auth] Solicitando busca de grupos via useUserGruposHandler..."
+        );
+        const gruposCarregadosComSucesso = await fetchAndStoreUserGrupos(
+          trimmedUsername
+        );
+        // Não precisamos pegar os grupos aqui, pois eles já estão na useAuthStore.
+        // A notificação de erro/sucesso da busca de grupos é feita dentro do useUserGruposHandler.
+
+        if (!gruposCarregadosComSucesso) {
+          // Opcional: Adicionar lógica aqui se a falha na busca de grupos deve impedir o login.
+          // Por padrão, o login continua e a store terá grupos vazios ou o erro registrado.
+          console.warn(
+            "[Auth] A busca de grupos falhou, mas o login prosseguirá se a autenticação foi bem-sucedida."
           );
-          // ✅ Limpa strings dentro dos objetos GrupoFilial (AJUSTE AS PROPRIEDADES!)
-          grupos = rawGrupos.map((g) => trimStringProperties(g));
-          // Exemplo se precisasse limpar campos específicos:
-          // grupos = rawGrupos.map(g => ({ ...g, nomeGrupo: g.nomeGrupo?.trim(), codGrupo: g.codGrupo?.trim() }));
-          console.log("[Auth] Grupos buscados e limpos:", grupos.length);
-        } catch (err: any) {
-          /* ... warning ... */
         }
 
-        // 4. Busca Carga Inicial
-        let carga: CargaInicio = {
+        // 3. Busca Carga Inicial (Filiais de Acesso, UMs, Condições, CCs)
+        let cargaInicial: CargaInicio = {
           Filiais: [],
           UnidadeMedida: [],
           Condicoes: [],
           CentoCusto: [],
         };
-        let cargaFiliaisLimpa: FilialAcesso[] = [];
-        let cargaUMLimpa: UnidadeMedida[] = [];
-        let cargaCondLimpa: Condicao[] = [];
-        let cargaCCLimpa: CentroCusto[] = [];
+        let filiaisAcessoLimpo: FilialAcesso[] = EMPTY_FILIAIS_ACESSO_ARRAY;
+        let unidadesMedidaLimpo: UnidadeMedida[] = [];
+        let condicoesLimpo: Condicao[] = [];
+        let centrosCustoLimpo: CentroCusto[] = [];
+
         try {
-          console.log("[Auth] Buscando carga inicial...");
-          carga = await fetchCargaInicio(trimmedUsername);
-          console.log("[Auth] Carga inicial recebida.");
-
-          // ✅ Limpa Filiais da carga (AJUSTE AS PROPRIEDADES!)
-          cargaFiliaisLimpa = carga.Filiais.map((f) => trimStringProperties(f));
-          // Exemplo específico:
-          // cargaFiliaisLimpa = carga.Filiais.map(f => ({ ...f, M0_CODFIL: f.M0_CODFIL?.trim(), M0_FILIAL: f.M0_FILIAL?.trim() }));
-
-          // ✅ Limpa UnidadeMedida da carga (AJUSTE AS PROPRIEDADES!)
-          cargaUMLimpa = carga.UnidadeMedida.map((um) =>
-            trimStringProperties(um)
-          );
-          // Exemplo: cargaUMLimpa = carga.UnidadeMedida.map(um => ({ ...um, codigo: um.codigo?.trim(), descricao: um.descricao?.trim() }));
-
-          // ✅ Limpa Condicoes da carga (AJUSTE AS PROPRIEDADES!)
-          cargaCondLimpa = carga.Condicoes.map((c) => trimStringProperties(c));
-          // Exemplo: cargaCondLimpa = carga.Condicoes.map(c => ({ ...c, E4_CODIGO: c.E4_CODIGO?.trim(), E4_DESCRI: c.E4_DESCRI?.trim() }));
-
-          // ✅ Limpa CentroCusto da carga (AJUSTE AS PROPRIEDADES!)
-          cargaCCLimpa = carga.CentoCusto.map((cc) => trimStringProperties(cc));
-          // Exemplo: cargaCCLimpa = carga.CentoCusto.map(cc => ({ ...cc, CTT_CUSTO: cc.CTT_CUSTO?.trim(), CTT_DESC01: cc.CTT_DESC01?.trim() }));
-
-          console.log("[Auth] Dados da carga inicial limpos.");
+          console.log("[Auth] Buscando carga inicial de dados...");
+          const rawCargaInicial = await fetchCargaInicio(trimmedUsername);
+          cargaInicial = trimStringProperties(rawCargaInicial);
+          filiaisAcessoLimpo = cargaInicial.Filiais || [];
+          unidadesMedidaLimpo = cargaInicial.UnidadeMedida || [];
+          condicoesLimpo = cargaInicial.Condicoes || [];
+          centrosCustoLimpo = cargaInicial.CentoCusto || [];
+          console.log("[Auth] Carga inicial de dados buscada e limpa.");
         } catch (err: any) {
-          /* ... warning ... */
+          console.error("[Auth] Erro ao buscar carga inicial de dados:", err);
+          toast.error(
+            `Erro ao buscar dados iniciais: ${
+              err.message || "Erro desconhecido."
+            }`
+          );
         }
 
-        // 5. Busca Filiais Gerais
-        let filiaisGeral: FilialGeral[] = [];
-        let filiaisGeralLimpa: FilialGeral[] = [];
+        // 4. Busca Filiais Gerais (para lookups)
+        let filiaisGeraisLimpo: FilialGeral[] = [];
         try {
           console.log("[Auth] Buscando filiais gerais...");
-          filiaisGeral = await fetchFiliais();
-          console.log("[Auth] Filiais gerais recebidas.");
-
-          // ✅ Limpa Filiais gerais (AJUSTE AS PROPRIEDADES 'numero' e 'filial' ou 'nomeFilial')
-          filiaisGeralLimpa = filiaisGeral.map((f) => trimStringProperties(f));
-          // Exemplo específico:
-          // filiaisGeralLimpa = filiaisGeral.map(f => ({ ...f, numero: f.numero?.trim(), filial: f.filial?.trim() }));
-          console.log("[Auth] Filiais gerais limpas.");
+          const rawFiliaisGerais = await fetchFiliais();
+          filiaisGeraisLimpo = trimStringProperties(rawFiliaisGerais);
+          console.log(
+            "[Auth] Filiais gerais buscadas e limpas:",
+            filiaisGeraisLimpo.length
+          );
         } catch (err: any) {
-          /* ... warning ... */
+          console.error("[Auth] Erro ao buscar filiais gerais:", err);
+          toast.error(
+            `Erro ao buscar lista de filiais: ${
+              err.message || "Erro desconhecido."
+            }`
+          );
         }
 
-        // 6. Monta o UserSession (com dados limpos)
-        const session: UserSession = {
-          username: trimmedUsername, // Username limpo
-          accessToken: auth.access_token,
-          refreshToken: auth.refresh_token,
-          expiresAt: Date.now() + auth.expires_in * 1000,
-          grupos: grupos, // Grupos limpos
-          filiais: cargaFiliaisLimpa, // Filiais da carga limpas
+        // 5. Monta o UserSession
+        // Os grupos são lidos do estado atual da store, que foi atualizado pelo useUserGruposHandler
+        const gruposDaStore = useAuthStore.getState().grupos;
+
+        const userSessionData: UserSession = {
+          username: trimmedUsername,
+          accessToken: authResponse.access_token,
+          refreshToken: authResponse.refresh_token,
+          expiresAt: Date.now() + (authResponse.expires_in || 0) * 1000,
+          grupos: gruposDaStore, // Usa os grupos da store, atualizados pelo hook
+          filiais: filiaisAcessoLimpo,
         };
-        console.log("[Auth] Sessão montada com dados limpos:", session);
+        console.log("[Auth] Sessão do usuário montada:", userSessionData);
 
-        // 7. Popula auth-store (com dados limpos)
-        setUser(session);
-        console.log("[Auth] Auth Store populado."); // Log do estado completo pode ser muito grande
+        // 6. Popula auth-store com a sessão completa
+        setUser(userSessionData); // Esta ação na sua store também atualiza state.grupos e state.filiais
+        console.log("[Auth] AuthStore atualizado com a sessão completa.");
 
-        // 8. Popula aux-store (com dados limpos)
+        // 7. Popula aux-store com dados auxiliares
         loadInitialData({
-          filiais: filiaisGeralLimpa, // Filiais gerais limpas
-          unidadeMedida: cargaUMLimpa, // UMs limpas
-          condicoes: cargaCondLimpa, // Condições limpas
-          centroCusto: cargaCCLimpa, // CCs limpos
+          filiais: filiaisGeraisLimpo,
+          unidadeMedida: unidadesMedidaLimpo,
+          condicoes: condicoesLimpo,
+          centroCusto: centrosCustoLimpo,
         });
-        console.log("[Auth] Aux Store populado."); // Log do estado completo pode ser muito grande
+        console.log("[Auth] AuxStore atualizado.");
 
-        // 9. Finaliza e retorna sucesso
-        useAuthStore.setState({ isAuthenticated: true });
-        console.log("[Auth] Autenticado com sucesso.");
+        toast.success("Login realizado com sucesso!");
+        console.log("[Auth] Processo de login concluído com sucesso.");
         console.groupEnd();
-        return true; // Sucesso no login
+        return true;
       } catch (err: any) {
+        // Captura erros primários, como falha na autenticação
+        console.error("[Auth] Falha crítica no processo de login:", err);
+        const errorMessage =
+          err.response?.data?.error_description ||
+          err.response?.data?.message ||
+          err.message ||
+          "Erro desconhecido durante o login.";
+        toast.error(`Falha no login: ${errorMessage}`);
+        useAuthStore.setState({ error: errorMessage }); // Salva o erro principal na store
         console.groupEnd();
-        return false; // Falha no login
+        return false;
       } finally {
+        // O isLoading para a busca de grupos é gerenciado pelo useUserGruposHandler
+        // Este finally deve garantir que o isLoading geral do login seja resetado.
+        // Se fetchAndStoreUserGrupos definir isLoading:false, este pode ser redundante ou causar um set a mais.
+        // Idealmente, o isLoading da useAuthStore refletiria o processo de login como um todo.
+        // O useUserGruposHandler já seta isLoading:false na store ao concluir sua tarefa.
         useAuthStore.setState({ isLoading: false });
-        console.log("[Auth] isLoading = false");
+        console.log(
+          "[Auth] isLoading (geral do login) definido como false (bloco finally)."
+        );
       }
     },
-    [setUser, loadInitialData] // Dependências do useCallback
+    [setUser, loadInitialData, fetchAndStoreUserGrupos] // Adiciona fetchAndStoreUserGrupos às dependências
   );
 
-  // Retorno do Hook (mantido)
-  return {
-    user: useAuthStore((s) => s.user),
-    grupos: useAuthStore((s) => s.grupos),
-    filiaisAcesso: useAuthStore((s) => s.filiais), // Filiais que o usuário TEM acesso (da carga)
-    isAuthenticated: useAuthStore((s) => s.isAuthenticated),
-    isLoading: useAuthStore((s) => s.isLoading),
+  const logout = useCallback(() => {
+    logoutFromStore();
+    // Opcional: Limpar grupos também do useUserGruposHandler se ele tivesse estado local,
+    // mas como ele opera na useAuthStore, o logout da useAuthStore já deve cobrir.
+    toast.info("Você foi desconectado.");
+  }, [logoutFromStore]);
 
+  // Seletores de estado para o retorno do hook
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading); // Reflete o isLoading geral da store
+  const error = useAuthStore((state) => state.error); // Reflete o erro geral da store
+  const gruposFromStore = useAuthStore((state) => state.grupos); // Grupos diretamente da store
+
+  return {
+    user,
+    grupos: gruposFromStore || EMPTY_GRUPOS_ARRAY, // Usa os grupos da store
+    filiaisAcesso: user?.filiais || EMPTY_FILIAIS_ACESSO_ARRAY, // Filiais de acesso ainda vêm do user object
+    isAuthenticated,
+    isLoading,
+    error,
     login,
     logout,
   };

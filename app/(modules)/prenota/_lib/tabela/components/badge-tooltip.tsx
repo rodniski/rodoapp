@@ -1,12 +1,7 @@
 /* ui/BadgeWithTooltip.tsx
    ------------------------------------------------------------------ */
    import { Tooltip, TooltipTrigger, TooltipContent } from "ui";
-
-   export interface BadgePreset {
-     color: string; // classes tailwind (text-… ou bg-…) - usado apenas no icon
-     icon: React.ReactNode; // qualquer nó: ícone, badge, texto…
-     tooltip: string; // texto do tooltip
-   }
+   import { BadgePreset } from "../config/tabela.type";
    
    export const BadgeWithTooltip: React.FC<{ preset: BadgePreset }> = ({
      preset,

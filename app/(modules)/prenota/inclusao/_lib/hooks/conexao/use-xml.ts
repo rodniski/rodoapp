@@ -113,7 +113,7 @@ export function useSearchXml(): UseSearchXmlReturn {
       }
     },
     // Depende apenas das funções trigger dos hooks aninhados
-    [fetchDetails, lookupSupplierData]
+    [fetchDetails, lookupSupplierData, errorXml]
   );
 
   // Retorna o estado GERAL de loading/error e a função trigger

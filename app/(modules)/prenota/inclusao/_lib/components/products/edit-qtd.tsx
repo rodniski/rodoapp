@@ -44,7 +44,7 @@ export const EditableQuantityCell: React.FC<{ row: any }> = React.memo(
         setInputValue(currentEditableQuantity.toString());
       }
       // A dependência é a quantidade vinda do item na store auxiliar
-    }, [currentEditableQuantity]); // Removido inputValue para evitar loops
+    }, [currentEditableQuantity, inputValue]); // Added inputValue as dependency
 
     // Define limites mínimo e máximo para o input
     const minQuantity = 0;

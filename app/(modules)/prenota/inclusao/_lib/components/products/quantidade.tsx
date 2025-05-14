@@ -48,7 +48,7 @@ export const QuantityConfirmationModal: React.FC<Props> = ({
   }, [open, quantidadePedido]);
 
   const handleSave = () => {
-    let confirmedQty = parseFloat(qtyStr);
+    const confirmedQty = parseFloat(qtyStr);
     if (isNaN(confirmedQty) || confirmedQty < 0) {
       toast.error("Quantidade inválida. Informe um número positivo.");
       return; // Don't close, require valid input

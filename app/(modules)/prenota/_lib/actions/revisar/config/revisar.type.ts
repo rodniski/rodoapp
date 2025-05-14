@@ -96,6 +96,9 @@ interface RevisaoFormCore {
 /** miolo (somente campos) */
 export interface FormularioRevisaoFieldsProps extends RevisaoFormCore {
   rec: string | number | undefined;
+  actionInProgress?: "form" | "finalize" | null;
+  username?: string;
+  handleFinalizarDiretamente?: () => void;
 }
 
 /** `<form>` completo (inclui a prenota e o submit) */

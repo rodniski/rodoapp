@@ -95,19 +95,30 @@ export function DatePicker({
 
         {!disabled && (
           <PopoverContent className="w-auto p-0" align="center">
-            <Calendar
-              locale={ptBR}
-              mode={mode}
-              numberOfMonths={numberOfMonths}
-              selected={selected}
-              onSelect={handleSelect}
-              defaultMonth={
-                mode === "range" && typeof selected === "object"
-                  ? (selected as DateRange).from
-                  : undefined
-              }
-              disabled={disableBeforeToday ? { before: new Date() } : undefined}
-            />
+            {mode === "single" ? (
+              <Calendar
+                locale={ptBR}
+                mode="single"
+                numberOfMonths={numberOfMonths}
+                selected={selected as Date}
+                onSelect={(date) => handleSelect(date)}
+                disabled={disableBeforeToday ? { before: new Date() } : undefined}
+              />
+            ) : (
+              <Calendar
+                locale={ptBR}
+                mode="range"
+                numberOfMonths={numberOfMonths}
+                selected={selected as DateRange}
+                onSelect={(range) => handleSelect(range)}
+                defaultMonth={
+                  typeof selected === "object" && selected ? 
+                    (selected as DateRange).from || undefined : 
+                    undefined
+                }
+                disabled={disableBeforeToday ? { before: new Date() } : undefined}
+              />
+            )}
           </PopoverContent>
         )}
       </Popover>

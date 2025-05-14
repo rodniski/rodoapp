@@ -1,19 +1,22 @@
-import type { ComboboxItem } from "ui";
+/* ───────────────────────────  filter-options.ts  ──────────────────────────
+ * Opções de filtro para a feature de filtros da listagem de Pré-notas.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Define as opções disponíveis para os controles de tipo
+ *  ├────────────┤  `select` e `select-multiple` usados nos filtros de
+ *  │  OPÇÕES    │  Pré-notas, como Tipo de NF, Status e Prioridade.
+ *  └────────────┘
+ *  Cada opção é um item do tipo `ComboboxItem` com `value` e `label`.
+ *  Esses valores são usados diretamente nos filtros e devem corresponder
+ *  aos dados esperados pelo backend.
+ * -----------------------------------------------------------------------*/
 
-export interface CampoFiltro {
-  label: string;
-  campo: string;
-  tipo:
-    | "texto"
-    | "data-range"
-    | "numero-range"
-    | "select"
-    | "select-multiple"
-    | "filial-select";
-  opcoes?: ComboboxItem[];
-}
+import { ComboboxItem } from "@/_core/components";
 
-export const TIPOS_NF_OPTIONS = [
+/* ╭──────────────────────────────────────────╮
+   │ 1 ▸ OPÇÕES PARA TIPO DE NOTA FISCAL      │
+   ╰──────────────────────────────────────────╯ */
+export const TIPOS_NF_OPTIONS: ComboboxItem[] = [
   { value: "Revenda", label: "Revenda" },
   { value: "Despesa/Imobilizado", label: "Despesa/Imobilizado" },
   { value: "Materia Prima", label: "Matéria Prima" },
@@ -21,50 +24,20 @@ export const TIPOS_NF_OPTIONS = [
   { value: "Garantia Concebida", label: "Garantia Concebida" },
 ];
 
-export const STATUS_NF_OPTIONS = [
+/* ╭──────────────────────────────────────────╮
+   │ 2 ▸ OPÇÕES PARA STATUS DA NOTA FISCAL    │
+   ╰──────────────────────────────────────────╯ */
+export const STATUS_NF_OPTIONS: ComboboxItem[] = [
   { value: "Pendente", label: "Pendente" },
   { value: "Classificada", label: "Classificada" },
   { value: "Revisar", label: "Revisar" },
 ];
 
-export const PRIORIDADE_OPTIONS = [
+/* ╭──────────────────────────────────────────╮
+   │ 3 ▸ OPÇÕES PARA PRIORIDADE               │
+   ╰──────────────────────────────────────────╯ */
+export const PRIORIDADE_OPTIONS: ComboboxItem[] = [
   { value: "Alta", label: "Alta" },
-  { value: "Media", label: "Média" },
+  { value: "Média", label: "Média" },
   { value: "Baixa", label: "Baixa" },
-];
-
-export const CAMPOS_FILTRO: CampoFiltro[] = [
-  { label: "Filial", campo: "F1_FILIAL", tipo: "filial-select" },
-  { label: "Documento", campo: "F1_DOC", tipo: "texto" },
-  { label: "Série", campo: "F1_SERIE", tipo: "texto" },
-  {
-    label: "Status",
-    campo: "Status",
-    tipo: "select-multiple",
-    opcoes: [
-      { value: "Revisar", label: "Revisar" },
-      { value: "Classificado", label: "Classificado" },
-      { value: "Pendente", label: "Pendente" },
-    ],
-  },
-  { label: "Fornecedor", campo: "A2_NOME", tipo: "texto" },
-  { label: "Emissão", campo: "F1_EMISSAO", tipo: "data-range" },
-  { label: "Digitado em", campo: "F1_DTDIGIT", tipo: "data-range" },
-  { label: "Valor Bruto", campo: "F1_VALBRUT", tipo: "numero-range" },
-  {
-    label: "Tipo de NF",
-    campo: "F1_XTIPO",
-    tipo: "select-multiple",
-    opcoes: TIPOS_NF_OPTIONS,
-  },
-  {
-    label: "Prioridade",
-    campo: "F1_XPRIOR",
-    tipo: "select-multiple",
-    opcoes: PRIORIDADE_OPTIONS,
-  },
-  { label: "Usuário", campo: "F1_XUSRRA", tipo: "texto" },
-  { label: "Observação", campo: "F1_XOBS", tipo: "texto" },
-  { label: "Obs. Reversão", campo: "F1_ZOBSREV", tipo: "texto" },
-  { label: "Vencimento", campo: "VENCIMENTO", tipo: "data-range" },
 ];

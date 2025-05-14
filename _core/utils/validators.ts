@@ -50,3 +50,32 @@ export function isValidCNPJ(cnpj: string | null | undefined): boolean {
 export function isValidDate(d: any): d is Date {
   return d instanceof Date && !isNaN(d.getTime());
 }
+// Se uma propriedade for um objeto (não array e não null), chama recursivamente.
+export const trimStringProperties = <T extends object>(obj: T): T => {
+  if (!obj) return obj; // Retorna o objeto original se for null ou undefined
+
+  // Se for um array, mapeia cada elemento e aplica a função recursivamente
+  if (Array.isArray(obj)) {
+    return obj.map((item) =>
+      typeof item === "object" && item !== null
+        ? trimStringProperties(item)
+        : typeof item === "string"
+        ? item.trim()
+        : item
+    ) as unknown as T;
+  }
+
+  const newObj = { ...obj }; // Cria uma cópia superficial para não modificar o original diretamente
+  for (const key in newObj) {
+    if (Object.prototype.hasOwnProperty.call(newObj, key)) {
+      const value = newObj[key];
+      if (typeof value === "string") {
+        (newObj as any)[key] = value.trim();
+      } else if (typeof value === "object" && value !== null) {
+        // Chama recursivamente para objetos aninhados (incluindo arrays dentro de objetos)
+        (newObj as any)[key] = trimStringProperties(value as unknown as object);
+      }
+    }
+  }
+  return newObj;
+};

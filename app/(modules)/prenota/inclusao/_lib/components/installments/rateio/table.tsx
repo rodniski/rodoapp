@@ -22,7 +22,8 @@ import { toast } from "sonner";
 
 const formatPercent = (value: number): string => `${(value ?? 0).toFixed(2)}%`;
 
-interface RateioTableProps {}
+// Interface is replaced with a more specific type or object
+type RateioTableProps = object;
 
 export function RateioTable({}: RateioTableProps) {
   const filiais = useLoginAuxStore((state) => state.filiais);

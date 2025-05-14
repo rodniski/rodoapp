@@ -53,6 +53,7 @@ export interface UserSession {
 }
 
 export interface AuthState {
+  error: any;
   /** Sessão do usuário */
   user: UserSession | null;
 

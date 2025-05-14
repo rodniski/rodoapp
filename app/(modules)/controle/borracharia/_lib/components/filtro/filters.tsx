@@ -108,7 +108,7 @@ export function DataTableFilterModal() {
   // Handler para aplicar filtros
   const handleApply = () => {
     console.groupCollapsed(`${logPrefix} Aplicando Filtros`);
-    let finalFilterObject: Record<string, any> = {};
+    const finalFilterObject: Record<string, any> = {};
     console.log("Filtros internos:", internalFilters);
 
     internalFilters.forEach((f) => {

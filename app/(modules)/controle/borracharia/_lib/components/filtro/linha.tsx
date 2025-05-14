@@ -30,11 +30,6 @@ export const FilterRow: React.FC<FilterRowProps> = ({
     [filter.field]
   );
 
-  if (!cfg) {
-    console.error("[FilterRow] Campo não configurado:", filter.field);
-    return null;
-  }
-
   /* ─── 2. handlers ─────────────────────────────────────────────── */
   const handleFieldChange = useCallback(
     (nextField: string) => {
@@ -60,6 +55,11 @@ export const FilterRow: React.FC<FilterRowProps> = ({
     (val: unknown) => onChange(filter.id, filter.field, val),
     [filter.id, filter.field, onChange]
   );
+
+  if (!cfg) {
+    console.error("[FilterRow] Campo não configurado:", filter.field);
+    return null;
+  }
 
   /* ─── 3. decide o componente de valor (via switch) ─────────────── */
   const valueControl = (() => {
@@ -121,18 +121,23 @@ export const FilterRow: React.FC<FilterRowProps> = ({
         );
 
       case "select":
-      case "select-multiple":
-      case "filial-select":
+        // For single select
         return (
           <SmartSelect
-            /* simples × múltiplo */
-            multiple={cfg.tipo !== "select"}
-            value={
-              cfg.tipo === "select"
-                ? (filter.value as string) ?? null
-                : (filter.value as string[]) ?? []
-            }
-            onChange={handleValueChange as any}
+            value={(filter.value as string) ?? null}
+            onChange={handleValueChange}
+            options={cfg.opcoes as ComboboxItem[] ?? []}
+            placeholder={`Selecione ${cfg.label.toLowerCase()}`}
+          />
+        );
+      case "select-multiple":
+      case "filial-select":
+        // For multi select
+        return (
+          <SmartSelect
+            multiple={true}
+            value={(filter.value as string[]) ?? []}
+            onChange={handleValueChange}
             options={cfg.opcoes as ComboboxItem[] ?? []}
             placeholder={`Selecione ${cfg.label.toLowerCase()}`}
           />

@@ -19,12 +19,15 @@ import {
 } from "ui";
 import { cn } from "utils";
 import { DataTableProps } from ".";
+import { Table as ReactTable } from "@tanstack/react-table";
 
-const TableContext = React.createContext(null);
-export const useReactTableContext = () => {
+// Create a properly typed context that can accept a table instance or null
+const TableContext = React.createContext<ReactTable<any> | null>(null);
+
+export const useReactTableContext = <TData,>(): ReactTable<TData> => {
   const context = React.useContext(TableContext);
   if (!context) throw new Error("useReactTableContext must be used inside <DataTable>");
-  return context;
+  return context as ReactTable<TData>;
 };
 
 export function DataTable<TData, TValue>({

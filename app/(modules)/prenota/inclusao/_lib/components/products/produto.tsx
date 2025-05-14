@@ -58,7 +58,7 @@ export const ProdutoSelectionCell: React.FC<ProdutoSelectionCellProps> = ({ xmlI
   );
 
   /* ---------- Função para Gravar Item (igual ao combobox, mas pega prevItens na hora) ---------- */
-  const gravarItem = (prod: Pedido, quantidade: number) => {
+  const gravarItem = useCallback((prod: Pedido, quantidade: number) => {
     const prevItens = getDraftItens; // Pega o estado MAIS ATUAL dos itens
     const itemId = xmlItem.ITEM;
 
@@ -83,7 +83,7 @@ export const ProdutoSelectionCell: React.FC<ProdutoSelectionCellProps> = ({ xmlI
 
     setItens(updated); // Atualiza o store
     setDialogOpen(false); // Fecha o dialog após gravar
-  };
+  }, [getDraftItens, setItens, xmlItem]);
 
   /* ---------- Seleção no Command Dialog ---------- */
   const handleSelect = useCallback(
