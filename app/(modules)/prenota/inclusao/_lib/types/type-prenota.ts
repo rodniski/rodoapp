@@ -56,7 +56,7 @@ export interface Anexo {
 /** Parcela de pagamento */
 export interface Parcela {
   Parcela: string;
-  Vencimento: DateString | "";
+  Vencimento: string | "";
   Valor: number;
 }
 

@@ -26,7 +26,7 @@ import {
 import { FilialMeta } from "../config";
 import { Badge } from "ui";
 import { cn } from "utils";
-import { BadgePreset } from "../tabela"; // Assumindo que BadgePreset está definido em @prenota/tabela
+import { BadgePreset } from "../config/tabela.type"; // Import from the correct location
 
 /* ╔══════════════════════════════════════════════╗
    ║ 1 ▸ FILIAIS (cor, avatar, hook de meta)      ║

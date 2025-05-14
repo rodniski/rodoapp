@@ -1,4 +1,4 @@
-import type { FetchParams } from "@/app/(modules)/prenota/_lib/lib/types";
+import type { FetchParams } from "@prenota/tabela";
 
 /**
  * Busca pré-notas com paginação, ordenação e filtros via API Prisma.

@@ -1,7 +1,16 @@
-// @inclusao/validation/prenota.schema.ts
+/* ───────────────────────────  prenota.schema.ts  ───────────────────────────
+ * Esquemas de validação para formulários de Pré-notas.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Define esquemas Zod para validação de inputs, como
+ *  ├────────────┤  rateio, garantindo que os dados sejam válidos antes
+ *  │  ESQUEMAS  │  de serem processados ou enviados ao backend.
+ *  └────────────┘
+ * -----------------------------------------------------------------------*/
+
 import { z } from "zod";
+import { formatCurrency } from "utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formatCurrency } from "utils"; // Supondo que você tenha essa função
 
 /* ──────────────────────────────────────────────
  * Sub-schemas reutilizáveis
@@ -20,7 +29,7 @@ export const parcelaSchema = z.object({
   Vencimento: z
     .string()
     .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data deve estar no formato DD/MM/YYYY")
-    .or(z.literal("")), // Permite string vazia
+    .or(z.literal("")),
   Valor: z
     .number({
       required_error: "Valor da parcela é obrigatório",
@@ -62,47 +71,23 @@ export const rateioInputSchema = z.object({
   percent: z
     .number({ invalid_type_error: "Percentual inválido" })
     .min(0, "Percentual não pode ser negativo")
-    .max(100, "Percentual não pode exceder 100")
-    .optional()
-    .default(0), // Tornando opcional com default
+    .max(100, "Percentual não pode exceder 100"),
   valor: z
     .number({ invalid_type_error: "Valor inválido" })
-    .min(0, "Valor não pode ser negativo") // Permitindo 0
-    .max(999999999.99, "Valor muito alto")
-    .optional()
-    .default(0), // Tornando opcional com default
+    .min(0, "Valor não pode ser negativo")
+    .max(999999999.99, "Valor muito alto"),
 });
 
 /* 5 ▸ Item */
-// Este é o tipo PreNotaItem do seu @inclusao/types
-// export interface PreNotaItem {
-//   ITEM: string;
-//   PRODUTO: string;
-//   QUANTIDADE: number;
-//   VALUNIT: number;
-//   PRODFOR: string;
-//   DESCFOR: string;
-//   ORIGEMXML: string;
-//   TOTAL: number;
-//   PC: string;
-//   ITEMPC: string;
-//   B1_UM: string;
-//   SEGUN: string;
-//   TPFATO: string;
-//   CONV: number;
-//   ORIGEM: string;
-//   B1_DESC?: string;
-// }
-// Vamos criar um schema Zod que corresponda a PreNotaItem
 export const itemSchema = z.object({
   ITEM: z.string().min(1, "Item é obrigatório"),
   PRODUTO: z.string().min(1, "Produto é obrigatório"),
   QUANTIDADE: z.number().positive("Quantidade deve ser positiva"),
-  VALUNIT: z.number().min(0, "Valor unitário não pode ser negativo"), // Permitindo 0
-  PRODFOR: z.string().optional(), // Tornando opcional se puder ser vazio
-  DESCFOR: z.string().optional(), // Tornando opcional
+  VALUNIT: z.number().min(0, "Valor unitário não pode ser negativo"),
+  PRODFOR: z.string().optional(),
+  DESCFOR: z.string().optional(),
   ORIGEMXML: z.string().optional().default("N"),
-  TOTAL: z.number().min(0, "Total não pode ser negativo"), // Permitindo 0
+  TOTAL: z.number().min(0, "Total não pode ser negativo"),
   PC: z.string().optional(),
   ITEMPC: z.string().optional(),
   B1_UM: z.string().min(1, "Unidade de medida é obrigatória"),
@@ -116,11 +101,10 @@ export const itemSchema = z.object({
     .default(1),
   ORIGEM: z.string().min(1, "Origem é obrigatória"),
   B1_DESC: z.string().optional(),
-  DESC_PROD: z.string().optional(), // Adicionado para descrição do produto no item
+  DESC_PROD: z.string().optional(),
 });
 
 /* 6 ▸ Header */
-// Tipo para DateString que o store espera
 const dateStringSchema = z.union([
   z.literal(""),
   z
@@ -164,24 +148,22 @@ export const headerSchema = z
         "",
       ],
       { errorMap: () => ({ message: "Tipo de rodovia inválido." }) }
-    ), // Mensagem de erro genérica
+    ),
     prioridade: z.enum(["Alta", "Media", "Baixa", ""], {
       errorMap: () => ({ message: "Prioridade inválida." }),
-    }), // Sem acento em "Media"
+    }),
     JUSTIFICATIVA: z.string().optional(),
-    DTINC: dateStringSchema, // Usa o schema customizado para DateString
+    DTINC: dateStringSchema,
     CHVNF: z
       .string()
       .length(44, "Chave NF-e deve ter 44 dígitos")
       .optional()
-      .or(z.literal("")), // Permite opcional ou string vazia
+      .or(z.literal("")),
     OBS: z.string().optional(),
     CGCPIX: z.string().optional(),
     CHAVEPIX: z.string().optional(),
-    PEDIDO: z.string().optional(), // <<< --- ADICIONADO PEDIDO
-    // Adicione outros campos se o seu tipo PreNotaHeader tiver mais que não estão aqui
-    // Ex: OLDSERIE, se for parte do formulário e do schema
-    OLDSERIE: z.string().optional(), // Exemplo, se necessário
+    PEDIDO: z.string().optional(),
+    OLDSERIE: z.string().optional(),
   })
   .superRefine((obj, ctx) => {
     if (
@@ -241,7 +223,6 @@ export const prenotaDraftSchema = z
 
     const somaPerc = val.RATEIOS.reduce((s, r) => s + (r.percent ?? 0), 0);
     if (val.RATEIOS.length > 0 && Math.abs(somaPerc - 100) > 0.01) {
-      // Só valida se houver rateios
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["RATEIOS"],

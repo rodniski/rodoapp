@@ -24,20 +24,22 @@ const features = [
 
 export function Features() {
   return (
-    <section className="z-10 container space-y-16 py-24 md:py-32">
+    <section className="z-10 container space-y-16 py-24 md:py-32 shadow-color-tint bg-primary/05 dark:bg-muted/20 backdrop-blur-xl rounded-3xl">
       <div className="mx-auto max-w-[58rem] text-center">
         <h2 className="font-bold text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
           Módulos Integrados
         </h2>
         <p className="mt-4 text-muted-foreground text-lg fhd:text-xl qhd:text-2xl">
-          Descubra como os módulos do hub de intranet do Grupo Rodoparaná transformam sua rotina com mais eficiência e controle.
+          Descubra como os módulos do hub de intranet do Grupo Rodoparaná
+          transformam sua rotina com mais eficiência e controle.
         </p>
       </div>
       <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
         {features.map((feature) => (
           <div
             key={feature.name}
-            className="relative min-h-[14rem] rounded-md border p-2 md:p-3 bg-card">
+            className="relative min-h-[14rem] rounded-md border p-2 md:p-3 bg-card shadow-color-tint"
+          >
             <GlowingEffect
               blur={0}
               borderWidth={2}
@@ -52,7 +54,7 @@ export function Features() {
                 <div className="w-fit rounded-md border border-primary p-2">
                   <feature.icon className="size-6 fhd:size-8 qhd:size-10 text-foreground" />
                 </div>
-                <div className="space-y-3 h-full flex flex-col justify-end">
+                <div className="space-y-3 h-full flex flex-col justify-start">
                   <h3 className="pt-0.5 text-xl/[1.375rem] font-semibold font-sans -tracking-4 md:text-2xl/[1.875rem] qhd:text-3xl text-balance text-foreground">
                     {feature.name}
                   </h3>

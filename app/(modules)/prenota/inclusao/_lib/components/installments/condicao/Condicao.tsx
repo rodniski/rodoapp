@@ -1,4 +1,17 @@
-// _lib/components/stepper/header/condicao/Condicao.tsx
+/* ───────────────────────────  Condicao.tsx  ───────────────────────────
+ * Formulário para edição de condições de pagamento de Pré-notas.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Permite editar parcelas (número, vencimento, valor) e
+ *  ├────────────┤  dados PIX opcionais, validando que o total das parcelas
+ *  │  FUNCIONAL │  corresponda ao valor da NF. Exibe a condição de pagamento
+ *  │            │  (CTT_DESC01) estabelecida no pedido, cruzando CONDFIN
+ *  │            │  com CTT_CUSTO do centro de custo.
+ *  └────────────┘
+ *  Usa componentes de UI (Dialog, Input, NumericFormat), date-fns para
+ *  manipulação de datas no formato DD/MM/YYYY, e Zustand para stores.
+ * -----------------------------------------------------------------------*/
+
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -29,10 +42,13 @@ import { NumericFormat } from "react-number-format";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { usePreNotaStore, usePreNotaAuxStore } from "@inclusao/stores";
-import type { CondicaoPagamentoResponse } from "@inclusao/api";
+import { useAuxStore } from "@login/stores";
 import type { Parcela } from "@inclusao/types";
+import type { CentroCusto } from "@login/types";
+import type { CondicaoPagamentoResponse } from "@inclusao/api";
 import { toast } from "sonner";
 
+// Utilitário para parsing de datas DD/MM/YYYY
 const parseDatePt = (s: string): Date => {
   try {
     const parsed = parse(s, "dd/MM/yyyy", new Date(), { locale: ptBR });
@@ -42,8 +58,23 @@ const parseDatePt = (s: string): Date => {
   }
 };
 
+// Formata data para DD/MM/YYYY ou retorna ""
 const fmtDatePt = (d: Date): string =>
   !isNaN(d.getTime()) ? format(d, "dd/MM/yyyy", { locale: ptBR }) : "";
+
+// Valida e formata uma string de data para DD/MM/YYYY ou retorna ""
+const ensureValidVencimento = (
+  vencimento: string | undefined | null
+): string => {
+  if (!vencimento) return "";
+  const parsed = parseDatePt(vencimento);
+  const formatted = fmtDatePt(parsed);
+  if (!formatted) {
+    console.warn(`Invalid Vencimento format: ${vencimento}`);
+    return "";
+  }
+  return formatted;
+};
 
 interface CondicaoPagamentoFormProps {
   data: CondicaoPagamentoResponse | undefined | null;
@@ -56,27 +87,36 @@ export function CondicaoPagamentoForm({
   isLoading,
   error,
 }: CondicaoPagamentoFormProps) {
-  // lê o valor da NF vindo do store auxiliar
+  // Estados do Zustand
   const valorNF = usePreNotaAuxStore((s) => s.totalNf.valorTotalXml);
+  const setParcelasStore = usePreNotaStore((s) => s.setParcelas);
+  const condfin = usePreNotaStore((s) => s.draft.header.CONDFIN);
+  const centroCusto = useAuxStore((s) => s.centroCusto);
 
-  // estado local de parcelas e campos PIX
+  // Estado local
   const [parcelas, setParcelas] = useState<Parcela[]>([]);
   const [pixFields, setPixFields] = useState({
     chave_pix: "",
     cpf_cnpj_destinatario: "",
   });
-
-  // ações da store principal
-  const setParcelasStore = usePreNotaStore((s) => s.setParcelas);
-
   const [open, setOpen] = useState(false);
 
-  // sempre que `data` mudar, mapeia para Parcela[] e preenche campos PIX
+  // Encontra a descrição da condição de pagamento
+  const condicaoDescricao = useMemo(() => {
+    const matchingCentroCusto = centroCusto.find(
+      (cc: CentroCusto) => cc.CTT_CUSTO === condfin
+    );
+    return matchingCentroCusto
+      ? matchingCentroCusto.CTT_DESC01
+      : "Desconhecida";
+  }, [centroCusto, condfin]);
+
+  // Mapeia dados de Pagamentos e PIX quando `data` muda
   useEffect(() => {
     if (data?.Pagamentos) {
-      const mapped = data.Pagamentos.map((p) => ({
+      const mapped: Parcela[] = data.Pagamentos.map((p) => ({
         Parcela: p.Parcela ?? "",
-        Vencimento: p.Vencimento ?? "",
+        Vencimento: ensureValidVencimento(p.Vencimento),
         Valor: p.Valor ?? 0,
       }));
       setParcelas(mapped);
@@ -93,16 +133,16 @@ export function CondicaoPagamentoForm({
     }
   }, [data]);
 
-  // atualiza uma parcela localmente
+  // Atualiza uma parcela localmente
   const updateLocalParcela = (idx: number, patch: Partial<Parcela>) => {
     setParcelas((prev) => {
       const next = [...prev];
-      next[idx] = { ...next[idx], ...patch } as Parcela;
+      next[idx] = { ...next[idx], ...patch };
       return next;
     });
   };
 
-  // soma valores e validações
+  // Calcula total das parcelas e validação
   const parcelasTotal = useMemo(
     () => parcelas.reduce((sum, p) => sum + (p.Valor || 0), 0),
     [parcelas]
@@ -112,7 +152,7 @@ export function CondicaoPagamentoForm({
     [parcelasTotal, valorNF]
   );
 
-  // salva na store principal
+  // Salva na store principal
   const handleSaveChanges = () => {
     if (isValorValido) {
       setParcelasStore(parcelas);
@@ -152,6 +192,11 @@ export function CondicaoPagamentoForm({
           )}
           {!isLoading && !error && data && (
             <div className="space-y-4">
+              {/* Descrição da condição de pagamento */}
+              <p className="text-sm text-muted-foreground">
+                Condição de pagamento {condicaoDescricao} estabelecida no
+                pedido.
+              </p>
               <ScrollArea className="max-h-[300px] pr-2">
                 {parcelas.map((p, idx) => {
                   const vencimentoDate = parseDatePt(p.Vencimento);
@@ -169,15 +214,13 @@ export function CondicaoPagamentoForm({
                           className="h-8 text-center"
                         />
                       </div>
-                      <div className="col-span-4">
+                      <div className="col-span-4 relative">
                         <Label htmlFor={`venc-${idx}`}>Vencimento</Label>
                         <Input
                           id={`venc-${idx}`}
                           type="date"
                           className={`h-8 ${
-                            isNaN(vencimentoDate.getTime())
-                              ? "border-red-500"
-                              : ""
+                            !p.Vencimento ? "border-red-500" : ""
                           }`}
                           value={
                             !isNaN(vencimentoDate.getTime())
@@ -188,17 +231,18 @@ export function CondicaoPagamentoForm({
                             const newDate = new Date(
                               e.target.value + "T00:00:00"
                             );
-                            if (!isNaN(newDate.getTime())) {
-                              updateLocalParcela(idx, {
-                                Vencimento: fmtDatePt(newDate),
-                              });
-                            } else {
-                              updateLocalParcela(idx, {
-                                Vencimento: "",
-                              });
-                            }
+                            updateLocalParcela(idx, {
+                              Vencimento: !isNaN(newDate.getTime())
+                                ? fmtDatePt(newDate)
+                                : "",
+                            });
                           }}
                         />
+                        {!p.Vencimento && (
+                          <span className="text-red-500 text-xs absolute -bottom-5 left-0">
+                            Data obrigatória
+                          </span>
+                        )}
                       </div>
                       <div className="col-span-4">
                         <Label htmlFor={`val-${idx}`}>Valor</Label>

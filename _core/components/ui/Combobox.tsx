@@ -16,6 +16,13 @@ import {
 } from "ui";
 import { toast } from "sonner";
 
+/**
+ * Representa um item de combobox.
+ *
+ * @property value - O valor do item que será retornado quando
+ *   o item for selecionado.
+ * @property label - O texto exibido para o item no combobox.
+ */
 export interface ComboboxItem {
   value: string;
   label: string;

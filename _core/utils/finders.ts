@@ -1,7 +1,18 @@
-// src/utils/finders.ts (ou _core/utils/finders.ts)
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store"; // Ajuste path
-import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores/aux-store"; // Ajuste path
-import type { FilialGeral } from "@/app/login/_lib"; // Ajuste path
+/* ───────────────────────────  finders.ts  ───────────────────────────
+ * Utilitários para busca e formatação de dados de autenticação e filiais.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Fornece funções para obter username, código de filial
+ *  ├────────────┤  por CNPJ, estado de autenticação, e opções de combobox
+ *  │  FUNCIONAL │  para filiais e grupos do usuário, usando stores de
+ *  │            │  autenticação e auxiliares.
+ *  └────────────┘
+ *  Integra com useAuthStore e useLoginAuxStore para acesso a dados.
+ * -----------------------------------------------------------------------*/
+
+import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
+import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores/aux-store";
+import type { FilialGeral } from "@/app/login/_lib";
 import { ComboboxItem } from "comp";
 import { useMemo } from "react";
 
@@ -9,12 +20,12 @@ const DEFAULT_USERNAME = "USUARIO_DESCONHECIDO";
 
 /**
  * Obtém o username do usuário logado a partir do useAuthStore.
+ * @returns Username ou "USUARIO_DESCONHECIDO" se não disponível.
  */
 export function getCurrentUsername(): string {
   try {
-    // AJUSTE: Confirme state.user.username
     const username = useAuthStore.getState().user?.username;
-    return username?.trim() || DEFAULT_USERNAME; // Já faz trim aqui
+    return username?.trim() || DEFAULT_USERNAME;
   } catch (error) {
     console.error("[getCurrentUsername] Erro:", error);
     return DEFAULT_USERNAME;
@@ -29,33 +40,24 @@ export function getCurrentUsername(): string {
 export function findFilialCodigo(
   cnpjDestinatario: string | null | undefined
 ): string {
-  const cleanCnpj = cnpjDestinatario?.replace(/\D/g, ""); // Limpa CNPJ antes de comparar
+  const cleanCnpj = cnpjDestinatario?.replace(/\D/g, "");
   if (!cleanCnpj) {
-    // console.warn("[findFilialCodigo] CNPJ do destinatário inválido ou não fornecido.");
     return "";
   }
 
   try {
-    // AJUSTE: Confirme nomes 'filiais', 'cnpjFilial', 'numero'
     const listaFiliais: FilialGeral[] | undefined =
       useLoginAuxStore.getState().filiais;
 
     if (!listaFiliais || listaFiliais.length === 0) {
-      // console.warn("[findFilialCodigo] Lista de filiais vazia ou indisponível.");
       return "";
     }
 
     const filialEncontrada = listaFiliais.find(
-      (f: FilialGeral) => f.cnpjFilial?.replace(/\D/g, "") === cleanCnpj // Compara CNPJs limpos
+      (f: FilialGeral) => f.cnpjFilial?.replace(/\D/g, "") === cleanCnpj
     );
 
-    if (filialEncontrada) {
-      // AJUSTE 'numero' se necessário
-      return filialEncontrada.numero?.trim() || ""; // Retorna o código limpo
-    } else {
-      // console.warn(`[findFilialCodigo] Nenhuma filial corresponde ao CNPJ ${cleanCnpj}.`);
-      return "";
-    }
+    return filialEncontrada ? filialEncontrada.numero?.trim() || "" : "";
   } catch (error) {
     console.error("[findFilialCodigo] Erro:", error);
     return "";
@@ -96,8 +98,8 @@ export function getAuthState(): {
 }
 
 /**
- * Retorna uma lista de ComboboxItem para as filiais que o usuário
- * tem acesso, extraídas do auth-store.
+ * Retorna uma lista de ComboboxItem para as filiais que o usuário tem acesso.
+ * @returns Lista de ComboboxItem com value (M0_CODFIL) e label (código e nome da filial).
  */
 export function useFilialOptions(): ComboboxItem[] {
   const filiais = useAuthStore((s) => s.filiais);
@@ -112,4 +114,34 @@ export function useFilialOptions(): ComboboxItem[] {
       })),
     [filiais]
   );
+}
+
+/**
+ * Verifica se o usuário pertence a um grupo específico, opcionalmente restrito a uma filial.
+ * @param grupo Nome do grupo a verificar (ex: "000172").
+ * @param filialCod Código da filial (ex: "0101"). Se não fornecido, verifica apenas o grupo.
+ * @returns true se o usuário pertence ao grupo (e à filial, se especificada), false caso contrário.
+ */
+export function hasAccessToGrupo(grupo: string, filialCod?: string): boolean {
+  try {
+    const grupos = useAuthStore.getState().grupos;
+    if (!grupo || !grupos?.length) {
+      return false;
+    }
+
+    const cleanGrupo = grupo.trim();
+    if (filialCod) {
+      const cleanFilialCod = filialCod.trim();
+      return grupos.some(
+        (g) =>
+          g.Grupo?.trim() === cleanGrupo &&
+          g.Filial.some((f) => f.Loja?.trim() === cleanFilialCod)
+      );
+    }
+
+    return grupos.some((g) => g.Grupo?.trim() === cleanGrupo);
+  } catch (error) {
+    console.error("[hasAccessToGrupo] Erro:", error);
+    return false;
+  }
 }
