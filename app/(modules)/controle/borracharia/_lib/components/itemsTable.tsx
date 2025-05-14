@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {NumericInput, Progress, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "ui";
 import {ItemNF} from "@/app/(modules)/controle/borracharia/_lib/types/index";
 import {Loader2} from "lucide-react";
-import {useListaItensNF} from "../hooks/useListaItensNF";
+import {useListaItensNF} from "../hooks/hook.useListaItensNF";
 
 interface ItemsTableProps {
     filial: string;

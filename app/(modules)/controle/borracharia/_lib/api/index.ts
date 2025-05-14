@@ -1,1 +1,2 @@
-export * from './portaria';
+export * from './api.borracharia';
+export * from './api.itens';

@@ -1,32 +1,10 @@
-// api/movPortaria.ts
+// api/api.borracharia.ts
 import { config } from "config";
-import {
-  BorrachariaParams,
-  BorrachariaRequestParams,
-  ConferenciaParams,
-  EstornoParams,
-  HistoricoParams,
-  ItemNFParams,
-  PortariaParams,
-} from "../types";
+import { BorrachariaParams} from "../types";
 
-type MovPortariaType =
-  | "borracharia"
-  | "portaria"
-  | "historico"
-  | "listaItensNF"
-  | "grupoFilial"
-  | "conferenciaSaida"
-  | "estornoSaida";
+type MovBorrachariaType = "borracharia";
 
-type ParamsType =
-  | PortariaParams
-  | BorrachariaParams
-  | HistoricoParams
-  | ItemNFParams
-  | { Usuario: string }
-  | ConferenciaParams
-  | EstornoParams
+type ParamsType = BorrachariaParams;
 
 function fixMalformedJson(jsonString: string): string {
   // Replace multiple consecutive objects without commas
@@ -36,31 +14,25 @@ function fixMalformedJson(jsonString: string): string {
     .replace(/}\s*]/g, "\n}]");
 }
 
-export const fetchMovPortaria = async (
-    type: MovPortariaType,
+export const fetchMovBorracharia = async (
+    type: MovBorrachariaType,
     params: ParamsType,
     usePost: boolean = false // flag para definir se deve usar POST
 ) => {
-  console.log("🚀 Iniciando fetchMovPortaria:", { type, params, usePost });
-  console.log("filtros: ", params);
+  console.log("🚀 Iniciando fetchMovBorracharia:", { type, params, usePost });
+
   let queryParams = new URLSearchParams();
   let endpoint = "";
 
   // Montagem dos parâmetros e definição do endpoint
   switch (type) {
     case "borracharia":
-    case "portaria":
-    case "historico": {
-      const movParams = params as
-          | PortariaParams
-          | BorrachariaParams
-          | HistoricoParams;
+   {
+      const movParams = params as BorrachariaParams;
+
       queryParams.append("Page", movParams.Page.toString());
       if ("Filial" in movParams && movParams.Filial) {
         queryParams.append("Filial", movParams.Filial.toString());
-      }
-      if (type === "portaria" && "Conferido" in movParams) {
-        queryParams.append("Conferido", movParams.Conferido);
       }
       if ("PageSize" in movParams) {
         queryParams.append("PageSize", movParams.PageSize.toString());
@@ -75,48 +47,9 @@ export const fetchMovPortaria = async (
         queryParams.append("datafim", to.replaceAll("-", ""));
       }
 
-      const endpointMap = {
-        borracharia: "Borracharia",
-        portaria: "Portaria",
-        historico: "Historico",
-      };
+      const endpointMap = { borracharia: "Borracharia" };
+
       endpoint = endpointMap[type];
-      break;
-    }
-    case "listaItensNF": {
-      const itensParams = params as ItemNFParams;
-      queryParams = new URLSearchParams({
-        Filial: itensParams.Filial.toString(),
-        Doc: itensParams.Doc.toString(),
-        Serie: itensParams.Serie.toString(),
-        CodCliente: itensParams.CodCliente.toString(),
-        Loja: itensParams.Loja.toString(),
-      });
-      endpoint = "ListaItensNF";
-      break;
-    }
-    case "conferenciaSaida": {
-      const confParams = params as ConferenciaParams;
-      // Se for POST, os dados serão enviados no corpo
-      // Se for GET, podemos enviar via query string
-      queryParams.append("Sequencia", confParams.Sequencia);
-      queryParams.append("RespConf", confParams.RespConf);
-      endpoint = "ConferenciaSaida";
-      break;
-    }
-    case "estornoSaida": {
-      const estornoParams = params as EstornoParams;
-      queryParams.append("Sequencia", estornoParams.Sequencia);
-      queryParams.append("RespEstor", estornoParams.RespEstor);
-      // Mesmo que "OriEstorno" seja fixo, pode ser enviado tanto via query quanto no body
-      queryParams.append("OriEstorno", "p");
-      endpoint = "EstornoSaida";
-      break;
-    }
-    case "grupoFilial": {
-      const userParams = params as { Usuario: string };
-      queryParams.append("Usuario", userParams.Usuario);
-      endpoint = "GrupoFilial";
       break;
     }
     default:

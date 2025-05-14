@@ -1,17 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { config } from "config";
-import { ItemNF } from "@borracharia/types";
+import { ItemNF, ItemNFParams } from "@borracharia/types";
 
-interface ListaItensNFParams {
-    Filial: string;
-    Doc: string;
-    Serie: string;
-    CodCliente: string;
-    Loja: string;
-}
-
-export const useListaItensNF = (params: ListaItensNFParams, enabled = true) => {
+export const useListaItensNF = (params: ItemNFParams, enabled = true) => {
     const fetchItensNF = async () => {
         const configRequest = {
             method: 'get',
