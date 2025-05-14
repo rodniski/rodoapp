@@ -1,5 +1,5 @@
 import { ComboboxItem } from "@/_core/components";
-import { FilterInputs } from "../types/filterInputs";
+import { FilterInputs } from "../types/types.filterInputs";
 /* ╭──────────────────────────────────────────╮
    │ 1 ▸ ENUM DOS 3 TIPOS DE CONTROLE         │
    ╰──────────────────────────────────────────╯ */

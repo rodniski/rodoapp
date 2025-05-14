@@ -16,7 +16,7 @@ import {
 } from "ui";
 
 import { CAMPOS_FILTRO } from "@/app/(modules)/controle/borracharia/_lib/config/constants";
-import type { FilterInputs } from "../../types/filterInputs";
+import type { FilterInputs } from "../../types/types.filterInputs";
 import type { FilterRowProps, RangeValue } from "@/app/(modules)/controle/borracharia/_lib/config/filters";
 
 export const FilterRow: React.FC<FilterRowProps> = ({

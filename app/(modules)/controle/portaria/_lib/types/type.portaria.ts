@@ -26,7 +26,7 @@ export interface PortariaItem {
   Saldo: number;
 }
 export interface UseMovPortariaOptions {
-    type: "borracharia" | "portaria" | "historico";
+    type: "portaria";
     filial?: string;
     conferido?: "S" | "N";
     enabled?: boolean;
@@ -39,7 +39,7 @@ export interface UseMovPortariaOptions {
 export interface PortariaParams {
   PageSize: string;
   Page: string;
-  Filial: number;
+  Filial: string;
   Conferido: string;
 }
 
