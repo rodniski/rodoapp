@@ -15,30 +15,12 @@ export interface BorrachariaItem {
     QtdItens: number; // Ex: 1
 }
 
-//* Tipos para listagem dos itens da NF
-
-export interface ItemNF {
-    Item: string;
-    ProdutoCod: string;
-    ProdutoDesc: string;
-    ProdutoLabel: string;
-    Saldo: number;
-    SaldoSelecionado: number;
-}
-
 //* Parâmetros para a API de Borracharia
 export interface BorrachariaParams {
     Page: string;
     PageSize: string;
-}
-
-//* Parâmetros para a API de Borracharia
-export interface ItemNFParams {
     Filial: string;
-    Doc: string;
-    Serie: string;
-    CodCliente: string;
-    Loja: string;
+    Conferido: string;
 }
 
 // Interface para os parâmetros da requisição
@@ -57,4 +39,15 @@ export interface BorrachariaRequestParams {
     Obs: string;
     RespCarreg: string;
     Quantidade: string;
+}
+
+// Interface para os parâmetros da requisição
+export interface useMovBorrachariaOptions {
+    type: "borracharia";
+    filial?: string;
+    conferido?: "S" | "N";
+    enabled?: boolean;
+    page?: number;
+    pageSize?: number;
+    filters?: Record<string, any>;
 }

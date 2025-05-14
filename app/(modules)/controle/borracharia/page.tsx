@@ -3,7 +3,7 @@
 import { Background } from "@/_core/components";
 import { DataTable, useDataTableStore } from "@/_core/components/ui/data-table";
 import { BorPagination } from "./_lib/components/borPagination";
-import { useMovPortaria } from "@borracharia/hooks";
+import { useMovBorracharia } from "@borracharia/hooks";
 import { columnsBorracharia } from "./_lib/components/borColumns";
 import { DataTableFilterModal } from "./_lib/components/filtro/filters";
 
@@ -14,7 +14,7 @@ export default function ControlePage() {
     filters
   } = useDataTableStore();
 
-  const { data, isLoading } = useMovPortaria({ type: "borracharia", page: pageIndex + 1, pageSize, filters });
+  const { data, isLoading } = useMovBorracharia({ type: "borracharia", page: pageIndex + 1, pageSize, filters });
 
   return (
     <div className="flex flex-col items-center justify-center !max-h-[calc(100vh-60px)] p-4">
