@@ -1,4 +1,16 @@
-// app/(modules)/_lib/components/Navbar.tsx
+/* ───────────────────────────  Navbar.tsx  ───────────────────────────
+ * Componente de barra de navegação para o RodoApp.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Exibe uma barra de navegação responsiva com logo,
+ *  ├────────────┤  menu de navegação (desktop/mobile), seletor de tema
+ *  │  FUNCIONAL │  e ações de usuário (login/perfil). Condicionalmente
+ *  │            │  oculto na tela de login.
+ *  └────────────┘
+ *  Integra com useAuth para autenticação, next-themes para temas e
+ *  componentes de UI personalizados.
+ * -----------------------------------------------------------------------*/
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -16,7 +28,6 @@ import {
   ThemeSwitcher,
 } from "ui";
 import { SunIcon, MoonIcon, Half2Icon } from "@radix-ui/react-icons";
-
 import { useAuth } from "@/app/login/_lib/hooks";
 
 export function Navbar() {
@@ -25,7 +36,6 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const firstPage = pathname === "/";
-  // usa nosso hook, não useSession()
   const { isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
