@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="container flex min-h-[calc(50vh)] max-w-screen-2xl flex-col items-center justify-center space-y-8 text-center">
+    <section className="container flex min-h-[calc(55vh)] max-w-screen-2xl flex-col items-center justify-center space-y-8 text-center">
       <div className="space-y-4">
         <h1 className="bg-gradient-to-br from-foreground from-30% via-foreground/90 to-foreground/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent pb-3 sm:text-5xl md:text-6xl lg:text-7xl">
           Todas as Ferramentas

@@ -1,3 +1,16 @@
+/* ───────────────────────────  NavigationMenu.tsx  ───────────────────────────
+ * Componentes de menu de navegação para o RodoApp.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Fornece componentes reutilizáveis para criar menus de
+ *  ├────────────┤  navegação com suporte a dropdowns, triggers, links e
+ *  │  FUNCIONAL │  indicadores, usando Radix UI. Estilizado com Tailwind
+ *  │            │  e class-variance-authority, sem efeitos de hover.
+ *  └────────────┘
+ *  Integra com lucide-react para ícones e utils para classes.
+ * -----------------------------------------------------------------------*/
+
+
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { cva } from "class-variance-authority"

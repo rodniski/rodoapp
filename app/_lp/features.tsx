@@ -24,7 +24,7 @@ const features = [
 
 export function Features() {
   return (
-    <section className="z-10 container space-y-16 py-24 md:py-32 shadow-color-tint bg-primary/05 dark:bg-muted/20 backdrop-blur-xl rounded-3xl">
+    <section className="z-10 container space-y-16 py-16 shadow-color-tint bg-primary/05 dark:bg-muted/20 backdrop-blur-xl rounded-3xl">
       <div className="mx-auto max-w-[58rem] text-center">
         <h2 className="font-bold text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
           Módulos Integrados
