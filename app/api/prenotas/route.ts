@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { getPrenotas } from "./service";
 
-export async function handleGetPrenotas(request: Request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
@@ -24,7 +24,7 @@ export async function handleGetPrenotas(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Erro no controller handleGetPrenotas:", error);
+    console.error("Erro no controller POST:", error);
 
     let statusCode = 500;
     let errorMessage = "Erro interno do servidor ao buscar prenotas.";
@@ -42,5 +42,3 @@ export async function handleGetPrenotas(request: Request) {
     );
   }
 }
-
-export { handleGetPrenotas as POST };

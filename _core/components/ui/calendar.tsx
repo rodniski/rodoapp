@@ -2,28 +2,41 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DateRange, DayPicker } from "react-day-picker";
+import { 
+  DateRange, 
+  DayPicker, 
+  DayPickerSingleProps,
+  DayPickerMultipleProps,
+  DayPickerRangeProps,
+  DayPickerDefaultProps
+} from "react-day-picker";
 
 import { cn } from "utils";
 import { buttonVariants } from "ui/button";
+
+// Define a union type for all possible Calendar prop variations
+type CalendarProps = 
+  | (Omit<DayPickerSingleProps, 'mode'> & {
+      mode: 'single';
+    })
+  | (Omit<DayPickerMultipleProps, 'mode'> & {
+      mode: 'multiple';
+    })
+  | (Omit<DayPickerRangeProps, 'mode'> & {
+      mode: 'range';
+    })
+  | (Omit<DayPickerDefaultProps, 'mode'> & {
+      mode?: undefined;
+    });
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
   ...props
-}: React.ComponentProps<typeof DayPicker>) {
-  const dayPickerProps = props.mode === "range"
-    ? {
-        ...props,
-        selected: props.selected as DateRange,
-        mode: "range" as const,
-      }
-    : {
-        ...props,
-        selected: props.selected as Date,
-        mode: "single" as const,
-      }
+}: CalendarProps) {
+  // The props are now properly typed with the union type
+  // No need for typecasting since the types are properly discriminated
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -79,7 +92,7 @@ function Calendar({
           <ChevronRight className={cn("size-4", className)} {...props} />
         ),
       }}
-      {...dayPickerProps}
+      {...props}
     />
   );
 }

@@ -24,7 +24,7 @@ model SB1010 {
   B1_MARCA  String? @map("B1_MARCA") // Marca do Produto
 
   // Campos de controle
-  B1_MSBLQL  String? @map("B1_MSBLQL") // Produto Bloqueado? ('1'-Sim / '2'-Não)
+  B1_MSBLQL  String? @map("B1_MSBLQL") // Produto Bloqueado? ("1"-Sim / "2"-Não)
   D_E_L_E_T_ String? @default("") @map("D_E_L_E_T_") // Flag de Deleção (não mostrar deletados "normalmente")
 
   // Adicionar índices para campos frequentemente buscados pode melhorar a performance

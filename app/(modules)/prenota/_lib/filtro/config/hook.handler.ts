@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useDataTableStore } from "ui/data-table";
-import { CAMPOS_FILTRO } from "@prenota/config";
+import { CAMPOS_FILTRO } from "@prenota/filtro";
 import { useFilialOptions } from "utils";
 import type { PrenotaRow } from "@prenota/tabela";
 import type { ComboboxItem } from "ui";
@@ -97,7 +97,7 @@ export function useFilterModalHandlers() {
 
   const handleApply = () => {
     console.groupCollapsed(`${logPrefix} Aplicando Filtros`);
-    let finalFilterObject: Partial<Record<keyof PrenotaRow, any>> = {};
+    const finalFilterObject: Partial<Record<keyof PrenotaRow, any>> = {};
     console.log("Filtros internos:", internalFilters);
 
     internalFilters.forEach((f) => {

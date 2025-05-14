@@ -46,6 +46,9 @@ export const FormularioRevisaoFields: React.FC<
   setEmailTags,
   isPending,
   rec,
+  actionInProgress,
+  username,
+  handleFinalizarDiretamente,
 }) => (
   <div className="space-y-6">
     <DialogHeader className="p-4 border-b">
@@ -78,10 +81,10 @@ export const FormularioRevisaoFields: React.FC<
 
     <FormFooter
       isPending={isPending}
-      actionInProgress={actionInProgress}
-      username={username}
+      actionInProgress={actionInProgress ?? "form"}
+      username={username ?? ""}
       revisarText={revisarText}
-      handleFinalizarDiretamente={handleFinalizarDiretamente}
+      handleFinalizarDiretamente={handleFinalizarDiretamente ?? (() => {})}
     />
   </div>
 );

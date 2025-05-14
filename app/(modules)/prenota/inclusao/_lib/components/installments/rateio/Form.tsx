@@ -157,6 +157,17 @@ export function RateioForm({
 
   const [displayValor, setDisplayValor] = useState<string>("");
   const [isValorFocused, setIsValorFocused] = useState<boolean>(false);
+  
+  // Watch valor field for formatting display
+  const watchedValor = watch("valor");
+  
+  // Effect to update displayValor when field.value changes (moved from inside render)
+  useEffect(() => {
+    const rhfValue = watchedValor ?? 0;
+    if (!isValorFocused) {
+      setDisplayValor(rhfValue > 0 ? formatCurrency(rhfValue) : "");
+    }
+  }, [watchedValor, isValorFocused]);
 
   // Desabilitar botão se o formulário não for válido ou se não houver mais valor/percentual para alocar
   const isAddingDisabled = !isValid || maxValorDisponivelGlobalmente < 0.01;
@@ -206,12 +217,6 @@ export function RateioForm({
           <Controller
             name="valor" control={control}
             render={({ field, fieldState }) => {
-              useEffect(() => { // Para formatar o displayValor quando field.value (RHF) muda
-                const rhfValue = field.value ?? 0;
-                if (!isValorFocused) {
-                  setDisplayValor(rhfValue > 0 ? formatCurrency(rhfValue) : "");
-                }
-              }, [field.value, isValorFocused]);
 
               const handleValorFocus = () => {
                 setIsValorFocused(true);

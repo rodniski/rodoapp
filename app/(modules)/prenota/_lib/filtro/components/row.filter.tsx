@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
 } from "ui";
-import { CAMPOS_FILTRO } from "@prenota/config";
+import { CAMPOS_FILTRO } from "@prenota/filtro";
 import type { FilterRowProps } from "@prenota/filtro";
 import { useFilterModalHandlers } from "../config";
 import { useFilterRowLogic, renderValueControl } from "./logic.filter";

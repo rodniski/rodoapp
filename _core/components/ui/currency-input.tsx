@@ -2,7 +2,8 @@ import type React from "react";
 import type { InputHTMLAttributes } from "react";
 import { Input } from "ui";
 
-interface CurrencyInputProps extends InputHTMLAttributes<HTMLInputElement> {
+// Use Omit to exclude the original onChange and value properties from InputHTMLAttributes
+interface CurrencyInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value: number;
   onChange: (value: number) => void;
 }

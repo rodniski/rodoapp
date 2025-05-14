@@ -40,7 +40,6 @@ export function populateStoresFromXml({
 
     // 1. Atualiza o fornecedor selecionado no store auxiliar
     if (fornecedor) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { PEDIDOS, ...fornecedorSemPedidos } = fornecedor; // Remove PEDIDOS se existir
       setSelectedFornecedor(fornecedorSemPedidos);
     } else {

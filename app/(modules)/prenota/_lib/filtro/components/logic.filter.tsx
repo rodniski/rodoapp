@@ -1,8 +1,19 @@
-import { useCallback, useMemo } from "react";
+/* ───────────────────────────  FilterRow.tsx  ───────────────────────────
+ * Lógica e renderização do componente de linha de filtro para Pré-notas.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Gerencia a lógica de seleção de campos e valores para
+ *  ├────────────┤  filtros, renderizando controles apropriados (texto,
+ *  │  FUNCIONAL │  range, select) com base na configuração de CAMPOS_FILTRO.
+ *  └────────────┘
+ *  Usa SmartSelect para seletores e Input para entradas de texto/range.
+ * -----------------------------------------------------------------------*/
+
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { SmartSelect, Input, ComboboxItem, Label } from "ui";
-import { CAMPOS_FILTRO } from "@prenota/config";
+import { CAMPOS_FILTRO } from "@prenota/filtro";
 import type { PrenotaRow } from "@prenota/tabela";
-import type { FilterRowProps, RangeValue } from "@prenota/filtro";
+import type { FilterRowProps, RangeValue, FilterValue } from "@prenota/filtro";
 
 interface UseFilterRowLogicProps {
   filter: FilterRowProps["filter"];
@@ -10,7 +21,7 @@ interface UseFilterRowLogicProps {
   filialOptions: ComboboxItem[];
 }
 
-interface RenderValueControlProps {
+interface ValueControlProps {
   cfg: (typeof CAMPOS_FILTRO)[number];
   filter: FilterRowProps["filter"];
   onChange: (val: unknown) => void;
@@ -18,7 +29,11 @@ interface RenderValueControlProps {
   filialOptions: ComboboxItem[];
 }
 
-export function useFilterRowLogic({ filter, onChange, filialOptions }: UseFilterRowLogicProps) {
+export function useFilterRowLogic({
+  filter,
+  onChange,
+  filialOptions,
+}: UseFilterRowLogicProps) {
   const cfg = useMemo(() => {
     const baseCfg = CAMPOS_FILTRO.find((f) => f.campo === filter.field);
     if (baseCfg?.campo === "F1_FILIAL") {
@@ -42,33 +57,50 @@ export function useFilterRowLogic({ filter, onChange, filialOptions }: UseFilter
             return "";
         }
       })();
-      onChange(filter.id, nextField as keyof PrenotaRow, empty);
+      onChange(filter.id, nextField as keyof PrenotaRow, empty as FilterValue);
     },
     [filter.id, onChange]
   );
 
   const handleValueChange = useCallback(
-    (val: unknown) => onChange(filter.id, filter.field, val),
+    (val: unknown) => onChange(filter.id, filter.field, val as FilterValue),
     [filter.id, filter.field, onChange]
   );
 
   return { cfg, handleFieldChange, handleValueChange };
 }
 
-export function renderValueControl({
+// Converted to a proper React component to fix hook rules
+export function ValueControl({
   cfg,
   filter,
   onChange,
   id,
   filialOptions,
-}: RenderValueControlProps) {
+}: ValueControlProps) {
+  // Handle dynamic options for select controls
+  const [resolvedOptions, setResolvedOptions] = useState<ComboboxItem[]>([]);
+
+  useEffect(() => {
+    if (cfg.opcoes) {
+      if (typeof cfg.opcoes === "function") {
+        cfg.opcoes().then((options) => setResolvedOptions(options));
+      } else {
+        setResolvedOptions(cfg.opcoes);
+      }
+    } else {
+      setResolvedOptions([]);
+    }
+  }, [cfg, cfg.opcoes]); // Added cfg as a dependency
+
+  // Render the appropriate control based on the filter type
   switch (cfg.tipo) {
     case "texto":
       return (
         <Input
-          type="text"
+          type={cfg.numeric ? "number" : "text"}
           placeholder="Digite o valor"
-          value={filter.value as string}
+          value={(filter.value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
           className="w-full"
         />
@@ -79,7 +111,7 @@ export function renderValueControl({
       const inputType = cfg.tipo === "data-range" ? "date" : "number";
       const labelFrom = cfg.tipo === "data-range" ? "De" : "Mínimo";
       const labelTo = cfg.tipo === "data-range" ? "Até" : "Máximo";
-      const value = filter.value as RangeValue;
+      const value = (filter.value as RangeValue) ?? { from: "", to: "" };
 
       return (
         <div className="flex flex-col sm:flex-row gap-2 w-full">
@@ -116,7 +148,7 @@ export function renderValueControl({
           multiple={false}
           value={(filter.value as string) ?? null}
           onChange={onChange as (val: string | null) => void}
-          options={cfg.opcoes ?? []}
+          options={resolvedOptions}
           placeholder={`Selecione ${cfg.label.toLowerCase()}`}
         />
       );
@@ -128,7 +160,7 @@ export function renderValueControl({
           multiple={true}
           value={(filter.value as string[]) ?? []}
           onChange={onChange as (vals: string[]) => void}
-          options={cfg.opcoes ?? []}
+          options={resolvedOptions}
           placeholder={`Selecione ${cfg.label.toLowerCase()}`}
         />
       );
@@ -136,4 +168,9 @@ export function renderValueControl({
     default:
       return null;
   }
+}
+
+// For backward compatibility, keep a function that renders the component
+export function renderValueControl(props: ValueControlProps) {
+  return <ValueControl {...props} />;
 }

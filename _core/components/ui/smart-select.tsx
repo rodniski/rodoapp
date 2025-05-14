@@ -1,3 +1,15 @@
+/* ───────────────────────────  smart-select.tsx  ──────────────────────────
+ * Componente de seleção inteligente para filtros de Pré-notas.
+ *
+ *  ┌────────────┐
+ *  │  RESUMO    │  Renderiza um combobox com suporte a seleção única ou
+ *  ├────────────┤  múltipla, com busca, badges para valores selecionados
+ *  │  FUNCIONAL │  e opção de limpar a seleção.
+ *  └────────────┘
+ *  Usado em FilterRow para controles de tipo `select`, `select-multiple`
+ *  e `filial-select`.
+ * -----------------------------------------------------------------------*/
+
 "use client";
 
 import React from "react";
@@ -12,14 +24,13 @@ import {
   CommandGroup,
   CommandItem,
   Badge,
-  Button,
 } from "ui";
 import { Check, ChevronsUpDown, XCircle } from "lucide-react";
 import { cn } from "utils";
 import type { ComboboxItem } from "ui";
 
 interface BaseProps {
-  options?: ComboboxItem[];
+  options: ComboboxItem[]; // Removed optional to enforce non-empty arrays
   placeholder?: string;
   className?: string;
   badgeClassName?: string;
@@ -41,7 +52,7 @@ export type SmartSelectProps = SingleSelectProps | MultiSelectProps;
 
 export function SmartSelect(props: SmartSelectProps) {
   const {
-    options = [],
+    options,
     placeholder = "Selecione…",
     className,
     badgeClassName,
@@ -77,7 +88,11 @@ export function SmartSelect(props: SmartSelectProps) {
 
   const clear = (e: React.MouseEvent) => {
     e.stopPropagation();
-    isMulti ? props.onChange([]) : props.onChange(null);
+    if (isMulti) {
+      props.onChange([]);
+    } else {
+      props.onChange(null);
+    }
   };
 
   return (
@@ -89,7 +104,6 @@ export function SmartSelect(props: SmartSelectProps) {
             "inline-flex h-9 w-full items-center justify-between rounded-md border border-input bg-muted/30 px-2 text-sm shadow-sm focus:outline-none",
             className
           )}
-          onClick={() => setOpen(!open)}
         >
           <div className="flex flex-wrap gap-1 overflow-hidden">
             {selectedOptions.length ? (
