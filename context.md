@@ -26,11 +26,48 @@ Exemplo de estrutura para um módulo:
 ```
 /app/(modules)/prenota/
 ├── _lib/
-│   ├── api/
-│   ├── components/
-│   ├── stores/
-│   ├── types/
-│   └── hooks/
+│   ├── tabela/
+│   │   ├── config/
+│   │   │   ├──tabela.api.ts
+│   │   │   ├──tabela.hooks.ts
+│   │   │   ├──tabela.types.ts
+│   │   │   └──index.ts
+│   │   └── components/
+│   │   │   ├──columns.tsx
+│   │   │   └──tabela.tsx
+│   ├── actions/
+│   │   ├──anexo/
+│   │   │   ├── config/
+│   │   │   │   ├──anexo.api.ts
+│   │   │   │   ├──anexo.hooks.ts
+│   │   │   │   ├──anexo.types.ts
+│   │   │   │   └──index.ts
+│   │   │   └── components/
+│   │   │   │   ├──anexoDownload.tsx
+│   │   │   │   └──editar.tsx
+│   │   │   └──index.ts
+│   │   ├── editar/
+│   │   │   ├──config/
+│   │   │   │   ├──editar.api.ts
+│   │   │   │   ├──editar.hooks.ts
+│   │   │   │   ├──editar.types.ts
+│   │   │   │   └──index.ts
+│   │   │   └──components/
+│   │   │   │   ├──editar.tsx
+│   │   │   │   └──index.ts
+│   │   │   └──index.ts
+│   │   ├── editar/
+│   │   │   ├──config/
+│   │   │   │   ├──editar.api.ts
+│   │   │   │   ├──editar.hooks.ts
+│   │   │   │   ├──editar.types.ts
+│   │   │   │   └──index.ts
+│   │   │   └──components/
+│   │   │   │   ├──editar.tsx
+│   │   │   │   └──index.ts
+│   │   │   └──index.ts
+│   │   └── index.ts
+│   └── filtro/
 └── page.tsx
 ```
 
