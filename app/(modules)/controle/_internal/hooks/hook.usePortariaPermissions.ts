@@ -10,7 +10,7 @@
  *  Integra com useAuthStore para acesso aos grupos.
  * -----------------------------------------------------------------------*/
 
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
+import { useAuthStore } from "@/app/login/_internal/stores/auth-store";
 import { hasAccessToGrupo } from "utils";
 
 type PortariaAccess = {

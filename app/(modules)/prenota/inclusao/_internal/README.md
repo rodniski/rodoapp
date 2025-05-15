@@ -40,6 +40,6 @@ Regras:
 
 Sugestão de import:
 
-import { usePostPreNota } from "@inclusao/_lib/hooks";
-import { postPreNota }    from "@inclusao/_lib/api";
-import { usePreNotaStore } from "@inclusao/_lib/stores";
+import { usePostPreNota } from "@inclusao/_internal/hooks";
+import { postPreNota }    from "@inclusao/_internal/api";
+import { usePreNotaStore } from "@inclusao/_internal/stores";

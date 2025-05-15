@@ -136,7 +136,7 @@ export const dashboardData: Category[] = [
             title: "Power BI",
             url: "/documentacao/powerbi/acesso",
             description: "Documentação sobre como usar Power BI.",
-            icon: BarChartIconw,
+            icon: BarChartIcon,
           },
         ],
       },

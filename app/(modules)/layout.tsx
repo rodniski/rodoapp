@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
+import { useAuthStore } from "@/app/login/_internal/stores/auth-store";
 import { getAuthState } from "utils";
 
 export default function ModulesLayout({ children }: { children: React.ReactNode }) {

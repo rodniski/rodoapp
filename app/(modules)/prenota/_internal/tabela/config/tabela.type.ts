@@ -1,4 +1,4 @@
-// app/(modules)/prenota/_lib/tabela/config/tabela.type.ts
+// app/(modules)/prenota/_internal/tabela/config/tabela.type.ts
 
 /* ─────────────────────────────  tabela.types.ts  ───────────────────────────
  * Tipos-base usados em toda a feature **Pré-notas** (listagem, filtros,

@@ -2,7 +2,7 @@
 
 import { ScrollArea } from "ui";
 import { Hero, Features, CTA, Footer,Background } from "./_internal";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 
 export default function Home() {

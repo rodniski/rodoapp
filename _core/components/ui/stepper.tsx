@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, Button } from "ui";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { cn } from "utils";
 import { SavePreNotaButton, DebugStateSheet } from "@inclusao/components";
 import Link from "next/link";

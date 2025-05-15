@@ -1,7 +1,7 @@
 "use client";
 
 import { HistColumns } from "./_internal/components";
-// import { useHistory } from "./_lib/hooks";
+// import { useHistory } from "./_internal/hooks";
 import { DataTable, ScrollArea } from "ui";
 
 const Page = () => {

@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
-import { LoginForm } from "@/app/login/_lib/components";
+import { useAuthStore } from "@/app/login/_internal/stores/auth-store";
+import { LoginForm } from "@/app/login/_internal/components";
 import Logo from "@/public/logo/logo";
 import {Background} from "comp";
 

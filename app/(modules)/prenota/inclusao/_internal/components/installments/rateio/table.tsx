@@ -13,7 +13,7 @@ import {
 } from "ui";
 import { NumericFormat, type NumberFormatValues } from "react-number-format";
 import { Trash2, Save } from "lucide-react";
-import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores";
+import { useAuxStore as useLoginAuxStore } from "@/app/login/_internal/stores";
 import { usePreNotaStore, useValorTotalXml } from "@inclusao/stores";
 import type { Rateio as RateioType } from "@inclusao/types";
 import { Combobox, ComboboxItem } from "ui";

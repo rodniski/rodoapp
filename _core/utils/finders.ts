@@ -10,9 +10,9 @@
  *  Integra com useAuthStore e useLoginAuxStore para acesso a dados.
  * -----------------------------------------------------------------------*/
 
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
-import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores/aux-store";
-import type { FilialGeral } from "@/app/login/_lib";
+import { useAuthStore } from "@/app/login/_internal/stores/auth-store";
+import { useAuxStore as useLoginAuxStore } from "@/app/login/_internal/stores/aux-store";
+import type { FilialGeral } from "@/app/login/_internal";
 import { ComboboxItem } from "comp";
 import { useMemo } from "react";
 

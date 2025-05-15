@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { ChevronsUpDown, Save, ChevronLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Popover, PopoverTrigger, PopoverContent, Button, Textarea } from "ui";
 import { PRIORIDADE_OPTIONS } from "@/app/(modules)/prenota/_internal/config/constants";
 

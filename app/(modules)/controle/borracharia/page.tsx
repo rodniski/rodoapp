@@ -2,10 +2,10 @@
 
 import { Background } from "@/_core/components";
 import { DataTable, useDataTableStore } from "@/_core/components/ui/data-table";
-import { BorPagination } from "./_lib/components/borPagination";
+import { BorPagination } from "./_internal/components/borPagination";
 import { useMovBorracharia } from "@borracharia/hooks";
-import { columnsBorracharia } from "./_lib/components/borColumns";
-import { DataTableFilterModal } from "./_lib/components/filtro/filters";
+import { columnsBorracharia } from "./_internal/components/borColumns";
+import { DataTableFilterModal } from "./_internal/components/filtro/filters";
 
 export default function ControlePage() {
   const {

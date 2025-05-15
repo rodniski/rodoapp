@@ -1,0 +1,56 @@
+---
+title: "Configuração de Proxy para Acesso à Internet"
+group: "TI"
+date: "05 de Julho de 2024"
+description: "As redes internas da empresa requerem a configuração de proxy para liberar o acesso à internet. Geralmente, essa configuração é feita automaticamente, mas, em caso de dificuldades na navegação, é importante validar as informações conforme as orientações fornecidas."
+# Sem headerButton para este artigo
+footerButton:
+  text: "Abrir Chamado (Problemas de Proxy)"
+  onClickIdentifier: "openHeskTicketTIProxy" # Identificador específico
+---
+
+# Configurando o Proxy para Acesso à Internet na Rede Interna
+
+Para garantir o acesso à internet dentro das redes da empresa, é necessário que seu computador esteja configurado para usar nosso servidor proxy. Na maioria dos casos, essa configuração é aplicada automaticamente. No entanto, se você estiver enfrentando problemas para navegar na internet (sites não carregam, erros de conexão), pode ser preciso verificar e ajustar essas configurações manualmente.
+
+## Verificando e Configurando o Proxy no Windows
+
+Siga os passos abaixo para configurar o proxy no seu computador Windows:
+
+1.  Clique no **Menu Iniciar** (ou pressione a tecla Windows).
+2.  Digite "**proxy**" na barra de busca.
+3.  Selecione a opção "**Alterar configurações de proxy**" (ou similar, como "Configurações de proxy de rede").
+4.  Na janela de Configurações de Proxy que se abre:
+    * Role até a seção "**Configuração manual de proxy**" (ou "Script de configuração automática de proxy", dependendo da sua versão do Windows).
+    * Certifique-se de que a opção "**Detectar configurações automaticamente**" esteja **DESATIVADA**.
+    * Certifique-se de que a opção "**Usar script de instalação**" (ou "Usar script de configuração") esteja **ATIVADA**.
+    * No campo de endereço do script (ou "Endereço do script"), insira exatamente:
+        ```
+        http://wpad.rodoparana.local/wpad.dat
+        ```
+5.  Clique em **Salvar**.
+6.  **Reinicie o seu computador.** Esta etapa é crucial para que as novas configurações de proxy sejam aplicadas corretamente por todos os programas, incluindo navegadores e o Outlook.
+
+**Demonstração Visual (Windows):**
+
+{/* Lembre-se de verificar/ajustar os caminhos das imagens */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <DocImage 
+    src="/documentacao/ti/proxy/1.png" 
+    alt="Janela de Configurações de Proxy no Windows mostrando opções" 
+    width={600} 
+    height={500}
+    caption="1. Janela de Configurações de Proxy: desative 'Detectar automaticamente' e ative 'Usar script de instalação'."
+  />
+  <DocImage 
+    src="/documentacao/ti/proxy/2.png" 
+    alt="Campo para inserir o endereço do script wpad.dat" 
+    width={600} 
+    height={500} 
+    caption="2. Insira o endereço do script: http://wpad.rodoparana.local/wpad.dat e salve."
+  />
+</div>
+
+## Outros Problemas
+
+Se, mesmo após seguir estas instruções e reiniciar o computador, você continuar com dificuldades para acessar a internet ou se deparar com mensagens de erro relacionadas ao proxy, por favor, abra um chamado para a equipe de TI. Inclua o máximo de detalhes possível sobre o problema para que possamos ajudá-lo rapidamente.

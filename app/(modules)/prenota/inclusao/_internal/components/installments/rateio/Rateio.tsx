@@ -2,8 +2,15 @@
 "use client";
 
 import React, { useMemo, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent, ComboboxItem } from "ui";
-import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  ComboboxItem,
+  ScrollArea,
+} from "ui";
+import { useAuxStore as useLoginAuxStore } from "@login/stores";
 // Importar o tipo Parcela para o mapeamento
 import { usePreNotaStore, useValorTotalXml } from "@inclusao/stores";
 import { RateioTable, RateioChartView, RateioForm } from ".";
@@ -23,7 +30,9 @@ interface PagamentoAPI {
 }
 
 // Função helper para converter data de YYYYMMDD para DD/MM/YYYY
-function formatApiDateToParcelaDate(apiDate: string | undefined | null): Parcela["Vencimento"] {
+function formatApiDateToParcelaDate(
+  apiDate: string | undefined | null
+): Parcela["Vencimento"] {
   if (!apiDate || apiDate.length !== 8) {
     return ""; // Retorna string vazia se a data for inválida ou não tiver 8 caracteres
   }
@@ -36,7 +45,6 @@ function formatApiDateToParcelaDate(apiDate: string | undefined | null): Parcela
   }
   return `${day}/${month}/${year}` as Parcela["Vencimento"];
 }
-
 
 export function RateioCard() {
   // Stores de contexto
@@ -137,39 +145,44 @@ export function RateioCard() {
           value="table"
           className="flex-1 flex flex-col overflow-y-auto mt-0 p-2 gap-4"
         >
-          <RateioForm
-            filiaisOptions={filiaisOptions}
-            centroCustoOptions={centroCustoOptions}
-            totalGeral={totalGeral}
-            rateios={rateios || []} // Garante que rateios seja sempre um array
-            addRateio={addRateio}
-            updateRateio={updateRateio}
-          />
+          <ScrollArea className="h-full overflow-auto">
+            <RateioForm
+              filiaisOptions={filiaisOptions}
+              centroCustoOptions={centroCustoOptions}
+              totalGeral={totalGeral}
+              rateios={rateios || []} // Garante que rateios seja sempre um array
+              addRateio={addRateio}
+              updateRateio={updateRateio}
+            />
 
-          <div className="px-2 text-sm text-muted-foreground flex gap-1">
-            <p>
-              Total Alocado: <strong>R$ {totalDivisaoSalva.toFixed(2)}</strong>{" "}
-              de R$ {totalGeral.toFixed(2)}
-            </p>
-            <p
-              className={
-                isTotalPercentualValid && isTotalValorValid
-                  ? "text-green-600 font-medium"
-                  : "text-amber-600 font-medium"
-              }
-            >
-              / (<strong>{totalPercentualSalvo.toFixed(2)}%</strong> de 100%
-              {totalGeral > 0 &&
-                !(isTotalPercentualValid && isTotalValorValid) &&
-                ")"}
-            </p>
-          </div>
+            <div className="px-2 text-sm text-muted-foreground flex gap-1">
+              <p>
+                Total Alocado:{" "}
+                <strong>R$ {totalDivisaoSalva.toFixed(2)}</strong> de R${" "}
+                {totalGeral.toFixed(2)}
+              </p>
+              <p
+                className={
+                  isTotalPercentualValid && isTotalValorValid
+                    ? "text-green-600 font-medium"
+                    : "text-amber-600 font-medium"
+                }
+              >
+                / (<strong>{totalPercentualSalvo.toFixed(2)}%</strong> de 100%
+                {totalGeral > 0 &&
+                  !(isTotalPercentualValid && isTotalValorValid) &&
+                  ")"}
+              </p>
+            </div>
 
-          <RateioTable />
+            <RateioTable />
+          </ScrollArea>
         </TabsContent>
 
         <TabsContent value="chart" className="flex-1 overflow-y-auto p-2 mt-0">
-          <RateioChartView />
+          <ScrollArea className="h-full overflow-auto">
+            <RateioChartView />
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </div>

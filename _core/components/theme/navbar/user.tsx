@@ -1,4 +1,4 @@
-// app/(modules)/_lib/components/NavUser.tsx
+// app/(modules)/_internal/components/NavUser.tsx
 "use client";
 
 import React from "react";
@@ -10,7 +10,7 @@ import {
 } from "ui";
 import { getInitials } from "utils";
 import { UserMenuContent } from ".";
-import { useAuthStore } from "@/app/login/_lib/stores/auth-store";
+import { useAuthStore } from "@/app/login/_internal/stores/auth-store";
 
 export function NavUser() {
   const { user } = useAuthStore();

@@ -16,7 +16,7 @@ import {
   CardContent,
 } from "ui"; // Seu UI Kit
 import { usePreNotaStore } from "@inclusao/stores";
-import { useAuxStore as useLoginAuxStore } from "@/app/login/_lib/stores";
+import { useAuxStore as useLoginAuxStore } from "@/app/login/_internal/stores";
 import { formatCurrency } from "utils";
 import type { Rateio as RateioType } from "@inclusao/types";
 

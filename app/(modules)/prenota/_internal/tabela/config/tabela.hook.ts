@@ -1,4 +1,4 @@
-// app/(modules)/prenota/_lib/tabela/config/tabela.hook.ts
+// app/(modules)/prenota/_internal/tabela/config/tabela.hook.ts
 
 
 "use client";

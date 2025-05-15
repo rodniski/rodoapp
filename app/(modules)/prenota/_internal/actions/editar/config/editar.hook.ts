@@ -1,4 +1,4 @@
-// /app/(modules)/prenota/_lib/editar/config/editar.hook.ts
+// /app/(modules)/prenota/_internal/editar/config/editar.hook.ts
 "use client";
 
 import { useEffect } from "react";

@@ -46,7 +46,7 @@
       "@controle/*": ["./app/(modules)/controle/_internal/*"],
       "@borracharia/*": ["./app/(modules)/controle/borracharia/_internal/*"],
       "@portaria/*": ["./app/(modules)/controle/portaria/_internal/*"],
-      "@documentacao/*": ["./app/(modules)/documentacao/_internal/*"]
+      "@documentacao/*": ["./app/documentacao/_internal/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(modules)/prenota/inclusao/_internal/(api)/getXmlDetails.ts"],

@@ -1,0 +1,35 @@
+---
+title: "Utilização Geral do Power BI"
+group: "PowerBI"
+date: "11 de Fevereiro de 2024" # Considere atualizar esta data se for específica para este artigo
+description: "O BI pode ser acessado pelo seu navegador ou instalando o aplicativo em seu Android ou IOS. Para fazer login, utilize a conta disponibilizada pela TI. Favor não alterar a senha, pois a mesma é compartilhada com outros usuários!"
+headerButton:
+  text: "Acessar PowerBI"
+  onClickIdentifier: "openPowerBiAppMain" # Mapeado para window.open(...)
+footerButton:
+  text: "Abrir Chamado (Dúvidas Utilização)"
+  onClickIdentifier: "openHeskTicketPowerBiUtilizacao" # Identificador específico
+---
+
+{/* O título principal visível na página agora virá do próprio Markdown */}
+# Utilização Geral do Power BI
+
+O Power BI é dividido em três principais componentes: **Aplicativos**, **Relatórios** e **Páginas**, que permitem localizar e acessar facilmente qualquer informação. No ambiente Rodoparaná, atualmente utilizamos um único aplicativo chamado `Workspace`. Você pode identificar o que está visualizando conforme demonstrado nos prints a seguir.
+
+{/* Usando um div com Tailwind para layout das imagens */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <DocImage src="/documentacao/ti/powerbi/1.png" alt="Print sinalizando o aplicativo Workspace no Power BI" caption="1. Aplicativo Principal: Workspace." />
+  <DocImage src="/documentacao/ti/powerbi/2.png" alt="Print sinalizando a lista de relatórios dentro do Workspace" caption="2. Lista de Relatórios." />
+  <DocImage src="/documentacao/ti/powerbi/3.png" alt="Print sinalizando as diferentes páginas dentro de um relatório" caption="3. Páginas de um Relatório." />
+</div>
+
+## Corrigindo Problemas Comuns
+
+O Power BI pode exibir dados inconsistentes ou erros visuais devido a atualizações ou cache acumulado no navegador. Para corrigir, pressione `CTRL + F5` no teclado para recarregar a página e limpar o cache do navegador para a página atual (force refresh).
+
+## Outros Problemas
+
+Se estiver enfrentando outra dificuldade, abra um chamado e, assim que possível, um membro da equipe de TI entrará em contato para ajudá-lo!
+
+{/* Se você precisar de um botão específico NO MEIO do conteúdo MDX: */}
+{/* <DocButton onClickIdentifier="openHeskTicket">Precisa de Ajuda Extra?</DocButton> */}

@@ -1,7 +1,6 @@
-// app/layout.tsx
 "use client";
 import { Roboto } from "next/font/google";
-import { Providers } from "comp/providers";
+import { Providers } from "config";
 import "./globals.css";
 
 const font = Roboto({
@@ -19,6 +18,7 @@ export default function RootLayout({
       <body
         className={`${font.className} antialiased min-h-screen bg-background flex flex-col`}
       >
+
         <Providers>{children}</Providers>
       </body>
     </html>

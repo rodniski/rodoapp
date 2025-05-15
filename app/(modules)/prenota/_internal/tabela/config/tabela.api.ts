@@ -1,4 +1,4 @@
-// app/(modules)/prenota/_lib/tabela/config/tabela.api.ts
+// app/(modules)/prenota/_internal/tabela/config/tabela.api.ts
 
 import type { FetchParams } from "@/app/(modules)/prenota/_internal/tabela";
 

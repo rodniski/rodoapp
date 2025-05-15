@@ -1,0 +1,38 @@
+---
+title: "Ajustando Limite da Caixa de Correio (Outlook com G-Suite Sync)"
+group: "TI"
+date: "22 de Janeiro de 2023" # Data do objeto original
+description: "Instruções para ajustar o limite de tamanho da caixa de correio no Outlook quando sincronizado com o Google Workspace (G-Suite), caso seus e-mails não estejam sincronizando completamente."
+# Sem headerButton neste artigo
+footerButton:
+  text: "Abrir Chamado (E-mail Outlook)"
+  onClickIdentifier: "openHeskTicketTIEmailOutlook"
+---
+
+# Ajustando Limite da Caixa de Correio no Outlook (G-Suite Sync)
+
+Se você utiliza o Microsoft Outlook sincronizado com sua conta Google Workspace (anteriormente G-Suite) e percebe que nem todos os seus e-mails estão sendo baixados ou sincronizados, pode ser necessário ajustar o limite de tamanho da caixa de correio definido pela ferramenta de sincronização.
+
+## Tutorial para Ajustar o Limite
+
+1.  Localize o ícone do **Google Workspace Sync for Microsoft Outlook (GWSMO)** na bandeja do sistema (geralmente próximo ao relógio do Windows). Pode ser necessário clicar na setinha (^) para expandir os ícones ocultos.
+2.  Clique com o botão direito do mouse sobre o ícone do GWSMO.
+3.  No menu que aparece, selecione a opção **"Definir limite de tamanho da caixa de correio..."**.
+4.  Uma janela de diálogo será exibida. Selecione a opção **"Ilimitado"**.
+5.  Clique em **OK**.
+
+Após esses passos, o Outlook deverá começar a sincronizar todos os seus e-mails sem restrição de tamanho da caixa local. Pode levar algum tempo para a sincronização completa, dependendo da quantidade de e-mails.
+
+**Representação Visual dos Passos:**
+
+{/* As imagens originais tinham nomes genéricos 1.png, 2.png. Renomeie para algo descritivo. */}
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 items-start">
+  <DocImage src="/documentacao/ti/emails-limitados/passo1-icone-gsuite.png" alt="Ícone do G-Suite Sync na bandeja" width={350} height={200} caption="1. Ícone do G-Suite Sync." />
+  <DocImage src="/documentacao/ti/emails-limitados/passo2-menu-limite.png" alt="Menu com opção de definir limite" width={350} height={250} caption="2. Opção 'Definir limite...'" />
+  <DocImage src="/documentacao/ti/emails-limitados/passo3-dialogo-limite.png" alt="Diálogo para escolher limite" width={350} height={200} caption="3. Janela de diálogo." />
+  <DocImage src="/documentacao/ti/emails-limitados/passo4-selecionar-ilimitado.png" alt="Selecionando 'Ilimitado'" width={350} height={200} caption="4. Selecione 'Ilimitado' e OK." />
+</div>
+
+## Outros Problemas
+
+Se mesmo após ajustar o limite para "Ilimitado" você continuar enfrentando dificuldades com a sincronização de e-mails no Outlook, abra um chamado para a equipe de TI.

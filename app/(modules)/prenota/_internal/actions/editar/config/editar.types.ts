@@ -1,4 +1,4 @@
-// src/app/(modules)/prenota/_lib/editar/config/editar.types.ts
+// src/app/(modules)/prenota/_internal/editar/config/editar.types.ts
 
 export interface EditarItem {
   D1_COD: string;

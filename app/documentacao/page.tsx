@@ -1,5 +1,5 @@
 import React from 'react'
-import { inicialCards } from './_lib/data/inicial'
+import { inicialCards } from './_internal/logic/inicial'
 
 export default function Page() {
   return (
