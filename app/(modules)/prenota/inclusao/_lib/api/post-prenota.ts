@@ -8,6 +8,7 @@ import type {
   PostPreNotaResponse, // Use o tipo de resposta unificado
   PostPreNotaOptions,
 } from "@inclusao/types"; // Ajuste o caminho se necessário
+import { config } from "config";
 
 export async function postPreNota(
   payload: PostPreNotaPayload, // Tipagem correta do payload
@@ -15,7 +16,7 @@ export async function postPreNota(
 ): Promise<PostPreNotaResponse> {
   // Promete retornar a resposta unificada
   let response: Response;
-  const url = "http://172.16.99.174:8400/rest/PreNota/InclusaoPreNota"; // Mova para uma constante
+  const url = `${config.API_PRODUCTION_URL}PreNota/InclusaoPreNota`;
 
   try {
     response = await fetch(url, {
