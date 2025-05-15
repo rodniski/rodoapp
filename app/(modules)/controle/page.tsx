@@ -1,14 +1,15 @@
 "use client";
 
 import { HistColumns } from "./_lib/components";
-import { useHistory } from "./_lib/hooks";
+// import { useHistory } from "./_lib/hooks";
 import { DataTable, ScrollArea } from "ui";
 
 const Page = () => {
-  const { data, isLoading } = useHistory({
-    Page: '1',
-    Filial: "0101"
-  });
+  // const { data, isLoading } = useHistory({
+  //   Page: '1',
+  //   PageSize: '100',
+  //   Filial: "0101"
+  // });
 
   return (
     <ScrollArea className="h-[calc(100vh-60px)]">
@@ -16,11 +17,11 @@ const Page = () => {
         <h1 className="text-4xl font-bold mb-6 text-center">
           Central de Carregamento de Pneus
         </h1>
-        <DataTable
+        {/* <DataTable
           columns={HistColumns}
           data={data || []}
           isLoading={isLoading}
-        />
+        /> */}
       </div>
     </ScrollArea>
   );

@@ -3,7 +3,6 @@ import { config } from "config";
 import { BorrachariaParams} from "../types";
 
 type MovBorrachariaType = "borracharia";
-
 type ParamsType = BorrachariaParams;
 
 function fixMalformedJson(jsonString: string): string {
@@ -74,45 +73,16 @@ export const fetchMovBorracharia = async (
   // Monta a URL base
   const baseUrl = `${config.API_BORRACHARIA_URL}MovPortaria/${endpoint}`;
 
-  // Se for para usar POST, envia os dados no corpo
   if (usePost) {
-    console.log("📡 Enviando via POST");
     const response = await fetch(baseUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify(params),
-    });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Erro na requisição POST:", {
-        status: response.status,
-        statusText: response.statusText,
-        errorText,
-        type,
-        endpoint,
-      });
-      throw new Error(`Erro ao realizar operação ${type}: ${errorText}`);
-    }
-    const responseText = await response.text();
-    try {
-      return JSON.parse(responseText);
-    } catch (parseError) {
-      const fixedJsonString = fixMalformedJson(responseText);
-      try {
-        return JSON.parse(fixedJsonString);
-      } catch (finalParseError) {
-        console.error("Não foi possível analisar JSON mesmo após correção", {
-          originalError: parseError,
-          finalParseError,
-          fixedJsonString,
-        });
-        throw finalParseError;
-      }
-    }
+      body: queryParams.toString(),
+    }); 
   } else {
-    // Se não for POST, envia via GET com query string
+     // Se não for POST, envia via GET com query string
     const url = `${baseUrl}?${queryParams.toString()}`;
     console.log("🌐 URL Construída:", url);
     const response = await fetch(url);
@@ -144,5 +114,5 @@ export const fetchMovBorracharia = async (
       }
     }
   }
-};
+}
 
