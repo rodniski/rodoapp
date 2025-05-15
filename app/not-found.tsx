@@ -12,7 +12,7 @@ export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="relative flex min-h-[calc(100vh-65px)] overflow-hidden flex-col items-center justify-center bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950">
+    <div className="relative flex min-h-[calc(100vh-50px)] overflow-hidden flex-col items-center justify-center bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950">
       {/* Barra animada no rodapé */}
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-1"
@@ -20,7 +20,7 @@ export default function NotFound() {
         animate={{ scaleX: 1 }}
         transition={{ duration: 2, ease: "easeInOut" }}
       >
-        <div className="h-full bg-gradient-to-r from-lime-500 via-emerald-500 to-cyan-500"></div>
+        <div className="h-full bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500"></div>
       </motion.div>
 
       {/* Conteúdo centralizado */}
@@ -33,21 +33,20 @@ export default function NotFound() {
         >
           <h1 className="relative select-none text-4xl font-extrabold tracking-tight lg:text-[200pt]">
             <motion.span
-              // Removidos spinning e tap, mantendo apenas o hover scale
               whileHover={{ scale: 1.2 }}
-              className="inline-block cursor-pointer bg-green-500 bg-clip-text text-transparent"
+              className="inline-block cursor-pointer bg-sky-500 bg-clip-text text-transparent"
             >
               4
             </motion.span>
             <motion.span
               whileHover={{ scale: 1.2 }}
-              className="inline-block cursor-pointer bg-green-500 bg-clip-text text-transparent"
+              className="inline-block cursor-pointer bg-sky-500 bg-clip-text text-transparent"
             >
               0
             </motion.span>
             <motion.span
               whileHover={{ scale: 1.2 }}
-              className="inline-block cursor-pointer bg-green-500 bg-clip-text text-transparent"
+              className="inline-block cursor-pointer bg-sky-500 bg-clip-text text-transparent"
             >
               4
             </motion.span>
@@ -100,10 +99,11 @@ export default function NotFound() {
           </motion.div>
         </motion.div>
       </div>
+
       <Logo
-            className="z-0 absolute size-350 -top-60 -right-65 opacity-5"
-            color="var(--foreground)"
-          />
+        className="z-0 absolute size-350 -top-60 -right-65 opacity-5"
+        color="var(--foreground)"
+      />
     </div>
   );
 }

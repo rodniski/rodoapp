@@ -3,11 +3,12 @@
 import { AnimatedTabs } from "ui";
 import {
   HeaderForm,
-  Tabela,
   Installments,
   FormProgressHoverCard,
+  InclusaoTable,
+  columns,
 } from "@inclusao/components";
-import { usePreNotaStore } from "@/app/(modules)/prenota/inclusao/_lib/stores";
+import { usePreNotaStore } from "@inclusao/stores";
 import { z } from "zod";
 import {
   headerSchema,
@@ -20,7 +21,7 @@ import { Background } from "comp";
 
 export default function PrenotaPage() {
   const draft = usePreNotaStore((s) => s.draft);
-
+  const itens = usePreNotaStore((state) => state.draft.itens);
   // Validação do cabeçalho
   const headerValidationResult = headerSchema.safeParse(draft.header);
   const headerValid =
@@ -64,15 +65,15 @@ export default function PrenotaPage() {
             },
             {
               value: "step2",
-              label: "Pagamento",
-              content: <Installments />,
-              valid: step2Valid,
+              label: "Produtos",
+              content: <InclusaoTable columns={columns} data={itens} />,
+              valid: itemsValid,
             },
             {
               value: "step3",
-              label: "Produtos",
-              content: <Tabela />,
-              valid: itemsValid,
+              label: "Pagamento",
+              content: <Installments />,
+              valid: step2Valid,
             },
           ]}
         />

@@ -1,5 +1,6 @@
 "use client";
-
+import { EditPrenotaButton } from "@prenota/editar";
+import { getCurrentUsername } from "utils";
 import React, { useState } from "react";
 import {
   MenuItem,
@@ -20,7 +21,6 @@ import {
 } from "ui";
 import {
   ExclamationTriangleIcon,
-  Pencil2Icon,
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 
@@ -30,7 +30,7 @@ export const Actions: React.FC<ActionsProps> = ({
 }) => {
   const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
-
+  console.log(preNota.REC);
   const {
     attachments,
     isLoading: isLoadingAnexos,
@@ -86,11 +86,7 @@ export const Actions: React.FC<ActionsProps> = ({
             isOpen={isTimelineOpen}
             onOpenChange={setIsTimelineOpen}
           />
-          <MenuItem
-            label="Editar Nota"
-            icon={<Pencil2Icon className="size-4" />}
-            disabled
-          />
+          <EditPrenotaButton rec={preNota.REC} usr={getCurrentUsername()} />
 
           <DropdownMenuSeparator />
 

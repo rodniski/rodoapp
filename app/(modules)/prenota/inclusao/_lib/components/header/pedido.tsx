@@ -9,15 +9,18 @@ import {
   CommandGroup,
   CommandItem,
   CommandEmpty,
+  Badge,
 } from "ui";
-import { PackageSearch, Check } from "lucide-react";
+import { PackageSearch } from "lucide-react";
 import {
   usePreNotaStore,
-  usePreNotaAuxStore,
   useFornecedorSearchResult,
+  usePedidosSelecionadosAux,
+  useAddPedidoSelecionadoAux,
+  useRemovePedidoSelecionadoAux,
+  usePreNotaAuxStore,
 } from "@inclusao/stores";
 import type { Pedido, Fornecedor } from "@inclusao/api";
-
 
 interface PedidoResumo {
   numero: string;
@@ -34,11 +37,13 @@ interface PedidoDialogProps {
 
 export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
   const [open, setOpen] = useState(false);
-  // novo estado para controlar o valor de busca
   const [filter, setFilter] = useState("");
 
   const header = usePreNotaStore((s) => s.draft.header);
   const fornecedores = useFornecedorSearchResult();
+  const pedidosSelecionados = usePedidosSelecionadosAux();
+  const addPedidoSelecionado = useAddPedidoSelecionadoAux();
+  const removePedidoSelecionado = useRemovePedidoSelecionadoAux();
   const setSelectedPedido = usePreNotaAuxStore(
     (s) => s.selection.setSelectedPedido
   );
@@ -61,7 +66,6 @@ export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
       {}
     );
 
-    // cria o resumo completo
     const todos = Object.entries(agrupados).map(([numero, itens]) => ({
       numero,
       total: itens.reduce((s, i) => s + (i.C7_TOTAL || 0), 0),
@@ -70,21 +74,43 @@ export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
       itensOriginais: itens,
     }));
 
-    // filtra pelo número do pedido conforme digitado
     return todos.filter((p) => p.numero.includes(filter));
   }, [fornecedores, header.FORNECEDOR, header.LOJA, filter]);
 
-  const buttonLabel = value ?? "Selecionar pedido";
+  const buttonLabel = pedidosSelecionados.pedidosSelecionados.length
+    ? ""
+    : "Selecionar pedido";
 
-  const handleSelectPedido = (pedResumo: PedidoResumo) => {
-    setSelectedPedido(pedResumo.itensOriginais[0]);
-    const condicao = pedResumo.itensOriginais[0]?.C7_COND ?? "";
-
-    // Aqui chamamos o onChange que atualiza no componente pai
-    onChange(pedResumo.numero, condicao);
-
-    // limpa filtro ao fechar
-    setFilter("");
+  const handleTogglePedido = (pedido: PedidoResumo) => {
+    if (pedidosSelecionados.pedidosSelecionados.includes(pedido.numero)) {
+      removePedidoSelecionado(pedido.numero);
+    } else {
+      addPedidoSelecionado(pedido.numero);
+    }
+  };
+  const handleConfirmarSelecao = () => {
+    if (pedidosSelecionados.pedidosSelecionados.length > 0) {
+      const primeiroPedido = pedidosResumo.find(
+        (p) => p.numero === pedidosSelecionados.pedidosSelecionados[0]
+      );
+      if (primeiroPedido) {
+        const pedidoSelecionado = primeiroPedido.itensOriginais[0];
+        
+        // Atualiza na store auxiliar
+        setSelectedPedido(pedidoSelecionado);
+  
+        // Atualiza no header da pré-nota
+        usePreNotaStore.getState().setHeader({
+          CONDFIN: pedidoSelecionado.C7_COND || "",
+        });
+  
+        // Atualiza via callback do formulário (opcional se for redundante)
+        onChange(
+          pedidoSelecionado.C7_NUM,
+          pedidoSelecionado.C7_COND || ""
+        );
+      }
+    }
     setOpen(false);
   };
 
@@ -99,12 +125,18 @@ export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
           !header.FORNECEDOR ? "Selecione um fornecedor primeiro" : buttonLabel
         }
       >
-        <span className="truncate">{buttonLabel}</span>
+        <span className="truncate flex gap-2 items-center">
+          {buttonLabel}
+          {pedidosSelecionados.pedidosSelecionados.map((num) => (
+            <Badge key={num} variant="default">
+              {num}
+            </Badge>
+          ))}
+        </span>
         <PackageSearch className="h-4 w-4 opacity-60" />
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        {/* adiciona value e onValueChange para controlar a busca */}
         <CommandInput
           placeholder="Buscar número do pedido..."
           value={filter}
@@ -119,8 +151,12 @@ export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
                 <CommandItem
                   key={p.numero}
                   value={p.numero}
-                  onSelect={() => handleSelectPedido(p)}
-                  className="flex flex-col items-start cursor-pointer"
+                  onSelect={() => handleTogglePedido(p)}
+                  className={`flex flex-col items-start cursor-pointer my-1 ${
+                    pedidosSelecionados.pedidosSelecionados.includes(p.numero)
+                      ? "bg-primary text-white"
+                      : ""
+                  }`}
                 >
                   <div className="justify-between items-center w-full flex">
                     <span className="font-medium">Pedido: {p.numero}</span>
@@ -132,18 +168,12 @@ export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
                       })}
                     </span>
                   </div>
-                  <div className="w-full flex justify-between text-xs text-muted-foreground">
+                  <div className="w-full flex justify-between text-xs">
                     {p.obs && (
-                      <span className="text-xs mt-0.5 italic text-muted-foreground">
-                        OBS: {p.obs}
-                      </span>
+                      <span className="mt-0.5 italic">OBS: {p.obs}</span>
                     )}
-                    <span>Itens: {p.qtdItens}</span>
+                    <span className="mt-0.5 italic">Itens: {p.qtdItens}</span>
                   </div>
-
-                  {value === p.numero && (
-                    <Check className="absolute right-2 top-1/2 -translate-y-1/2 text-primary h-4 w-4" />
-                  )}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -155,6 +185,9 @@ export function PedidoDialog({ value, onChange }: PedidoDialogProps) {
             </CommandEmpty>
           )}
         </CommandList>
+        <div className="p-3 flex justify-end">
+          <Button onClick={handleConfirmarSelecao}>Confirmar Seleção</Button>
+        </div>
       </CommandDialog>
     </>
   );

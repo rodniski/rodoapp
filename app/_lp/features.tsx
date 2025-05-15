@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { GlowingEffect } from "comp";
 import { FileText, ClipboardList, BookOpen } from "lucide-react";
 
@@ -24,21 +27,37 @@ const features = [
 
 export function Features() {
   return (
-    <section className="z-10 container space-y-16 pt-16 pb-24 shadow-color-tint bg-primary/05 dark:bg-muted/20 backdrop-blur-xl rounded-3xl">
+    <section className="z-10 container space-y-16 pt-12 pb-24 max-w-7xl mx-auto">
       <div className="mx-auto max-w-[58rem] text-center">
-        <h2 className="font-bold text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
+        <motion.h2
+          className="font-bold text-3xl leading-[1.1] sm:text-3xl md:text-5xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5 }}
+        >
           Módulos Integrados
-        </h2>
-        <p className="mt-4 text-muted-foreground text-lg fhd:text-xl qhd:text-2xl">
+        </motion.h2>
+        <motion.p
+          className="mt-4 text-muted-foreground text-lg fhd:text-xl qhd:text-2xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           Descubra como os módulos do hub de intranet do Grupo Rodoparaná
           transformam sua rotina com mais eficiência e controle.
-        </p>
+        </motion.p>
       </div>
       <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
-        {features.map((feature) => (
-          <div
+        {features.map((feature, index) => (
+          <motion.div
             key={feature.name}
             className="relative min-h-[14rem] rounded-md border p-2 md:p-3 bg-card shadow-color-tint"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5, delay: 0.1 * index }}
           >
             <GlowingEffect
               blur={0}
@@ -64,7 +83,7 @@ export function Features() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

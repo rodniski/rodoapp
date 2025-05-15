@@ -12,19 +12,17 @@ import {
 } from "ui";
 import { NavGroup, NavItem } from ".";
 import { motion, AnimatePresence } from "motion/react";
+import { aplicacoesGroup, corporativoGroup } from "./navigation";
+import { hasAccessToGrupo } from "utils";
 
-interface NavMenuProps {
-  items: NavGroup[];
-}
-
-export function NavMenu({ items }: NavMenuProps) {
+export function NavMenu() {
   const [hoveredItem, setHoveredItem] = React.useState<NavItem | null>(null);
   const [activeGroup, setActiveGroup] = React.useState<NavGroup | null>(null);
-
+  const navItems = [aplicacoesGroup, corporativoGroup];
   return (
     <NavigationMenu>
       <NavigationMenuList>
-        {items.map((group) => (
+        {navItems.map((group) => (
           <NavigationMenuItem
             key={group.id}
             className="m-0 flex list-none items-center rounded p-1"
@@ -45,7 +43,6 @@ export function NavMenu({ items }: NavMenuProps) {
             </NavigationMenuTrigger>
             <NavigationMenuContent>
               <motion.div
-                // Responsividade com Tailwind
                 className="flex flex-col w-full gap-2 p-2 sm:p-0 sm:flex-row sm:w-[380px] lg:w-[450px] qhd:w-[600px]"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -108,21 +105,28 @@ export function NavMenu({ items }: NavMenuProps) {
                         </h4>
                       )}
                       <ul className="">
-                        {subGroup.items.map((subItem) => (
-                          <ListItem
-                            key={subItem.href}
-                            href={subItem.href}
-                            title={subItem.label}
-                            onMouseEnter={() => {
-                              setHoveredItem(subItem);
-                              setActiveGroup(group);
-                            }}
-                            onMouseLeave={() => {
-                              setHoveredItem(null);
-                              setActiveGroup(null);
-                            }}
-                          />
-                        ))}
+                        {subGroup.items
+                          .filter((item) => {
+                            if (!item.requiresGroup?.length) return true;
+                            return item.requiresGroup.some((grupo) =>
+                              hasAccessToGrupo(grupo)
+                            );
+                          })
+                          .map((subItem) => (
+                            <ListItem
+                              key={subItem.href}
+                              href={subItem.href}
+                              title={subItem.label}
+                              onMouseEnter={() => {
+                                setHoveredItem(subItem);
+                                setActiveGroup(group);
+                              }}
+                              onMouseLeave={() => {
+                                setHoveredItem(null);
+                                setActiveGroup(null);
+                              }}
+                            />
+                          ))}
                       </ul>
                       {/* Adiciona o Separator somente se não for o último item */}
                       {index < group.subGroups.length - 1 && (

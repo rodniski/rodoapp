@@ -53,8 +53,13 @@ export const usePreNotaStore = create<PreNotaState>((set) => ({
     })),
 
   /* Itens ----------------------------------------------------------------*/
-  setItens: (list: PreNotaItem[]) =>
-    set((state) => ({ draft: { ...state.draft, itens: [...list] } })),
+  setItens: (list?: PreNotaItem[]) =>
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        itens: Array.isArray(list) ? [...list] : [],
+      },
+    })),
 
   addItem: (item: PreNotaItem) =>
     set((state) => ({

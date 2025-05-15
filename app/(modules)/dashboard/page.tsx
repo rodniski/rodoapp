@@ -20,12 +20,15 @@ const Carousel = dynamic(
 
 export default function DashboardPage() {
   return (
-    <main className="w-full h-[calc(100vh-65px)] flex justify-center flex-col overflow-y-auto lg:px-5 fhd:px-20">
+    <main className="w-full h-[calc(100vh-65px)] flex flex-col justify-center overflow-y-auto lg:px-5 fhd:px-20">
       <Background />
-      <div className="z-10 space-y-8">
-        <span className="text-center text-2xl font-bold">
-          Bem vindo, {formatUsername(getCurrentUsername())}
+      <span className="absolute top-20 z-10 text-end text-2xl font-bold">
+        Bem vindo,{" "}
+        <span className="text-primary">
+          {formatUsername(getCurrentUsername())}!
         </span>
+      </span>
+      <div className="z-10 space-y-8">
         {dashboardData.map((category) => (
           <section
             key={category.id}

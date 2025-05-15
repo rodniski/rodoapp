@@ -29,7 +29,7 @@ import { TIPOS_NF_OPTIONS } from "@prenota/config";
 import type { PreNotaHeader } from "@inclusao/types";
 import { toast } from "sonner";
 import { isValid, isDate } from "date-fns";
-import { formatDateBR, parseDateBR } from "utils";  
+import { formatDateBR, parseDateBR } from "utils";
 
 /* ---------- RHF + Zod ------------------------------------------------*/
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -75,10 +75,9 @@ export const HeaderForm = () => {
   const methods = useForm<HeaderSchemaParsed>({
     resolver: zodResolver(headerSchema),
     mode: "onChange",
+    shouldUnregister: false, // ← mantém os valores registrados ao desmontar
     defaultValues: {
       ...headerDraftFromStore,
-      // Garante que os campos opcionais no Zod que são strings em PreNotaHeader
-      // sejam inicializados com "" se forem null/undefined no store.
       DTINC: headerDraftFromStore.DTINC || "",
       CHVNF: headerDraftFromStore.CHVNF || "",
       OBS: headerDraftFromStore.OBS || "",
@@ -86,7 +85,7 @@ export const HeaderForm = () => {
       CHAVEPIX: headerDraftFromStore.CHAVEPIX || "",
       JUSTIFICATIVA: headerDraftFromStore.JUSTIFICATIVA || "",
       tiporodo: headerDraftFromStore.tiporodo || "",
-      TIPO: headerDraftFromStore.TIPO || "N",
+      TIPO: headerDraftFromStore.TIPO || "N" || "C",
       prioridade: headerDraftFromStore.prioridade || "",
       OLDSERIE: headerDraftFromStore.OLDSERIE || "",
     },
@@ -119,7 +118,7 @@ export const HeaderForm = () => {
         CHAVEPIX: newDraftHeader.CHAVEPIX || "",
         JUSTIFICATIVA: newDraftHeader.JUSTIFICATIVA || "",
         tiporodo: newDraftHeader.tiporodo || "",
-        TIPO: newDraftHeader.TIPO || "N",
+        TIPO: newDraftHeader.TIPO || "N" || "C" ,
         prioridade: newDraftHeader.prioridade || "",
         OLDSERIE: newDraftHeader.OLDSERIE || "",
       });
@@ -180,7 +179,17 @@ export const HeaderForm = () => {
     const parsed = parseDateBR(watchedDtInc);
     return parsed && isValid(parsed) ? parsed : undefined;
   }, [watchedDtInc]);
+  const watchedTipoRodo = watch("tiporodo");
 
+  // Atualiza automaticamente o campo TIPO com base no tiporodo selecionado
+  useEffect(() => {
+    if (!watchedTipoRodo) return;
+    const tipo = watchedTipoRodo === "Despesa/Imobilizado" ? "N" : "C";
+    setValue("TIPO", tipo, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, [watchedTipoRodo, setValue]);
   return (
     <FormProvider {...methods}>
       <form

@@ -19,7 +19,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import Logo from "@/public/logo/logo";
-import { NavMenu, aplicacoesGroup, corporativoGroup, NavMobile, NavUser } from ".";
+import {
+  NavMenu,
+  aplicacoesGroup,
+  corporativoGroup,
+  NavMobile,
+  NavUser,
+} from ".";
 import {
   Popover,
   PopoverTrigger,
@@ -28,7 +34,7 @@ import {
   ThemeSwitcher,
 } from "ui";
 import { SunIcon, MoonIcon, Half2Icon } from "@radix-ui/react-icons";
-import { useAuth } from "@/app/login/_lib/hooks";
+import { useAuth } from "@login/hooks";
 
 export function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -65,26 +71,23 @@ export function Navbar() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex h-12 items-center justify-between px-8">
+      <div className="flex h-12 items-center justify-between px-2 md:px-8 w-full">
         {/* Logo e navegação */}
-        <div className="flex items-center space-x-6 w-full">
+        <div className="flex items-center justify-between md:justify-start space-x-6 w-full">
           {isAuthenticated && (
             <div className="lg:hidden">
-              <NavMobile items={navItems} />
+              <NavMobile />
             </div>
           )}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href={isAuthenticated ? "/dashboard" : "/"}
-              className="flex items-center space-x-2"
-            >
+            <Link href={"/"} className="flex items-center space-x-2">
               <Logo className="size-8" color="var(--primary)" />
               <span className="font-bold text-xl">RodoApp</span>
             </Link>
           </motion.div>
           {isAuthenticated && (
             <div className="hidden lg:block">
-              <NavMenu items={navItems} />
+              <NavMenu />
             </div>
           )}
         </div>

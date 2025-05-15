@@ -1,3 +1,4 @@
+import { gruposNomes } from "@/_core/utils";
 import {
   AccessibilityIcon,
   ArchiveIcon,
@@ -5,7 +6,6 @@ import {
   ClipboardIcon,
   DashboardIcon,
   DesktopIcon,
-  FileTextIcon,
   GlobeIcon,
   Pencil2Icon,
   PlusIcon,
@@ -15,8 +15,6 @@ import {
   ZoomInIcon,
 } from "@radix-ui/react-icons";
 import { TreePine, Truck } from "lucide-react";
-
-// Interfaces para itens e grupos hierárquicos
 
 export interface NavItem {
   id: string;
@@ -70,7 +68,11 @@ export const prenotaSubGroup: NavSubGroup = {
       icon: PlusIcon,
       description:
         "Cadastre novos pedidos de compra. Para aceleração do cadastro de Pré Documentos de Entrada",
-      requiresGroup: ["000013", "000014"],
+      requiresGroup: [
+        gruposNomes.comprasRodoparana,
+        gruposNomes.comprasTimber,
+        gruposNomes.admin,
+      ],
     },
   ],
 };
@@ -86,7 +88,7 @@ export const controleSubGroup: NavSubGroup = {
       icon: ClipboardIcon,
       description:
         "Registre e acompanhe o controle de saída de itens da borracharia. Mantenha um histórico detalhado das movimentações.",
-      requiresGroup: ["000190"],
+      requiresGroup: [gruposNomes.borracharia, gruposNomes.admin],
     },
     {
       id: "controle-conferencia",
@@ -95,7 +97,7 @@ export const controleSubGroup: NavSubGroup = {
       icon: ZoomInIcon,
       description:
         "Realize a conferência de itens. Compare o estoque físico com o sistema e identifique divergências.",
-      requiresGroup: ["000191"],
+      requiresGroup: [gruposNomes.portaria, gruposNomes.admin],
     },
     {
       id: "controle-historico",

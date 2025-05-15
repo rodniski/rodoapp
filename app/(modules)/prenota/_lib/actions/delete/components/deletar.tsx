@@ -3,7 +3,7 @@
 import { useDeletePrenota, DeletePrenotaButtonProps } from "@prenota/actions";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
-import { Button, DropdownMenuItem } from "ui";
+import { DropdownMenuItem } from "ui";
 import React from "react";
 
 export const DeletePrenotaButton: React.FC<DeletePrenotaButtonProps> = ({

@@ -10,7 +10,7 @@ export type DateString = `${number}/${number}/${number}`;
  * ==========================================================================*/
 
 /** Tipos auxiliares */
-export const TpNota = { NORMAL: "N", SERVICO: "S" } as const;
+export const TpNota = { DESPESA: "N", DEMAIS: "C" } as const;
 export const TpRodo = {
   REVENDA: "Revenda",
   DESPESA_IMOB: "Despesa/Imobilizado",
@@ -106,7 +106,7 @@ export const preNotaInitial: PreNotaDraft = {
   header: {
     FILIAL: "",
     OPCAO: 3,
-    TIPO: TpNota.NORMAL,
+    TIPO: TpNota.DESPESA || TpNota.DEMAIS,
     FORNECEDOR: "",
     LOJA: "",
     DOC: "",

@@ -1,11 +1,3 @@
-/**
- * _lib/components/stepper/header/XmlSearchInput.tsx (ou @inclusao/components/...)
- *
- * Componente de Input para busca de NFe por chave de 44 dígitos.
- * Utiliza o hook useSearchXml para disparar a busca e gerenciar estados.
- * Exibe histórico de buscas recentes e feedback de loading/erro.
- * Controla o disparo automático da busca para evitar loops.
- */
 "use client";
 
 import {
@@ -22,68 +14,62 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "ui"; // Seus componentes UI, ajuste o path se necessário
+} from "ui";
 import { History, Loader2, AlertCircle } from "lucide-react";
-import { useState, useEffect, useRef } from "react"; // useRef é crucial para o controle de disparo
-import { useSearchXml } from "@inclusao/hooks"; // Hook principal de busca XML
-import { useXmlHistoryStore } from "@inclusao/stores"; // Store auxiliar para histórico
+import { useState, useEffect, useRef } from "react";
+import { useSearchXml } from "@inclusao/hooks";
+import { useXmlHistoryStore, usePreNotaStore } from "@inclusao/stores";
 
 export function XmlSearchInput() {
-  const [inputValue, setInputValue] = useState("");
+  const chvnf = usePreNotaStore((state) => state.draft.header.CHVNF);
+  const [inputValue, setInputValue] = useState(chvnf || "");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // Hook de busca: retorna função para buscar e estados de loading/erro
   const { searchAndPopulate, isLoading, error } = useSearchXml();
-  // Lê o histórico do store auxiliar
   const xmlHistory = useXmlHistoryStore((state) => state.xmlHistory);
+  const setHeader = usePreNotaStore((state) => state.setHeader);
 
-  // --- Controle de Disparo Automático ---
-  // Ref para controlar se a busca já foi disparada para o valor atual de 44 dígitos
   const hasFiredSearch = useRef(false);
 
   useEffect(() => {
-    // Dispara a busca se tiver 44 dígitos e a flag NÃO estiver ativa
     if (inputValue.length === 44 && !hasFiredSearch.current) {
-      console.log("useEffect disparando busca automática para:", inputValue);
-      hasFiredSearch.current = true; // Ativa a flag para este valor
-      searchAndPopulate(inputValue); // Chama a busca
+      hasFiredSearch.current = true;
+      searchAndPopulate(inputValue);
+      setHeader({ CHVNF: inputValue });
     }
 
-    // Reseta a flag se o comprimento for menor que 44
     if (inputValue.length < 44 && hasFiredSearch.current) {
-       console.log("Resetando flag 'hasFiredSearch'");
-       hasFiredSearch.current = false;
+      hasFiredSearch.current = false;
     }
-    // Depende do valor do input e da função de busca (estável via useCallback no hook)
-  }, [inputValue, searchAndPopulate]);
-  // --- Fim do Controle de Disparo ---
+  }, [inputValue, searchAndPopulate, setHeader]);
 
-  // Limpa caracteres não numéricos ao digitar
+  useEffect(() => {
+    setInputValue(chvnf || "");
+  }, [chvnf]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const numericValue = e.target.value.replace(/\D/g, "");
     setInputValue(numericValue);
   };
 
-  // Permite forçar a busca com Enter (mesmo se já disparada automaticamente)
   const handleManualSearch = (chave: string) => {
-      if (chave.length === 44 && !isLoading) { // Só busca se tiver 44 e não estiver carregando
-          console.log("Disparando busca manual (Enter) para:", chave);
-          searchAndPopulate(chave);
-      }
+    if (chave.length === 44 && !isLoading) {
+      searchAndPopulate(chave);
+      setHeader({ CHVNF: chave });
+    }
   };
 
-   // Lida com a seleção de um item do histórico
   const handleSelectFromHistory = (chave: string) => {
-    setInputValue(chave); // Preenche o input
-    setIsPopoverOpen(false); // Fecha o popover
-    hasFiredSearch.current = true; // Marca como "disparado" para evitar trigger do useEffect
-    searchAndPopulate(chave); // Dispara a busca imediatamente
+    setInputValue(chave);
+    setIsPopoverOpen(false);
+    hasFiredSearch.current = true;
+    searchAndPopulate(chave);
+    setHeader({ CHVNF: chave });
   };
 
   return (
     <div className="relative w-full">
       <div className="flex items-center space-x-2">
-        {/* Input Principal */}
         <Input
           placeholder="Chave NF‑e (44 dígitos)"
           value={inputValue}
@@ -101,7 +87,6 @@ export function XmlSearchInput() {
           aria-describedby={error ? "xml-search-error" : undefined}
         />
 
-        {/* Ícones à Direita: Loader, Erro ou Histórico */}
         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground flex items-center h-full">
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-label="Carregando" />
@@ -109,7 +94,12 @@ export function XmlSearchInput() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" className="h-6 w-6 p-0 text-destructive hover:bg-transparent" aria-label={`Erro: ${error}`}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 p-0 text-destructive hover:bg-transparent"
+                    aria-label={`Erro: ${error}`}
+                  >
                     <AlertCircle className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -139,7 +129,7 @@ export function XmlSearchInput() {
                           key={h}
                           onSelect={() => handleSelectFromHistory(h)}
                           className="cursor-pointer text-xs"
-                          value={h} // Para busca interna do Command
+                          value={h}
                         >
                           {h}
                         </CommandItem>
@@ -152,10 +142,11 @@ export function XmlSearchInput() {
           ) : null}
         </div>
       </div>
-      {/* Exibição de erro textual abaixo do input */}
-       {error && !isLoading && (
-            <p id="xml-search-error" className="text-xs text-destructive mt-1 ml-1">{error}</p>
-        )}
+      {error && !isLoading && (
+        <p id="xml-search-error" className="text-xs text-destructive mt-1 ml-1">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
