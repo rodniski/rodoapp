@@ -48,7 +48,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
                         id="respRet"
                         value={respRet}
                         onChange={(e) => setRespRet(e.target.value)}
-                        className={"bg-muted/50 dark:bg-background/30 shadow border-muted-foreground/70"}
                     />
                 </div>
                 <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -57,7 +56,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
                         id="respCarreg"
                         value={respCarreg}
                         onChange={(e) => setRespCarreg(e.target.value)}
-                        className={"bg-muted/50 dark:bg-background/30 shadow border-muted-foreground/70"}
                     />
                 </div>
             </div>
@@ -68,7 +66,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
                         id="placa"
                         value={placa}
                         onChange={(e) => setPlaca(e.target.value)}
-                        className={"bg-muted/50 dark:bg-background/30 shadow border-muted-foreground/70"}
+                        
                     />
                 </div>
                 <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -77,7 +75,6 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
                         id="obs"
                         value={obs}
                         onChange={(e) => setObs(e.target.value)}
-                        className={"bg-muted/50 dark:bg-background/30 shadow border-muted-foreground/70"}
                     />
                 </div>
             </div>

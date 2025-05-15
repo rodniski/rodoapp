@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterInputs } from "../../types/filterInputs";
+import { FilterInputs } from "../../types/types.filterInputs";
 import { ZoomInIcon, PlusIcon } from "@radix-ui/react-icons";
 import { useDataTableStore } from "ui/data-table"; // Ajuste o caminho
 import { CAMPOS_FILTRO } from "@borracharia/config"; // Ajuste o caminho

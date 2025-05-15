@@ -71,7 +71,7 @@ export const dashboardData: Category[] = [
       },
       {
         id: "saida-pneus",
-        title: "Saída de Pneus (Em Breve)",
+        title: "Saída de Pneus",
         description: "Controle e gestão de saída de pneus.",
         icon: Truck,
         subLinks: [
