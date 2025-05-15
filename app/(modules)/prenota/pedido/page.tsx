@@ -1,6 +1,6 @@
 import { Background } from "@/_core/components/theme/background";
 import React from "react";
-import { IncludePedidoCard } from "./_lib/components/form";
+import { IncludePedidoCard } from "./_internal/components/form";
 
 export default function Page() {
   return (

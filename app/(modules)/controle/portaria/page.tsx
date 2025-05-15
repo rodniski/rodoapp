@@ -1,7 +1,7 @@
 "use client";
 
-import { useMovPortaria } from "./_lib/hooks";
-import { ConfColumns } from "./_lib/components/ConfColumns";
+import { useMovPortaria } from "./_internal/hooks";
+import { ConfColumns } from "./_internal/components/ConfColumns";
 import { DataTable } from "ui/data-table";
 import { ScrollArea } from "ui";
 

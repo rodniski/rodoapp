@@ -39,15 +39,16 @@
       "types": ["./_core/types"],
 
       "@modules/*": ["./app/(modules)/*"],
-      "@login/*": ["./app/login/_lib/*"],
-      "@prenota/*": ["./app/(modules)/prenota/_lib/*"],
-      "@pedido/*": ["./app/(modules)/prenota/pedido/_lib/*"],
-      "@inclusao/*": ["./app/(modules)/prenota/inclusao/_lib/*"],
-      "@controle/*": ["./app/(modules)/controle/_lib/*"],
-      "@borracharia/*": ["./app/(modules)/controle/borracharia/_lib/*"],
-      "@documentacao/*": ["./app/(modules)/documentacao/_lib/*"]
+      "@login/*": ["./app/login/_internal/*"],
+      "@prenota/*": ["./app/(modules)/prenota/_internal/*"],
+      "@pedido/*": ["./app/(modules)/prenota/pedido/_internal/*"],
+      "@inclusao/*": ["./app/(modules)/prenota/inclusao/_internal/*"],
+      "@controle/*": ["./app/(modules)/controle/_internal/*"],
+      "@borracharia/*": ["./app/(modules)/controle/borracharia/_internal/*"],
+      "@portaria/*": ["./app/(modules)/controle/portaria/_internal/*"],
+      "@documentacao/*": ["./app/(modules)/documentacao/_internal/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(modules)/prenota/inclusao/_lib/(api)/getXmlDetails.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(modules)/prenota/inclusao/_internal/(api)/getXmlDetails.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,165 +1,152 @@
-# 📘 Guia de Contexto e Boas Práticas - RodoApp
+# Prompt Padrão para Desenvolvimento do Projeto RodoAPP
 
-## 🧠 Visão Geral do Projeto
-O **RodoApp** é uma plataforma corporativa modular (intranet) desenvolvida para centralizar os serviços internos dos grupos **Rodoparaná** e **Timber**. O projeto está estruturado para ser **moderno**, **escalável** e de fácil manutenção, com foco em integração com o TOTVS Protheus e outros sistemas internos.
+Olá! Para o projeto **RodoAPP**, estamos usando as seguintes tecnologias e padrões. Por favor, siga estas diretrizes ao gerar código, sugerir estruturas ou fornecer exemplos:
+
+**Contexto Geral do Projeto:**
+
+- **Framework Principal:** Next.js (App Router)
+- **Linguagem:** TypeScript
+- **Gerenciamento de Estado de Servidor:** TanStack Query v5 (`@tanstack/react-query`)
+- **Tabelas:** TanStack Table v8 (`@tanstack/react-table`)
+- **Notificações (Toasts):** Sonner (`import { toast } from 'sonner';`)
+- **Logging Customizado:** Um módulo de logging centralizado, importado como `import { logger } from 'utils';`
+- **Princípios de Design:** DRY (Don't Repeat Yourself), KISS (Keep It Simple, Stupid), YAGNI (You Ain't Gonna Need It).
 
 ---
 
-## 🏗️ Estrutura do Projeto
+## I. ESTRUTURA DE DIRETÓRIOS (Padrão):
 
-### Diretórios Globais (`/_core`)
-- `components/`: Componentes compartilhados (UI, layout base, ícones, etc.)
-- `hooks/`: Hooks reutilizáveis e universais
-- `stores/`: Zustand stores globais
-- `types/`: Tipagens universais utilizadas em múltiplos domínios
-- `utils/`: Funções utilitárias reutilizáveis
+1.  **Módulos Principais (Features de Rota):**
 
-### Diretórios de Módulos (`/app/(modules)`)
-Cada módulo é um microfrontend com autonomia, contendo:
-- `_lib/api/`: Endpoints REST específicos do domínio
-- `_lib/components/`: Componentes usados somente dentro do módulo
-- `_lib/stores/`: Stores locais com Zustand
-- `_lib/types/`: Tipos específicos
-- `_lib/hooks/`: Hooks locais (se necessário)
+    - Localização: `app/(modules)/[nomeDoModulo]/`
+    - Ex: `app/(modules)/viagens/`, `app/(modules)/frotas/`
 
-Exemplo de estrutura para um módulo:
+2.  **Código de Suporte Interno ao Módulo/Feature (Não-Rota):**
+
+    - Nome da Pasta: `_internal/` (para agrupar "feature slices" como `tabela`, `filtros`, `acoes` etc.)
+    - Localização: Diretamente dentro da pasta do módulo ou sub-rota.
+      - Ex: `app/(modules)/viagens/_internal/`
+      - Ex: `app/(modules)/viagens/detalhes/_internal/` (se a sub-rota `detalhes` tiver lógica/UI complexa e específica apenas para ela)
+
+3.  **Sub-Rotas:**
+
+    - Localização: Diretamente dentro da pasta do módulo pai.
+    - Ex: `app/(modules)/viagens/nova/page.tsx`
+
+4.  **Estrutura Interna de uma "Slice" de Funcionalidade (dentro de `_internal/[nomeDaFeatureSlice]/`):**
+
+    - `[nomeDaFeatureSlice]/` (ex: `listagem/`, `formularioEdicao/`)
+      - `logic/`: Contém toda a lógica não visual.
+        - `[featureSliceName].types.ts`: Definições de tipos TypeScript.
+        - `[featureSliceName].constants.ts`: Constantes (endpoints de API, chaves de query).
+        - `[featureSliceName].api.ts`: Funções para chamadas de API.
+        - `[featureSliceName].queries.ts`: Hooks do TanStack Query (`useQuery`, `useMutation`).
+        - `index.ts`: Barrel file para reexportar de `logic/`.
+      - `ui/`: Contém os componentes React visuais.
+        - `NomeDoComponente.tsx`
+        - `index.ts` (opcional, para reexportar componentes de `ui/`)
+
+5.  **Arquivos Padrão do Next.js App Router:**
+    - `page.tsx` para páginas.
+    - `layout.tsx` para layouts.
+    - `loading.tsx`, `error.tsx` conforme necessário.
+
+---
+
+## II. CONVENÇÕES DE NOMENCLATURA DE ARQUIVOS:
+
+1.  **Arquivos de Lógica (dentro de `logic/`):**
+
+    - Padrão: `[nomeDaFeatureSlice].[papelDoArquivo].ts`
+    - Separador: Ponto (`.`)
+    - Exemplos: `listagemViagens.api.ts`, `formularioViagem.queries.ts`, `viagem.types.ts`.
+
+2.  **Componentes React (dentro de `ui/`):**
+
+    - Padrão: `PascalCase.tsx`
+    - Exemplos: `TabelaViagens.tsx`, `CartaoDetalheVeiculo.tsx`.
+
+3.  **Hooks Customizados (se fora de `*.queries.ts` e não relacionados a TanStack Query):**
+
+    - Padrão: `useCamelCase.ts` (ex: `useContadorLocal.ts`)
+
+4.  **Barrel Files:**
+    - Sempre `index.ts`.
+
+---
+
+## III. ESTRUTURA E PADRÕES DE CÓDIGO:
+
+1.  **Tipos (`*.types.ts`):**
+
+    - Interfaces e tipos claros para parâmetros de API, respostas de API, opções de hooks e entidades de dados principais.
+    - Comentários JSDoc detalhados, especialmente para campos com regras de negócio ou origem específica.
+    - **EVITAR** reexportar tipos que pertencem a outros módulos (ex: tipos puramente visuais de uma biblioteca de UI devem ser importados de sua origem pelos componentes de UI, não de um arquivo `.types.ts` da lógica).
+
+2.  **Constantes (`*.constants.ts`):**
+
+    - Endpoints de API (ex: `export const VIAGENS_API_ENDPOINT = "/api/viagens";`).
+    - Fábricas de chaves para TanStack Query (ex: `export const viagemQueryKeys = { all: ['viagens'], list: (params) => [...] };`).
+
+3.  **Funções de API (`*.api.ts`):**
+
+    - Funções `async`. Preferencialmente usando `Workspace`.
+    - Parâmetros e retornos fortemente tipados.
+    - Uso de constantes para URLs de endpoint.
+    - Construção clara do corpo da requisição (`body`).
+    - Tratamento de erro robusto:
+      - Verificar `response.ok`.
+      - Tentar parsear o corpo do erro (texto ou JSON).
+      - Logar o erro detalhado usando `logger.error(new Error(mensagemExtraida), { contexto... });`.
+      - Lançar (`throw`) um novo `Error` com uma mensagem amigável.
+    - Retornar `Promise<TipoDaResposta>` com `response.json() as Promise<TipoDaResposta>`. Incluir tratamento para JSON de resposta inválido mesmo com status 2xx.
+
+4.  **Hooks do TanStack Query (`*.queries.ts`):**
+
+    - Incluir `"use client";` no topo.
+    - Usar `useQuery` / `useMutation`.
+    - Utilizar a fábrica de chaves de `*.constants.ts`.
+    - Parâmetros tipados e com defaults.
+    - Combinar parâmetros do hook com dados de stores externos (se aplicável).
+    - Usar `placeholderData: keepPreviousData` (TanStack Query v5).
+    - Usar `meta` (ex: `meta: { suppressGlobalErrorHandler: true }`) para coordenar com handlers globais.
+    - **Tratamento de Efeitos Colaterais (Erros/Sucesso) via `useEffect`:**
+      - **Erros:** Observar `queryResult.isError` e `queryResult.error`. Logar com `logger.warn()`. Disparar toast Sonner (`toast.error("Título", { description: error.message, action: { label: "Tentar Novamente", onClick: () => queryResult.refetch() } });`).
+      - **Sucesso (Opcional para queries):** Observar `queryResult.isSuccess` e `queryResult.data`. Logar com `logger.info()`.
+
+5.  **Logger (`logger` importado de `utils`):**
+
+    - `logger.error(new Error(...), { ... })` na camada da API.
+    - `logger.warn({ ... })` no `useEffect` de erro dos hooks.
+    - `logger.info({ ... })` ou `logger.debug({ ... })` para informações/depuração.
+
+6.  **Comentários:**
+    - **JSDoc (`@description`, `@param`, `@returns`, `@throws`, `@hook`, `@function`, `@file`)** para todas as exportações públicas.
+    - Estilo "Better Comments" para organização e destaque:
+      - `//* Título da Seção`
+      - `//! Alerta Importante`
+      - `//? Dúvida ou Ponto de Investigação`
+      - Evitar `//TODO:` no código final gerado, a menos que explicitamente parte de um rascunho.
+    - Comentários úteis, concisos, explicando o "porquê" quando necessário.
+
+---
+
+## IV. EXEMPLO DE ESTRUTURA PARA UMA FEATURE "VIAGENS" (Listagem):
+
+```typescript
+/app/(modules)/viagens/
+├── _internal/
+│   └── listagem/  // Ou 'tabelaViagens', 'dadosViagens', etc.
+│       ├── logic/
+│       │   ├── listagemViagens.types.ts
+│       │   ├── listagemViagens.constants.ts
+│       │   ├── listagemViagens.api.ts
+│       │   ├── listagemViagens.queries.ts
+│       │   └── index.ts
+│       └── ui/
+│           ├── TabelaViagens.tsx
+│           ├── FiltrosViagens.tsx
+│           └── index.ts
+├── page.tsx     // Página que usa os elementos de _internal/listagem/
+└── layout.tsx
 ```
-/app/(modules)/prenota/
-├── _lib/
-│   ├── tabela/
-│   │   ├── config/
-│   │   │   ├──tabela.api.ts
-│   │   │   ├──tabela.hooks.ts
-│   │   │   ├──tabela.types.ts
-│   │   │   └──index.ts
-│   │   └── components/
-│   │   │   ├──columns.tsx
-│   │   │   └──tabela.tsx
-│   ├── actions/
-│   │   ├──anexo/
-│   │   │   ├── config/
-│   │   │   │   ├──anexo.api.ts
-│   │   │   │   ├──anexo.hooks.ts
-│   │   │   │   ├──anexo.types.ts
-│   │   │   │   └──index.ts
-│   │   │   └── components/
-│   │   │   │   ├──anexoDownload.tsx
-│   │   │   │   └──editar.tsx
-│   │   │   └──index.ts
-│   │   ├── editar/
-│   │   │   ├──config/
-│   │   │   │   ├──editar.api.ts
-│   │   │   │   ├──editar.hooks.ts
-│   │   │   │   ├──editar.types.ts
-│   │   │   │   └──index.ts
-│   │   │   └──components/
-│   │   │   │   ├──editar.tsx
-│   │   │   │   └──index.ts
-│   │   │   └──index.ts
-│   │   ├── editar/
-│   │   │   ├──config/
-│   │   │   │   ├──editar.api.ts
-│   │   │   │   ├──editar.hooks.ts
-│   │   │   │   ├──editar.types.ts
-│   │   │   │   └──index.ts
-│   │   │   └──components/
-│   │   │   │   ├──editar.tsx
-│   │   │   │   └──index.ts
-│   │   │   └──index.ts
-│   │   └── index.ts
-│   └── filtro/
-└── page.tsx
-```
-
----
-
-## 🧩 Organização dos Imports
-
-### Alias definidos no `tsconfig.json`
-```json
-"paths": {
-  "@/*": ["./*"],
-  "comp/*": ["./_core/components/*"],
-  "ui/*": ["./_core/components/ui/*"],
-  "utils/*": ["./_core/utils/*"],
-  "hooks/*": ["./_core/hooks/*"],
-  "stores/*": ["./_core/stores/*"],
-  "types/*": ["./_core/types/*"],
-  "@modules/*": ["./app/(modules)/*"],
-  "@prenota/*": ["./app/(modules)/prenota/_lib/*"]
-}
-```
-
-### Boas Práticas
-- Sempre que possível, importar de `index.ts` para evitar caminhos longos.
-- Evite caminhos relativos como `../../../components`; use os aliases.
-- Centralize as exportações por domínio ou módulo.
-
-#### Exemplo de importação limpa:
-```ts
-import { Button } from "ui";
-import { useMobile } from "hooks";
-import { columns } from "@prenota/components";
-```
-
----
-
-## 🔐 Autenticação
-- Integração via **NextAuth** + API TOTVS Protheus
-- Sessão persistente entre módulos
-- Detecção de grupo e filial automática ao logar
-- A documentação (documentacao) é pública e acessível sem login
-
----
-
-## 🚚 Módulos Existentes
-| Módulo       | Caminho                          | Descrição                                     |
-|--------------|----------------------------------|-----------------------------------------------|
-| Hub          | `/app`                           | Navegação geral da intranet                   |
-| Login        | `/app/(modules)/login`           | Tela de login integrada ao Protheus          |
-| Dashboard    | `/app/(modules)/dashboard`       | Acesso central aos módulos                    |
-| Prenota      | `/app/(modules)/prenota`         | Pré-notas integradas ao Protheus             |
-| Controle     | `/app/(modules)/controle`        | Controle de movimentações (ex: pneus)        |
-| Documentação | `/app/(modules)/documentacao`    | Repositório de documentos internos           |
-
----
-
-## 🧰 Stack Técnica
-
-| Camada       | Tecnologias                                     |
-|--------------|--------------------------------------------------|
-| Frontend     | Next.js 15 React 19, TypeScript                  |
-| Estilização  | TailwindCSS 4.1, Shadcn UI, Aceternity UI        |
-| Estado       | Zustand                                          |
-| Backend API  | TANSTACK QUERY + autenticação com API Protheus   |
-| Banco        | MSSQL (Protheus)                                 |
-| ORM          | Prisma (módulo Prenota)                          |
-| Deploy       | Oracle Server (Ubuntu)                           |
-| Analytics    | PostHog (em planejamento)                        |
-| Gerenciador  | `pnpm`                                           |
-
----
-
-## 📚 Convenções e Padrões
-- **`index.ts` obrigatório** em pastas de componentes, stores, hooks e types
-- **Imports sempre por alias**, mesmo para arquivos dentro do mesmo módulo
-- **Evite dependências cruzadas entre módulos**, a não ser por `_core`
-- **Autonomia por módulo**, favorecendo testes, manutenção e escalabilidade
-
----
-
-## 📅 Status Atual
-- ✅ Header global implementado
-- ✅ Módulo Prenota funcional (com MSSQL via Prisma)
-    |- Inclusao pendente
-- ✅ Auth funcional (NextAuth + Protheus)
-- 📚 Módulo de Documentação em progresso
-- ✅ Layout geral da aplicação consolidado
-
----
-
-## 🙌 Responsável Técnico
-**Guilherme Rodniski Correia**
-- Email: guilherme.correia@rodoparana.com.br
-- Projeto: interno para Rodoparaná e Timber
-

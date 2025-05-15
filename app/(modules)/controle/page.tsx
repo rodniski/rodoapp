@@ -1,6 +1,6 @@
 "use client";
 
-import { HistColumns } from "./_lib/components";
+import { HistColumns } from "./_internal/components";
 // import { useHistory } from "./_lib/hooks";
 import { DataTable, ScrollArea } from "ui";
 

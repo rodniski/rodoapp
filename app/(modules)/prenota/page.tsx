@@ -11,9 +11,9 @@ import { Background } from "comp";
 import { Button, Badge } from "ui";
 import { X, RotateCcw } from "lucide-react";
 import { useAuthStore } from "@login/stores";
-import { columns, usePrenotas } from "@prenota/tabela";
-import { DataTableFilterModal } from "@prenota/filtro";
-import type { PrenotaRow } from "@prenota/tabela";
+import { columns, usePrenotas } from "@/app/(modules)/prenota/_internal/tabela";
+import { DataTableFilterModal } from "@/app/(modules)/prenota/_internal/filtro";
+import type { PrenotaRow } from "@/app/(modules)/prenota/_internal/tabela";
 
 // Mapeamento de IDs de filtros para labels amigáveis
 const filterLabels: Record<string, string> = {

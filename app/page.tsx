@@ -1,7 +1,7 @@
 "use client";
 
 import { ScrollArea } from "ui";
-import { Hero, Features, CTA, Footer,Background } from "./_lp";
+import { Hero, Features, CTA, Footer,Background } from "./_internal";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
