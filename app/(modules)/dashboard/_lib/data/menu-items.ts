@@ -13,9 +13,11 @@ import type { Category } from ".";
 import {
   AccessibilityIcon,
   ArchiveIcon,
+  BarChartIcon,
   ChatBubbleIcon,
   ClipboardIcon,
   DesktopIcon,
+  GearIcon,
   IdCardIcon,
   Pencil2Icon,
   QuestionMarkCircledIcon,
@@ -23,6 +25,7 @@ import {
   TransformIcon,
   ZoomInIcon,
 } from "@radix-ui/react-icons";
+import { gruposNomes } from "@/_core/utils";
 
 export const dashboardData: Category[] = [
   {
@@ -58,7 +61,11 @@ export const dashboardData: Category[] = [
             description:
               "Cadastre novos pedidos de compra. Para aceleração do cadastro de Pré Documentos de Entrada",
             icon: PlusIcon,
-            requiresGroup: ["000013", "000014"],
+            requiresGroup: [
+              gruposNomes.admin,
+              gruposNomes.comprasRodoparana,
+              gruposNomes.comprasTimber,
+            ],
           },
         ],
       },
@@ -83,7 +90,7 @@ export const dashboardData: Category[] = [
             description:
               "Registre e acompanhe o controle de saída de itens da borracharia.",
             icon: ClipboardIcon,
-            requiresGroup: ["000190"],
+            requiresGroup: [gruposNomes.admin, gruposNomes.borracharia],
           },
           {
             id: "pneus-portaria",
@@ -92,7 +99,7 @@ export const dashboardData: Category[] = [
             description:
               "Compare a saída física com o sistema e identifique divergências.",
             icon: ZoomInIcon,
-            requiresGroup: ["000191"],
+            requiresGroup: [gruposNomes.admin, gruposNomes.portaria],
           },
         ],
       },
@@ -122,16 +129,16 @@ export const dashboardData: Category[] = [
             title: "Protheus",
             url: "/documentacao/protheus/videoaulas",
             description: "Documentação sobre como usar Protheus.",
-            icon: DesktopIcon,
+            icon: GearIcon,
           },
           {
             id: "documentacao-powerbi",
             title: "Power BI",
             url: "/documentacao/powerbi/acesso",
             description: "Documentação sobre como usar Power BI.",
-            icon: DesktopIcon,
+            icon: BarChartIcon,
           },
-        ]
+        ],
       },
     ],
   },

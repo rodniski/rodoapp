@@ -1,64 +1,149 @@
-// Remova "use client" para usar Server Component por padrão
+"use client";
+
+import { getCurrentUsername } from "@/_core/utils";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
-import { motion } from "motion/react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { GridBackgroundDemo } from "comp";
 
 export function Hero() {
+  const username = getCurrentUsername();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar dispositivo móvel
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
-    <section className="container flex min-h-[calc(55vh)] max-w-screen-2xl flex-col items-center justify-center space-y-8 text-center">
-      <div className="space-y-4">
-        <h1 className="bg-gradient-to-br from-foreground from-30% via-foreground/90 to-foreground/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent pb-3 sm:text-5xl md:text-6xl lg:text-7xl">
-          Todas as Ferramentas
-          <br />
-          Em um só Lugar
-        </h1>
-        <p className="mx-auto max-w-[45rem] leading-normal text-muted-foreground qhd:text-2xl sm:leading-8">
-          Simplifique seu dia a dia com a plataforma centralizada do Grupo
-          Rodoparaná. Gerencie prenotas, controle operações e acesse
-          documentação essencial — tudo com apenas alguns cliques.
-        </p>
-      </div>
-      <motion.div
-        className="flex gap-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-      >
+    <section className="relative w-full overflow-hidden">
+      <div className=" mx-auto flex min-h-[90vh] w-full max-w-none flex-col items-center justify-center space-y-8 px-4 py-16 text-center sm:px-6 md:px-8 lg:px-10">
+        {/* Título com efeito de texto animado */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="flex gap-4"
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <h1 className="z-50 relative bg-clip-text text-transparent pb-3 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            <span className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent blur-xl opacity-30">
+              Todas as Ferramentas
+              <br className="hidden sm:block" />
+              Em um só Lugar
+            </span>
+            <span className="relative bg-gradient-to-br from-foreground from-30% via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+              Todas as Ferramentas
+              <br />
+              Em um só Lugar
+            </span>
+          </h1>
+          <motion.p
+            className="mx-auto max-w-[45rem] leading-normal text-muted-foreground sm:text-lg sm:leading-8 md:text-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
           >
-          <Link href="/documentacao" target="_blank" rel="noopener noreferrer">
-            <Button size="lg">
-              Ler Documentação <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/login" target="_blank" rel="noopener noreferrer">
-            <Button size="lg" variant="secondary">
-              Fazer Login <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+            Simplifique seu dia a dia com a plataforma centralizada do Grupo
+            Rodoparaná. Gerencie prenotas, controle operações e acesse
+            documentação essencial — tudo com apenas alguns cliques.
+          </motion.p>
         </motion.div>
-      </motion.div>
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 h-0.5"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 2, ease: "easeInOut", delay: 1 }}
-      >
+
+        {/* Botões com layout responsivo */}
         <motion.div
-          className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
-          animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+          className="flex flex-col gap-4 sm:flex-row"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <Link href="/documentacao" passHref legacyBehavior>
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto"
+            >
+              <Button
+                size={isMobile ? "default" : "lg"}
+                className="w-full sm:w-auto"
+              >
+                <span className="flex items-center">
+                  Ler Documentação <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
+              </Button>
+            </motion.a>
+          </Link>
+
+          {username ? (
+            <Link href="/dashboard" passHref legacyBehavior>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  size={isMobile ? "default" : "lg"}
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                >
+                  <span className="flex items-center">
+                    Acessar Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                  </span>
+                </Button>
+              </motion.a>
+            </Link>
+          ) : (
+            <Link href="/login" passHref legacyBehavior>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  size={isMobile ? "default" : "lg"}
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                >
+                  <span className="flex items-center">
+                    Fazer Login <ArrowRight className="ml-2 h-4 w-4" />
+                  </span>
+                </Button>
+              </motion.a>
+            </Link>
+          )}
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 10, 0] }}
           transition={{
-            duration: 5,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
+            opacity: { delay: 1, duration: 1 },
+            y: { delay: 1, duration: 1.5, repeat: Number.POSITIVE_INFINITY },
           }}
-        />
-      </motion.div>
+        >
+          <div className="flex flex-col items-center">
+            <span className="text-sm text-muted-foreground mb-2">
+              Rolar para baixo
+            </span>
+            <div className="h-10 w-6 rounded-full border-2 border-muted-foreground flex justify-center">
+              <motion.div
+                className="h-2 w-2 rounded-full bg-muted-foreground mt-1"
+                animate={{ y: [0, 12, 0] }}
+                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }

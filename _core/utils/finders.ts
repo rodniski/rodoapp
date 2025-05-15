@@ -145,3 +145,11 @@ export function hasAccessToGrupo(grupo: string, filialCod?: string): boolean {
     return false;
   }
 }
+// Interfaces para itens e grupos hierárquicos
+export const gruposNomes = {
+  comprasRodoparana: "000013",
+  comprasTimber: "000014",
+  borracharia: "000190",
+  portaria: "000191",
+  admin: "000000",
+} as const;

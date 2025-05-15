@@ -116,7 +116,7 @@ export const headerSchema = z
   .object({
     FILIAL: z.string().min(1, "Filial é obrigatória"),
     OPCAO: z.literal(3),
-    TIPO: z.enum(["N", "S"], { required_error: "Tipo de NF é obrigatório" }),
+    TIPO: z.enum(["N", "C"], { required_error: "Tipo de NF é obrigatório" }),
     FORNECEDOR: z
       .string({ required_error: "Fornecedor é obrigatório" })
       .min(1, "Fornecedor é obrigatório"),
@@ -147,7 +147,7 @@ export const headerSchema = z
         "Garantia Concebida",
         "",
       ],
-      { errorMap: () => ({ message: "Tipo de rodovia inválido." }) }
+      { errorMap: () => ({ message: "Tipo de Nota Fiscal Invalido" }) }
     ),
     prioridade: z.enum(["Alta", "Media", "Baixa", ""], {
       errorMap: () => ({ message: "Prioridade inválida." }),

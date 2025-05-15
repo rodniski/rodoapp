@@ -8,6 +8,12 @@ import type {
 import type { PreNotaItem } from "@inclusao/types"; // Importar o tipo do Item
 
 /* ───────────────────────── Interfaces das Slices ───────────────────────── */
+interface PedidosSelecionadosAuxState {
+  pedidosSelecionados: string[];
+  addPedidoSelecionado: (codigo: string) => void;
+  removePedidoSelecionado: (codigo: string) => void;
+  clearPedidosSelecionados: () => void;
+}
 
 interface XmlLoadStatusState {
   xmlDataLoaded: boolean;
@@ -53,6 +59,7 @@ interface ItemEditingState {
 
 /* ───────────────── Interface Principal da Store Auxiliar ───────────────── */
 export interface PreNotaAuxState {
+  pedidosSelecionadosAux: PedidosSelecionadosAuxState;
   loadStatus: XmlLoadStatusState;
   fornecedorSearch: FornecedorSearchState;
   selection: SelectionState;
@@ -63,6 +70,17 @@ export interface PreNotaAuxState {
 
 /* ──────────────────────── Criação da Store Zustand ────────────────────────── */
 export const usePreNotaAuxStore = create<PreNotaAuxState>((set) => ({
+  /* --- Slice: pedidosSelecionadosAux --- */
+  pedidosSelecionadosAux: {
+    pedidosSelecionados: [],
+    addPedidoSelecionado: (codigo) =>
+      set((state) => ({ pedidosSelecionadosAux: { ...state.pedidosSelecionadosAux, pedidosSelecionados: [...state.pedidosSelecionadosAux.pedidosSelecionados, codigo] } })),
+    removePedidoSelecionado: (codigo) =>
+      set((state) => ({ pedidosSelecionadosAux: { ...state.pedidosSelecionadosAux, pedidosSelecionados: state.pedidosSelecionadosAux.pedidosSelecionados.filter((c) => c !== codigo) } })),
+    clearPedidosSelecionados: () =>
+      set((state) => ({ pedidosSelecionadosAux: { ...state.pedidosSelecionadosAux, pedidosSelecionados: [] } })),
+  },
+
   /* --- Slice: loadStatus --- */
   loadStatus: {
     xmlDataLoaded: false,
@@ -198,4 +216,9 @@ export const useInitializeEditableItems = () => usePreNotaAuxStore((s) => s.item
 export const useUpdateEditableItemQuantity = () => usePreNotaAuxStore((s) => s.itemEditing.updateEditableItemQuantity);
 export const useUpdateEditableItem = () => usePreNotaAuxStore((s) => s.itemEditing.updateEditableItem);
 export const useClearEditableItems = () => usePreNotaAuxStore((s) => s.itemEditing.clearEditableItems);
-// --- FIM NOVOS Hooks/Selectors ---
+
+// --- Hooks/Selectors para a Slice de Pedidos Selecionados ---
+export const usePedidosSelecionadosAux = () => usePreNotaAuxStore((s) => s.pedidosSelecionadosAux);
+export const useAddPedidoSelecionadoAux = () => usePreNotaAuxStore((s) => s.pedidosSelecionadosAux.addPedidoSelecionado);
+export const useRemovePedidoSelecionadoAux = () => usePreNotaAuxStore((s) => s.pedidosSelecionadosAux.removePedidoSelecionado);
+export const useClearPedidosSelecionadosAux = () => usePreNotaAuxStore((s) => s.pedidosSelecionadosAux.clearPedidosSelecionados);

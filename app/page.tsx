@@ -1,31 +1,58 @@
 "use client";
-import { ScrollArea } from "ui";
-import { Hero } from "./_lp"; // Hero carrega normalmente
-import dynamic from "next/dynamic"; // Importa a função dynamic
-import { Background } from "comp";
 
-// Carrega os outros componentes dinamicamente
-// O 'ssr: false' é opcional, mas comum para componentes abaixo da dobra
-// que podem ter interatividade apenas no cliente. Se precisar de SSR, remova-o.
-const Features = dynamic(() => import("./_lp").then((mod) => mod.Features), {
-  ssr: false,
-});
-const CTA = dynamic(() => import("./_lp").then((mod) => mod.CTA), {
-  ssr: false,
-});
-const Footer = dynamic(() => import("./_lp").then((mod) => mod.Footer), {
-  ssr: false,
-});
+import { ScrollArea } from "ui";
+import { Hero, Features, CTA, Footer,Background } from "./_lp";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 
 export default function Home() {
-  return (
-    <ScrollArea className="relative min-h-screen">
-      <Background />
+  const featuresRef = useRef(null);
+  const ctaRef = useRef(null);
 
-      <div className="relative z-10 flex flex-col items-center justify-center w-screen">
+  // O hook useInView retorna true quando o elemento referenciado está na viewport
+  const isFeaturesInView = useInView(featuresRef, { once: true, amount: 0.2 });
+  const isCtaInView = useInView(ctaRef, { once: true, amount: 0.2 });
+
+  const animationVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const transitionSettings = { duration: 0.8, ease: "easeOut" };
+
+  return (
+    <ScrollArea className="relative h-screen w-screen overflow-x-hidden">
+      {/* Background base */}
+      <div className="absolute inset-0 z-0">
+        <Background />
+      </div>
+
+      {/* Efeitos de brilho que se estendem por toda a página */}
+
+
+      <div className="relative z-10 flex w-full flex-col items-center justify-center">
         <Hero />
-        <Features />
-        <CTA />
+        <motion.div
+          ref={featuresRef}
+          className="w-full py-12"
+          initial="hidden"
+          animate={isFeaturesInView ? "visible" : "hidden"}
+          variants={animationVariants}
+          transition={transitionSettings}
+        >
+          <Features />
+        </motion.div>
+        <motion.div
+          ref={ctaRef}
+          className="w-full"
+          initial="hidden"
+          animate={isCtaInView ? "visible" : "hidden"}
+          variants={animationVariants}
+          transition={transitionSettings}
+        >
+          <CTA />
+        </motion.div>
+
         <Footer />
       </div>
     </ScrollArea>
