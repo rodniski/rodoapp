@@ -45,6 +45,7 @@
       "@inclusao/*": ["./app/(modules)/prenota/inclusao/_lib/*"],
       "@controle/*": ["./app/(modules)/controle/_lib/*"],
       "@borracharia/*": ["./app/(modules)/controle/borracharia/_lib/*"],
+      "@portaria/*": ["./app/(modules)/controle/portaria/_lib/*"],
       "@documentacao/*": ["./app/(modules)/documentacao/_lib/*"]
     }
   },

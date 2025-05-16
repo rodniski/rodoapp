@@ -1,37 +1,15 @@
 // hooks/hook.borracharia.ts
 import {useQuery} from "@tanstack/react-query";
-import {fetchMovBorracharia} from "../api";
-import {useMovBorrachariaOptions} from "../types";
+import {BorrachariaParams} from "../types";
+import { defaultQueryOptions } from "@/app/(modules)/prenota/_lib";
+import { fetchMovBorracharia } from "../api";
 
-export const useMovBorracharia = ({
-                                   type = "borracharia",
-                                   filial = "0101",
-                                   conferido = "N",
-                                   enabled = true,
-                                   page = 1,
-                                   pageSize = 100,
-                                   filters = {},
-                               }: useMovBorrachariaOptions) => {
-
-    const query = useQuery({
-        queryKey: ["movPortaria", type, filial, conferido, page, pageSize, filters],
-        queryFn: async () => {
-            const result = await fetchMovBorracharia(type, {
-                Page: page.toString(),
-                PageSize: pageSize.toString(),
-                Filial: filial,
-                Conferido: conferido,
-                ...filters,
-            });
-            return result;
-        },
-        enabled,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        refetchOnMount: false,
-    });
-
-    return query;
-}
-
-export * from '@controle/hooks'
+export const useMovBorracharia = (params: BorrachariaParams) => {
+  console.log("🔴 Executando useMovBorracharia com params:", params);
+  return useQuery({
+    queryKey: ["movBorracharia", params.Page, params.PageSize, params.Filial, params.Filters],
+    queryFn: () =>
+      fetchMovBorracharia(params),
+    ...defaultQueryOptions,
+  });
+};

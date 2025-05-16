@@ -5,7 +5,7 @@ import { AnimatedButton } from "./AnimationButton";
 import { BorrachariaItem, ItemNF } from "../../types";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
-import { useBorrachariaStore } from "../../stores";
+import { useBorrachariaStore } from "@borracharia/stores";
 import { useCarregaSaida } from "@borracharia/hooks";
 
 interface EnviarButtonProps {

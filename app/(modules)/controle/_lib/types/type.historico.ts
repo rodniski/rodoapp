@@ -60,28 +60,19 @@ export interface HistoricoMovimentacao {
 
 //* Parâmetros para a API do Histórico
 export interface HistoricoParams {
-  Page: string;
-  PageSize: string;
-  Filial?: string;
-  Doc?: string;
-  Serie?: string;
-  CodCliente?: string;
-  Loja?: string;
-  DescCliente?: string;
-  Dataini?: string;
-  Datafim?: string;
-  ProdutoCod?: string;
-  ProdutoDesc?: string;
-  Conferido?: string;
-  RespCarreg?: string;
+  page: number;
+  pageSize: number;
+  filial: string;
+  filters?: Record<string, any>;
+  enabled?: boolean;
 }
 
 export interface useMovHistoricoOptions {
   type: "historico";
-  filial?: string;
+  filial: string;
   conferido?: "S" | "N";
   enabled?: boolean;
-  page?: number;
-  pageSize?: number;
+  page: number;
+  pageSize: number;
   filters?: Record<string, any>;
 }

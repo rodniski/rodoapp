@@ -58,7 +58,7 @@ const BorDeliver: React.FC<BorDeliverProps> = ({ item }) => {
                 </DialogHeader>
 
                 <div className="flex gap-8">
-                    <div className="w-[450px]">
+                    <div className="w-[400px]">
                         <NFDetails item={item} />
                         <DeliveryForm
                             respRet={respRet}

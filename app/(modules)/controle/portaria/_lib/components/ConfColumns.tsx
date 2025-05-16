@@ -78,7 +78,7 @@ export const ConfColumns: ColumnDef<PortariaItem>[] = [
       <>
         <Tooltip>
           <TooltipTrigger className="text-start">
-            <div className="uppercase">
+            <div className="uppercase truncate w-42">
               Retirado por: {row.original.RespRet}
             </div>
 

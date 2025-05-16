@@ -19,6 +19,9 @@ import {
   ScrollArea,
   Card,
 } from "ui"; // Ajuste o caminho
+import { useBorrachariaTableStore } from "../../stores";
+import { usePortariaTableStore } from "@/app/(modules)/controle/portaria/_lib/stores";
+import { useHistoricoTableStore } from "@/app/(modules)/controle/_lib/stores";
 
 interface LocalFilterState {
   id: string;
@@ -31,8 +34,9 @@ interface LocalFilterState {
  * Layout: Botão Adicionar no topo, filtros em um card único abaixo.
  * Filial é tratada como um filtro dinâmico comum.
  */
-export function DataTableFilterModal() {
+export function DataTableFilterModal({selectPage}: {selectPage?: string}) {
   const logPrefix = "[DataTableFilterModal]";
+  const dataTablePage = selectPage === "borracharia" ? useBorrachariaTableStore() : (selectPage === "portaria" ? usePortariaTableStore() : (selectPage === "historico" ? useHistoricoTableStore() : useDataTableStore()));
   const [isOpen, setIsOpen] = useState(false);
   const [internalFilters, setInternalFilters] = useState<LocalFilterState[]>(
     []
@@ -41,7 +45,7 @@ export function DataTableFilterModal() {
     setFilters,
     clearFilters,
     filters: appliedFilters,
-  } = useDataTableStore();
+  } = dataTablePage;
 
   // Efeito para carregar filtros aplicados ao abrir
   useEffect(() => {

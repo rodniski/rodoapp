@@ -2,7 +2,7 @@
 
 import { ScrollArea } from "ui";
 import { Hero, Features, CTA, Footer,Background } from "./_lp";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
   const transitionSettings = { duration: 0.8, ease: "easeOut" };
 
   return (
-    <ScrollArea className="relative h-screen w-screen overflow-x-hidden">
+    <ScrollArea className="relative h-screen w-screen overflow-hidden">
       {/* Background base */}
       <div className="absolute inset-0 z-0">
         <Background />

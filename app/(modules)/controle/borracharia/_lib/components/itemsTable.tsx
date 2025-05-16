@@ -92,7 +92,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
     }
 
     return (
-        <ScrollArea className="h-full overflow-auto shadow border rounded bg-muted/50 dark:bg-background/60">
+        <ScrollArea className="h-full overflow-auto shadow border rounded bg-muted/50 dark:bg-background/60 max-w-[800px]">
             <Table>
                 <TableHeader>
                     <TableRow>

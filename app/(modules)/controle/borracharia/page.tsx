@@ -1,20 +1,21 @@
 "use client";
 
 import { Background } from "@/_core/components";
-import { DataTable, useDataTableStore } from "@/_core/components/ui/data-table";
+import { DataTable } from "ui";
 import { BorPagination } from "./_lib/components/borPagination";
 import { useMovBorracharia } from "@borracharia/hooks";
-import { columnsBorracharia } from "./_lib/components/borColumns";
-import { DataTableFilterModal } from "./_lib/components/filtro/filters";
+import { columnsBorracharia } from "@borracharia/components/borColumns";
+import { DataTableFilterModal } from "@borracharia/components/filtro/filters";
+import { useBorrachariaTableStore } from "@borracharia/stores/useBorrachariaTableStore";
 
 export default function ControlePage() {
   const {
-    pageIndex,
-    pageSize,
-    filters
-  } = useDataTableStore();
+    pageIndex = 0,
+    pageSize = 100,
+    filters = {}
+  } = useBorrachariaTableStore();
 
-  const { data, isLoading } = useMovBorracharia({ type: "borracharia", page: pageIndex + 1, pageSize, filters });
+  const { data, isLoading } = useMovBorracharia({ Page: pageIndex + 1, PageSize: pageSize, Filial: "0101", Filters: filters });
 
   return (
     <div className="flex flex-col items-center justify-center !max-h-[calc(100vh-60px)] p-4">
@@ -22,11 +23,11 @@ export default function ControlePage() {
       <Background />
       {/* Container */}
       <div className="relative flex flex-col h-full w-full p-6">
-        <h1 className="text-4xl my-1 flex items-center justify-between">
-          Central de Carregamento de Pneus           
+        <h1 className="text-4xl font-bold mb-6 flex items-center justify-between">
+          Carregamento de Pneus - Borracharia          
           {/* Botão para Abrir Modal de Filtros */}
           <div className="mx-2 text-2xl">
-            <DataTableFilterModal aria-label="Abrir modal de filtros" />
+            <DataTableFilterModal selectPage="borracharia" aria-label="Abrir modal de filtros" />
           </div>
         </h1>
         {/* Tabela de dados */}
@@ -38,7 +39,7 @@ export default function ControlePage() {
           sortingConfig={{ allowMultiSort: false }}
           className="w-full backdrop-blur-2xl bg-card/60 rounded-xl border"
         >
-          <BorPagination dataLength={data?.length} />
+          <BorPagination dataLength={data?.length} selectPage="borracharia"/>
         </DataTable>
       </div>
     </div>
