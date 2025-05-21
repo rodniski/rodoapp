@@ -20,6 +20,7 @@ export interface BorrachariaParams {
     Page: number;
     PageSize: number;
     Filial: string;
+    Conferido?: "S" | "N";
     Filters?: Record<string, any>;
 }
 

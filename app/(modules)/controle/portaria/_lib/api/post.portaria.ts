@@ -41,11 +41,11 @@ export const fetchMovEstornoSaida = async (params: EstornoParams) => {
   const queryParams = new URLSearchParams({
     Sequencia: params.Sequencia,
     RespEstor: params.RespEstor,
-    OriEstorno: "p",
+    OrigemEst: "p",
   });
 
   const url = `${config.API_BORRACHARIA_URL}MovPortaria/EstornoSaida?${queryParams}`;
-
+  console.log(url);
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

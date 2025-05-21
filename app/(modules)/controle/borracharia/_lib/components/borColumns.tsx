@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { BorrachariaItem } from "../types";
+import { BorrachariaItem } from "@borracharia/types";
 import BorDeliver from "./borDelivery";
 
 export const columnsBorracharia: ColumnDef<BorrachariaItem>[] = [

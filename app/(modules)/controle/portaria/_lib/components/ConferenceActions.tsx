@@ -11,7 +11,7 @@ import { useMovConferenciaSaida, useMovEstornoSaida } from "../hooks";
 const ConferenceActions: React.FC<ConferenceActionsProps> = ({ produto }) => {
     const [openApprove, setOpenApprove] = useState(false);
     const [openReject, setOpenReject] = useState(false);
-    const [username] = getCurrentUsername();
+    const username = getCurrentUsername();
     const [isLoadingApprove, setIsLoadingApprove] = useState(false);
     const [isLoadingReject, setIsLoadingReject] = useState(false);
 
@@ -45,7 +45,7 @@ const ConferenceActions: React.FC<ConferenceActionsProps> = ({ produto }) => {
     const handleReject = async () => {
         setIsLoadingReject(true);
         try {
-            await reject({ Sequencia: produto.Sequencia, RespEstor: username, OriEstorno: "p" });
+            await reject({ Sequencia: produto.Sequencia, RespEstor: username, OrigemEst: "p" });
            
             console.log("[ConferenceActions] Entrega recusada!");
             setOpenReject(false); // Fecha o diálogo

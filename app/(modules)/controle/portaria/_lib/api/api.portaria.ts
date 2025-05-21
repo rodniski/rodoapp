@@ -6,12 +6,14 @@ export const fetchMovPortaria = async ({
   page,
   pageSize,
   filial,
+  conferido = "N",
   filters = {},
 }: PortariaParams ) => {
   const queryParams = new URLSearchParams({
     Filial: filial,
     Page: page.toString(),
     PageSize: pageSize.toString(),
+    Conferido: conferido,
     ...filters,
   });
 

@@ -46,7 +46,7 @@ export interface HistoricoMovimentacao {
   };
   Estorno: {
     RespEstor: string;
-    OriEstorno: string;
+    OrigemEst: string;
     DataEstor: string;
     HoraEstor: string;
   };

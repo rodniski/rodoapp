@@ -14,11 +14,10 @@ import {
   SelectValue,
 } from "ui";
 
-import { useDataTableStore, useReactTableContext } from "ui";
+import { useReactTableContext } from "ui";
 import { usePortariaTableStore } from "@portaria/stores";
-import { useBorrachariaTableStore } from "@borracharia/stores/useBorrachariaTableStore";
-import { useHistoricoTableStore } from "../../../_lib/stores/useHistoricoTableStore";
-import { da } from "date-fns/locale";
+import { useBorrachariaTableStore } from "@borracharia/stores";
+import { useHistoricoTableStore } from "@/app/(modules)/controle/_lib/stores";
 
 export function BorPagination({
   pageSizeOptions = [10, 25, 50, 100],

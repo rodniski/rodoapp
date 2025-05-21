@@ -14,7 +14,7 @@ const Page = () => {
   } = usePortariaTableStore();
 
   const { data, isLoading } = useMovPortaria({
-    page: pageIndex + 1, pageSize, filial: "0101", filters: filters
+    page: pageIndex + 1, pageSize, filial: "0101", conferido: "N",filters: filters
   });
 
   return (

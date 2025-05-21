@@ -40,8 +40,8 @@ export interface PortariaParams {
   page: number;
   pageSize: number;
   filial: string;
-  filters?: Record<string, any>;
   conferido?: "S" | "N";
+  filters?: Record<string, any>;
 }
 
 //! POST FORMS:
@@ -54,5 +54,5 @@ export interface ConferenciaParams {
 export interface EstornoParams {
   Sequencia: string;
   RespEstor: string;
-  OriEstorno: string;
+  OrigemEst: string;
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import { FilterInputs } from "../../types/types.filterInputs";
+import { FilterInputs } from "@borracharia/types";
 import { ZoomInIcon, PlusIcon } from "@radix-ui/react-icons";
-import { useDataTableStore } from "ui/data-table"; // Ajuste o caminho
-import { CAMPOS_FILTRO } from "@borracharia/config"; // Ajuste o caminho
-import { FilterRow } from "./linha";
+import { CAMPOS_FILTRO } from "@borracharia/config"; 
+import { FilterRow } from ".";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -18,9 +17,10 @@ import {
   Button,
   ScrollArea,
   Card,
-} from "ui"; // Ajuste o caminho
-import { useBorrachariaTableStore } from "../../stores";
-import { usePortariaTableStore } from "@/app/(modules)/controle/portaria/_lib/stores";
+  useDataTableStore
+} from "ui"; 
+import { useBorrachariaTableStore } from "@borracharia/stores";
+import { usePortariaTableStore } from "@portaria/stores";
 import { useHistoricoTableStore } from "@/app/(modules)/controle/_lib/stores";
 
 interface LocalFilterState {

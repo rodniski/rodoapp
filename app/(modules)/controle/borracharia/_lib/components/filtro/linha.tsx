@@ -15,9 +15,9 @@ import {
   ComboboxItem,
 } from "ui";
 
-import { CAMPOS_FILTRO } from "@/app/(modules)/controle/borracharia/_lib/config/constants";
-import type { FilterInputs } from "../../types/types.filterInputs";
-import type { FilterRowProps, RangeValue } from "@/app/(modules)/controle/borracharia/_lib/config/filters";
+import { CAMPOS_FILTRO } from "@borracharia/config";
+import type { FilterInputs } from "@borracharia/types";
+import type { FilterRowProps, RangeValue } from "@borracharia/config";
 
 export const FilterRow: React.FC<FilterRowProps> = ({
   filter,
