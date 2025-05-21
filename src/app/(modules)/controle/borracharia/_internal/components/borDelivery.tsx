@@ -9,15 +9,9 @@ import {
     DialogTitle,
 } from "ui";
 import { MessageCircleX, PackageCheck } from "lucide-react";
-import { BorrachariaItem } from "../types";
-
-import { useBorrachariaStore } from "../stores";
-import { EnviarButton } from "./buttons/EnviarButton";
-
-import NFDetails from "./NFDetails";
-import ItemsTable from "./itemsTable"; 
-import DeliveryForm from "./DeliveryForm";
-import { AnimatedButton } from "./buttons/AnimationButton"; 
+import { BorrachariaItem } from "@borracharia/types";
+import { useBorrachariaStore } from "@borracharia/stores";
+import { NFDetails, EnviarButton, ItemsTable, DeliveryForm, AnimatedButton } from ".";
 
 interface BorDeliverProps {
     item: BorrachariaItem;
@@ -58,7 +52,7 @@ const BorDeliver: React.FC<BorDeliverProps> = ({ item }) => {
                 </DialogHeader>
 
                 <div className="flex gap-8">
-                    <div className="w-[450px]">
+                    <div className="w-[400px]">
                         <NFDetails item={item} />
                         <DeliveryForm
                             respRet={respRet}

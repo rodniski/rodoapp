@@ -1,45 +1,16 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
-import { HistoricoParams, useMovHistoricoOptions } from "../types";
+import { HistoricoParams } from "../types";
+import { defaultQueryOptions } from "@prenota/config";
 import { fetchMovHistorico } from "../api";
 
-export const useMovHistorico = ({
-                                   type = "historico",
-                                   filial = "0101",
-                                   conferido = "N",
-                                   enabled = true,
-                                   page = 1,
-                                   pageSize = 100,
-                                   filters = {},
-                               }: useMovHistoricoOptions) => {
-
-    const query = useQuery({
-        queryKey: ["movPortaria", type, filial, conferido, page, pageSize, filters],
-        queryFn: async () => {
-            const result = await fetchMovHistorico(type, {
-                Page: page.toString(),
-                PageSize: pageSize.toString(),
-                Filial: filial,
-                Conferido: conferido,
-                ...filters,
-            });
-            return result;
-        },
-        enabled,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        refetchOnMount: false,
-    });
-
-    return query;
-}
-
-
-export const useHistory = (params: HistoricoParams) => {
-    console.log("🏢 useHistorico Iniciado:");
-    return useMovHistorico({
-        type: "historico",
-        ...params,
-    });
+export const useMovHistorico = (params: HistoricoParams) => {
+  console.log("🔴 Executando useMovHistorico com params:", params);
+  return useQuery({
+    queryKey: ["movHistorico", params.page, params.pageSize, params.filial, params.filters],
+    queryFn: () =>
+      fetchMovHistorico(params),
+    ...defaultQueryOptions,
+  });
 };
-
-export * from '@controle/hooks'

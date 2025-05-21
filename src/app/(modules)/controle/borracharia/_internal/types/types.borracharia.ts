@@ -17,10 +17,11 @@ export interface BorrachariaItem {
 
 //* Parâmetros para a API de Borracharia
 export interface BorrachariaParams {
-    Page: string;
-    PageSize: string;
+    Page: number;
+    PageSize: number;
     Filial: string;
-    Conferido: string;
+    Conferido?: "S" | "N";
+    Filters?: Record<string, any>;
 }
 
 // Interface para os parâmetros da requisição

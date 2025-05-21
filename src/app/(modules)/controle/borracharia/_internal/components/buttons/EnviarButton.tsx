@@ -2,10 +2,10 @@
 
 import React from "react";
 import { AnimatedButton } from "./AnimationButton";
-import { BorrachariaItem, ItemNF } from "../../types";
+import { BorrachariaItem, ItemNF } from "@borracharia/types";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
-import { useBorrachariaStore } from "../../stores";
+import { useBorrachariaStore } from "@borracharia/stores";
 import { useCarregaSaida } from "@borracharia/hooks";
 
 interface EnviarButtonProps {
@@ -42,7 +42,7 @@ export function EnviarButton({
       return toast.error(
         "Informe a quantidade a entregar para pelo menos um item."
       );
-
+      
     await toast.promise(
       Promise.all(
         itemsToDeliver.map((nf: ItemNF) =>
@@ -59,7 +59,7 @@ export function EnviarButton({
             RespRet: respRet,
             Placa: placa,
             Obs: obs ?? "",
-            RespCarreg: respCarreg ?? "",
+            RespCarreg: respCarreg ?? "", 
             Quantidade: nf.SaldoSelecionado,
           })
         )

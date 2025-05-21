@@ -1,13 +1,13 @@
 // NFDetails.tsx (novo arquivo)
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "ui";
-import { BorrachariaItem } from "../types"; // Importa o tipo
+import { BorrachariaItem } from "@borracharia/types"; // Importa o tipo
 
 interface NFDetailsProps {
     item: BorrachariaItem;
 }
 
-const NFDetails: React.FC<NFDetailsProps> = ({ item }) => {
+export const NFDetails: React.FC<NFDetailsProps> = ({ item }) => {
     return (
         <Card className="mb-4 bg-muted/30 dark:bg-background/60">
             <CardHeader>
@@ -39,4 +39,3 @@ const NFDetails: React.FC<NFDetailsProps> = ({ item }) => {
     );
 };
 
-export default NFDetails;

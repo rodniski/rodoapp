@@ -14,18 +14,23 @@ import {
   SelectValue,
 } from "ui";
 
-import { useDataTableStore } from "ui/stores";
-import { useReactTableContext } from "ui/table";
+import { useReactTableContext } from "ui";
+import { usePortariaTableStore } from "@portaria/stores";
+import { useBorrachariaTableStore } from "@borracharia/stores";
+import { useHistoricoTableStore } from "@/app/(modules)/controle/_lib/stores";
 
 export function BorPagination({
   pageSizeOptions = [10, 25, 50, 100],
 	dataLength = 0,
+  selectPage = "borracharia",
 }: {
   pageSizeOptions?: number[];
 	dataLength?: number;
+  selectPage?: string;
 }) {
   const table = useReactTableContext();
-  const { pagination, pageIndex, pageSize, setPageIndex, setPageSize } = useDataTableStore();
+  const dataTablePage = selectPage === "borracharia" ? useBorrachariaTableStore() : (selectPage === "portaria" ? usePortariaTableStore() : useHistoricoTableStore());
+  const { pagination, pageIndex, pageSize, setPageIndex, setPageSize } = dataTablePage;
 	
   return (
     <div className="flex items-center justify-between w-full gap-4 p-2 border-t bg-muted/40">

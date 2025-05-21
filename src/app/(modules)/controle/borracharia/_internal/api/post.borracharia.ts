@@ -1,6 +1,6 @@
 
 // /lib/api/carregaSaida.ts
-
+import type { EstornoParams } from "@portaria/types";
 import { config } from "logic";
 import axios from "axios";
 
@@ -40,7 +40,7 @@ export async function carregaSaida(params: CarregaSaidaParams): Promise<any> {
     RespCarreg: params.RespCarreg,
     Quantidade: params.Quantidade.toString(),
   });
-
+  
   const url = `${baseURL}MovPortaria/CarregaSaida?${queryString.toString()}`;
 
   const response = await axios.post(
@@ -52,6 +52,42 @@ export async function carregaSaida(params: CarregaSaidaParams): Promise<any> {
       },
     }
   );
-
+  
   return response.data;
 }
+
+function fixMalformedJson(json: string): string {
+  return json
+    .replace(/}(\s*){/g, "},\n{")
+    .replace(/\[\s*{/g, "[\n{")
+    .replace(/}\s*]/g, "\n}]");
+}
+
+export const fetchMovEstornoSaida = async (params: EstornoParams) => {
+  const queryParams = new URLSearchParams({
+    Sequencia: params.Sequencia,
+    RespEstor: params.RespEstor,
+    OrigemEst: "b",
+  });
+
+  const url = `${config.API_BORRACHARIA_URL}MovPortaria/EstornoSaida?${queryParams}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    console.error("❌ fetchMovEstornoSaida erro:", text);
+    throw new Error(`Erro ao rejeitar entrega: ${text}`);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    console.warn("⚠️ JSON malformado, tentando corrigir...");
+    return JSON.parse(fixMalformedJson(text));
+  }
+};

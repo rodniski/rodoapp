@@ -1,9 +1,9 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Tooltip, TooltipTrigger, TooltipContent } from "ui";
-import ConferenceActions from "./ConferenceActions";
-import { PortariaItem } from "../types";
+import { PortariaItem } from "@portaria/types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui";
+import { BorHistEstorno } from ".";
 
-export const ConfColumns: ColumnDef<PortariaItem>[] = [
+export const borHistColumns: ColumnDef<PortariaItem>[] = [			
   {
     accessorKey: "NFLabel",
     header: "NF",
@@ -107,18 +107,13 @@ export const ConfColumns: ColumnDef<PortariaItem>[] = [
       </div>
     ),
   },
-  {
-    id: "actions",
-    header: "Conferência",
-    cell: ({ row }) => {
-      const produto = {
-        NFLabel: row.original.NFLabel,
-        ProdutoDesc: row.original.ProdutoDesc,
-        QtdEntregue: row.original.QtdEntregue,
-        Placa: row.original.Placa,
-        Sequencia: row.original.Sequencia,
-      };
-      return <ConferenceActions produto={produto} />;
-    },
-  },
-];
+	{
+		accessorKey: "Actions",
+		header: "Ações",
+		cell: ({ row }) => (
+      <div className="w-[100px]">
+        <BorHistEstorno item={row.original} />
+      </div>
+    )
+	},
+]

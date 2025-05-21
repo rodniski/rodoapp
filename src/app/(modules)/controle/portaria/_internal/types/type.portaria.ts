@@ -37,10 +37,11 @@ export interface UseMovPortariaOptions {
 
 //* Parâmetros para a API de Portaria
 export interface PortariaParams {
-  PageSize: string;
-  Page: string;
-  Filial: string;
-  Conferido: string;
+  page: number;
+  pageSize: number;
+  filial: string;
+  conferido?: "S" | "N";
+  filters?: Record<string, any>;
 }
 
 //! POST FORMS:
@@ -53,5 +54,5 @@ export interface ConferenciaParams {
 export interface EstornoParams {
   Sequencia: string;
   RespEstor: string;
-  OriEstorno: string;
+  OrigemEst: string;
 }

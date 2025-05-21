@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {NumericInput, Progress, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "ui";
-import {ItemNF} from "@/app/(modules)/controle/borracharia/_internal/types/index";
+import {ItemNF} from "@borracharia/types";
 import {Loader2} from "lucide-react";
-import {useListaItensNF} from "../hooks/hook.useListaItensNF";
+import {useListaItensNF} from "@borracharia/hooks";
 
 interface ItemsTableProps {
     filial: string;
@@ -13,7 +13,7 @@ interface ItemsTableProps {
     onItemsChange: (items: ItemNF[]) => void; // Tipado explicitamente como ItemNF[]
 }
 
-const ItemsTable: React.FC<ItemsTableProps> = ({
+export const ItemsTable: React.FC<ItemsTableProps> = ({
                                                    filial,
                                                    doc,
                                                    serie,
@@ -92,7 +92,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
     }
 
     return (
-        <ScrollArea className="h-full overflow-auto shadow border rounded bg-muted/50 dark:bg-background/60">
+        <ScrollArea className="h-full overflow-auto shadow border rounded bg-muted/50 dark:bg-background/60 max-w-[800px]">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -140,5 +140,3 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
         </ScrollArea>
     );
 };
-
-export default ItemsTable;

@@ -39,7 +39,7 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
         isDialog
       />
 
-      <DialogContent className="max-w-4xl overflow-hidden flex flex-col">
+      <DialogContent className="!max-w-4xl overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Detalhes dos Produtos</DialogTitle>
         </DialogHeader>
@@ -49,7 +49,7 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 overflow-hidden"
         >
-          <TabsList className="w-full flex mb-4 relative shrink-0">
+          <TabsList className="!w-full flex mb-4 relative shrink-0">
             {produtos.map((produto) => (
               <TabsTrigger
                 key={produto.ProdutoCod}

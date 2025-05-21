@@ -14,7 +14,7 @@ interface DeliveryFormProps {
     setRetirado: (value: string) => void; // Setter para atualizar retirado
 }
 
-const DeliveryForm: React.FC<DeliveryFormProps> = ({
+export const DeliveryForm: React.FC<DeliveryFormProps> = ({
                                                        respRet,
                                                        setRespRet,
                                                        placa,
@@ -81,5 +81,3 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
         </CardContent>
     </Card>
 );
-
-export default DeliveryForm;
