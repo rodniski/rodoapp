@@ -8,5 +8,5 @@ export * from './buttons/EnviarButton';
 export * from './filtro/filters';
 export * from './filtro/linha';
 export * from './itemsTable';
-export * from './movimentacoes/borHistColumns';
-export * from './movimentacoes/borHistEstorno';
+export * from './movimentacoes/estorno';
+export * from './movimentacoes/historico.columns';
