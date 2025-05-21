@@ -5,7 +5,7 @@ import { Check, X } from "lucide-react";
 import { AnimatedButton } from "@borracharia/components";
 import { ConferenceDialog } from ".";
 import axios from "axios";
-import {config} from "config";
+import {config} from "logic";
 import { ConferenceActionsProps } from "../types";
 import { getCurrentUsername } from "utils";
 

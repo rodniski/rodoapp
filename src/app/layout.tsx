@@ -1,6 +1,6 @@
 "use client";
 import { Roboto } from "next/font/google";
-import { Providers } from "config";
+import { Providers } from "ui";
 import "./globals.css";
 
 const font = Roboto({

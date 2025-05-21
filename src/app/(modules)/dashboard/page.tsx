@@ -3,7 +3,7 @@
 import React from "react";
 import { dashboardData } from "./_internal/data/menu-items";
 import dynamic from "next/dynamic";
-import { Background } from "comp";
+import { Background } from "ui";
 import { formatUsername, getCurrentUsername } from "utils";
 const Carousel = dynamic(
   () => import("./_internal/components").then((mod) => mod.Carousel),

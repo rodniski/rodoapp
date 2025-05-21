@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import type { FilialGeral } from "@/app/login/_internal/types";
-import { config } from "config";
+import { config } from "logic";
 
 const FILIAIS_API_URL = `${config.API_PRODUCTION_URL}reidoapsdu/consultar/filiais/`;
 

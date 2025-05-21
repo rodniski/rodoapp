@@ -13,7 +13,7 @@
      HoverCardTrigger,
    } from "ui";
    import { useFilialMeta } from "./configs";
-import { cn } from "@/_core/utils";
+import { cn } from "utils";
    
    interface FilialHoverCardProps {
      filialNumero: string;

@@ -34,7 +34,7 @@
       "logic/*": ["./src/_core/logic/*"],
       "logic": ["./src/_core/logic"],
       "config/*": ["./src/_core/logic/config/*"],
-      "config": ["./src/_core/logic/config"],
+      "logic": ["./src/_core/logic/config"],
       "hooks/*": ["./src/_core/logic/hooks/*"],
       "hooks": ["./src/_core/logic/hooks"],
       "utils/*": ["./src/_core/logic/utils/*"],

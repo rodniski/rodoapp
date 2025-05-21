@@ -3,7 +3,7 @@ import type {
   RevisaoPreNotaPayload,
   RevisaoPreNotaApiResponse,
 } from "./revisar.type";
-import { config } from "config";
+import { config } from "logic";
 
 const REVISAR_PRENOTA_URL = `${config.API_PRODUCTION_URL}PreNota/RevisaoPreNota`;
 

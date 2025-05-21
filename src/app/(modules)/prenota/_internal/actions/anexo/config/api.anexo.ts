@@ -1,5 +1,5 @@
 import type { Attachment } from "@prenota/actions";
-import { config } from "config";
+import { config } from "logic";
 
 /**
  * Busca anexos relacionados a um documento específico.

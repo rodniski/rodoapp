@@ -1,7 +1,7 @@
 
 import axios from "axios";
 import type { GrupoFilial } from "@/app/login/_internal/types";
-import { config } from "config";
+import { config } from "logic";
 
 const GRUPO_FILIAL_API_URL = `${config.API_BORRACHARIA_URL}MovPortaria/GrupoFilial`;
 

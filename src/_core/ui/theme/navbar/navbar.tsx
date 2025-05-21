@@ -18,7 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import Logo from "@/public/logo/logo";
+import {Logo} from "ui";
 import {
   NavMenu,
   aplicacoesGroup,

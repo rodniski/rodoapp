@@ -36,7 +36,7 @@ import {
   PasswordInput,
 } from "ui";
 import { useAuth } from "@login/hooks";
-import Logo from "@/public/logo/logo";
+import {Logo} from "ui";
 
 const loginSchema = z.object({
   username: z

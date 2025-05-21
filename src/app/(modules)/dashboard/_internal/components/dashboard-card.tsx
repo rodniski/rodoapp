@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ExternalLink } from "lucide-react";
 import type { Card } from "../data";
 import { Badge } from "ui";
-import { GlowingEffect } from "comp/aceternity";
+import { GlowingEffect } from "ui";
 import { hasAccessToGrupo } from "utils/finders"; // ← usa a função centralizada
 
 interface DashboardCardProps {

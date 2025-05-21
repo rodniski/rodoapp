@@ -1,7 +1,7 @@
 // src/lib/api/fornecedorPedido/index.ts
 // (Ajuste o caminho conforme sua estrutura)
 
-import { config } from 'config'; // Ajuste o caminho para seu config.ts
+import { config } from "logic"; // Ajuste o caminho para seu config.ts
 import type { FornecedorPedidoResponse, FornecedorPedidoError } from './interfaces';
 import axios from 'axios';
 

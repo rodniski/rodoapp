@@ -12,7 +12,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "ui/dialog";
+} from "ui";
 
 function Command({
   className,

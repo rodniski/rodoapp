@@ -8,7 +8,7 @@ import type {
   PostPreNotaResponse, // Use o tipo de resposta unificado
   PostPreNotaOptions,
 } from "@inclusao/types"; // Ajuste o caminho se necessário
-import { config } from "config";
+import { config } from "logic";
 
 export async function postPreNota(
   payload: PostPreNotaPayload, // Tipagem correta do payload

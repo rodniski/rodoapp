@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/app/login/_internal/stores/auth-store";
 import { LoginForm } from "@/app/login/_internal/components";
-import Logo from "@/public/logo/logo";
-import {Background} from "comp";
+import {Logo} from "ui";
+import {Background} from "ui";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuthStore();

@@ -1,7 +1,7 @@
 "use client";
 import { sidebarData } from "@/app/documentacao/_internal/logic";
 import { DocSidebar } from "@documentacao/ui/sidebar/DocSidebar";
-import { SidebarProvider } from "@/_core/components";
+import { SidebarProvider } from "ui";
 
 export default function DocumentacaoLayout({
   children,

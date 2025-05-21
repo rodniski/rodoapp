@@ -1,12 +1,12 @@
 "use client";
 
-import { getCurrentUsername } from "@/_core/utils";
+import { getCurrentUsername } from "utils";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { GridBackgroundDemo } from "comp";
+import { GridBackgroundDemo } from "ui";
 
 export function Hero() {
   const username = getCurrentUsername();

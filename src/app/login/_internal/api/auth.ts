@@ -1,4 +1,4 @@
-import { config } from "config";
+import { config } from "logic";
 import type { AuthResponse, AuthError } from "@/app/login/_internal/types";
 import axios from "axios";
 

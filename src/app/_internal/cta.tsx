@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Button } from "ui";
 import { ExternalLink } from "lucide-react";
-import { ShimmerButton } from "comp/aceternity";
+import { ShimmerButton } from "ui";
 
 export function CTA() {
   return (

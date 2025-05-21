@@ -1,6 +1,6 @@
 // src/lib/api/conexaoNFE/index.ts
 
-import { config } from 'config'; // Ajuste o caminho para seu config.ts
+import { config } from "logic"; // Ajuste o caminho para seu config.ts
 import type { ConexaoNfeDetalhesResponse, ConexaoNfeError } from './interfaces';
 import axios from 'axios';
 

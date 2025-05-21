@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { config } from "config";
+import { config } from "logic";
 import { ItemNF, ItemNFParams } from "@borracharia/types";
 
 export const useListaItensNF = (params: ItemNFParams, enabled = true) => {

@@ -2,7 +2,7 @@
 
 import { useMovPortaria } from "./_internal/hooks";
 import { ConfColumns } from "./_internal/components/ConfColumns";
-import { DataTable } from "ui/data-table";
+import { DataTable } from "ui";
 import { ScrollArea } from "ui";
 
 const Page = () => {

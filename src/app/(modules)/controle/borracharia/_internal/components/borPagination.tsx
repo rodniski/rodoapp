@@ -14,8 +14,8 @@ import {
   SelectValue,
 } from "ui";
 
-import { useDataTableStore } from "@/_core/components/ui/data-table/stores";
-import { useReactTableContext } from "@/_core/components/ui/data-table/table";
+import { useDataTableStore } from "ui/stores";
+import { useReactTableContext } from "ui/table";
 
 export function BorPagination({
   pageSizeOptions = [10, 25, 50, 100],

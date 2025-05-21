@@ -1,5 +1,5 @@
 // api/api.borracharia.ts
-import { config } from "config";
+import { config } from "logic";
 import { BorrachariaParams} from "../types";
 
 type MovBorrachariaType = "borracharia";

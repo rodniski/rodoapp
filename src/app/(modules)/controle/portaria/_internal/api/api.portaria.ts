@@ -1,5 +1,5 @@
 // api/movPortaria.ts
-import { config } from "config";
+import { config } from "logic";
 import {
   ConferenciaParams,
   EstornoParams,

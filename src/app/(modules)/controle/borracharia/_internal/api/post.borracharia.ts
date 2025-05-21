@@ -1,7 +1,7 @@
 
 // /lib/api/carregaSaida.ts
 
-import { config } from "config";
+import { config } from "logic";
 import axios from "axios";
 
 export interface CarregaSaidaParams {

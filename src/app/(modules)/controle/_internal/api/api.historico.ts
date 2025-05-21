@@ -1,7 +1,7 @@
 // api/api.historico.ts
 
 import { HistoricoParams } from "../types";
-import { config } from "config";
+import { config } from "logic";
 
 type MovPortariaType = "historico";
 

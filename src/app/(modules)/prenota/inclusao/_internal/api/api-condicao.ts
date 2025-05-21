@@ -1,7 +1,7 @@
 // src/lib/api/condicaoPagamento/index.ts
 // (Ajuste o caminho conforme sua estrutura)
 
-import { config } from 'config'; // Ajuste o caminho para seu config.ts
+import { config } from "logic"; // Ajuste o caminho para seu config.ts
 import type {
     CondicaoPagamentoResponse,
     CondicaoPagamentoError,

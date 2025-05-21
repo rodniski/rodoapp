@@ -1,4 +1,4 @@
-import { config } from "config";
+import { config } from "logic";
 
 /**
  * Exclui uma Pré-Nota pelo identificador REC.

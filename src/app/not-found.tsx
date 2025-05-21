@@ -6,7 +6,7 @@ import { Button } from "ui";
 import { useRouter } from "next/navigation";
 import { Home, ArrowLeft } from "lucide-react";
 import Image from "next/image";
-import Logo from "@/public/logo/logo";
+import {Logo} from "ui";
 
 export default function NotFound() {
   const router = useRouter();

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { GlowingEffect } from "comp";
+import { GlowingEffect } from "ui";
 import { FileText, ClipboardList, BookOpen } from "lucide-react";
 
 const features = [

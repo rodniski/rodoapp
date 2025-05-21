@@ -1,4 +1,4 @@
-import { ComboboxItem } from "@/_core/components";
+import { ComboboxItem } from "ui";
 import { FilterInputs } from "../types/types.filterInputs";
 /* ╭──────────────────────────────────────────╮
    │ 1 ▸ ENUM DOS 3 TIPOS DE CONTROLE         │

@@ -27,7 +27,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-} from "ui/dialog";
+} from "ui";
 import {
   Button,
   Input,

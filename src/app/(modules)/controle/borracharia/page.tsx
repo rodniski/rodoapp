@@ -1,8 +1,8 @@
 "use client";
 
-import { Background } from "@/_core/components";
-import { DataTable, useDataTableStore } from "@/_core/components/ui/data-table";
-import { BorPagination } from "./_internal/components/borPagination";
+import { Background } from "ui";
+import { DataTable, useDataTableStore } from "ui";
+import { BorPagination } from "@borracharia/components/borPagination";
 import { useMovBorracharia } from "@borracharia/hooks";
 import { columnsBorracharia } from "./_internal/components/borColumns";
 import { DataTableFilterModal } from "./_internal/components/filtro/filters";

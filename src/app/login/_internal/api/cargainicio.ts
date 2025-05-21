@@ -1,4 +1,4 @@
-import { config } from "config";
+import { config } from "logic";
 import axios from "axios";
 import type { CargaInicio } from "@/app/login/_internal/types";
 

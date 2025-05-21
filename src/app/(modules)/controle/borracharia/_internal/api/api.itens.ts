@@ -1,5 +1,5 @@
 // api/api.itens.ts
-import { config } from "config";
+import { config } from "logic";
 import { ItemNFParams } from "../types";
 
 type MovPortariaType = "listaItensNF";

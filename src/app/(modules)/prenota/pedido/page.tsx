@@ -1,4 +1,4 @@
-import { Background } from "@/_core/components/theme/background";
+import { Background } from "ui/theme/background";
 import React from "react";
 import { IncludePedidoCard } from "./_internal/components/form";
 

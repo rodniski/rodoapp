@@ -1,4 +1,4 @@
-import { gruposNomes } from "@/_core/utils";
+import { gruposNomes } from "utils";
 import {
   AccessibilityIcon,
   ArchiveIcon,

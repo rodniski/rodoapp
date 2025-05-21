@@ -2,7 +2,7 @@
 
 import { FilterInputs } from "../../types/types.filterInputs";
 import { ZoomInIcon, PlusIcon } from "@radix-ui/react-icons";
-import { useDataTableStore } from "ui/data-table"; // Ajuste o caminho
+import { useDataTableStore } from "ui"; // Ajuste o caminho
 import { CAMPOS_FILTRO } from "@borracharia/config"; // Ajuste o caminho
 import { FilterRow } from "./linha";
 import { useState, useEffect } from "react";

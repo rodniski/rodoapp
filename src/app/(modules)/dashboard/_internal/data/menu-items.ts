@@ -25,7 +25,7 @@ import {
   TransformIcon,
   ZoomInIcon,
 } from "@radix-ui/react-icons";
-import { gruposNomes } from "@/_core/utils";
+import { gruposNomes } from "utils";
 
 export const dashboardData: Category[] = [
   {

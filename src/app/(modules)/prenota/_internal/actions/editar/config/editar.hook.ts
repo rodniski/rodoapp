@@ -6,7 +6,7 @@ import { usePreNotaStore } from "@inclusao/stores";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { useEffect } from "react";
-import { config } from "config";
+import { config } from "logic";
 import type {
   PreNotaItem,
   Parcela,

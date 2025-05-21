@@ -7,9 +7,9 @@ import type { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 
 import { cn } from "utils";
-import { Button } from "ui/button";
-import { Calendar } from "ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
+import { Button } from "ui";
+import { Calendar } from "ui";
+import { Popover, PopoverContent, PopoverTrigger } from "ui";
 
 type Mode = "single" | "range";
 

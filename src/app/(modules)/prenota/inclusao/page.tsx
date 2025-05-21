@@ -17,7 +17,7 @@ import {
   itemSchema,
   rateioSchema,
 } from "@inclusao/validation/prenota.schema";
-import { Background } from "comp";
+import { Background } from "ui";
 
 export default function PrenotaPage() {
   const draft = usePreNotaStore((s) => s.draft);

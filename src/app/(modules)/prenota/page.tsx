@@ -6,8 +6,8 @@ import {
   DataTable,
   DataTablePagination,
   useDataTableStore,
-} from "ui/data-table";
-import { Background } from "comp";
+} from "ui";
+import { Background } from "ui";
 import { Button, Badge } from "ui";
 import { X, RotateCcw } from "lucide-react";
 import { useAuthStore } from "@login/stores";

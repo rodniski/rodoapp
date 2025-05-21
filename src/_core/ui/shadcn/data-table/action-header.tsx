@@ -1,4 +1,4 @@
-// _core/components/ui/data-table/action-header.tsx
+// _core/components/ui/action-header.tsx
 import {
   Button,
   DropdownMenu,
@@ -13,7 +13,7 @@ import {
   CaretSortIcon,
 } from "@radix-ui/react-icons";
 import { Column } from "@tanstack/react-table";
-import { useDataTableStore } from "ui/data-table";
+import { useDataTableStore } from "ui";
 import { toast } from "sonner";
 
 type Props<TData, TValue> = {

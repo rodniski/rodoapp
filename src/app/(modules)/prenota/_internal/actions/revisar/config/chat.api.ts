@@ -1,7 +1,7 @@
 import type { HistoricoEntry, RawHistoricoEntry } from "@prenota/actions";
 import { isValidDate } from "utils";
 import { parse } from "date-fns";
-import { config } from "config";
+import { config } from "logic";
 import axios from "axios";
 
 const GET_HISTORICO_URL = `${config.API_PRODUCTION_URL}reidoapsdu/getHistorico`;
