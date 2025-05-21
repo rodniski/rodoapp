@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docs": "typedoc --entryPoints app --out docs"
   },
   "dependencies": {
     "@ag-grid-community/infinite-row-model": "^32.3.5",
@@ -61,6 +62,7 @@
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "consola": "^3.4.2",
     "contentlayer": "^0.3.4",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
@@ -105,6 +107,7 @@
     "eslint-config-next": "15.2.4",
     "prisma": "^6.7.0",
     "tailwindcss": "^4",
+    "typedoc": "^0.28.4",
     "typescript": "^5"
   }
 }

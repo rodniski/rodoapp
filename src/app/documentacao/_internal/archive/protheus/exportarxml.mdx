@@ -1,0 +1,40 @@
+---
+title: "Exportação de XML"
+group: "Protheus"
+date: "1 de fevereiro de 2024"
+description: "Saiba como exportar arquivos XML da NFe usando o Protheus, incluindo ambiente compatível, etapas detalhadas e pré-requisitos de filial e TSS."
+footerButton:
+  text: "Abrir Chamado"
+  onClickIdentifier: "openHeskTicket"
+---
+
+## Ambiente
+
+- Cross Segmentos - Backoffice Protheus - Doc. Eletrônicos - NFe - a partir da versão 12.1.25  
+- Cross Segmentos - TSS - a partir da versão 12
+
+## Solução
+
+1. Acesse o módulo **Faturamento**
+2. Vá até **NFESEFAZ (SPEDNFE)**
+3. Clique em **Outras Ações** → **Exportar**
+4. Na tela de parâmetros, preencha:
+   - Número, série
+   - Intervalo de datas
+   - Filtros diversos para refinar a busca
+5. Conclua o processo e acesse o diretório configurado para obter os arquivos.
+
+<DocImage src="/documentacao/protheus/exportar-xml/1.webp" alt="Print Tutorial" width={800} height={300} />
+<DocImage src="/documentacao/protheus/exportar-xml/2.webp" alt="Print Tutorial" width={800} height={300} />
+<DocImage src="/documentacao/protheus/exportar-xml/3.gif" alt="Tutorial em GIF" width={800} height={300} />
+
+## Saiba Mais
+
+Para que o processo funcione corretamente:
+- Você deve estar logado na **mesma filial** que transmitiu a nota.
+- Existe um vínculo entre a **filial do Protheus** e a **entidade no TSS**.
+  - Exemplo: Filial 01 = Entidade 000001 → necessário usar a Filial 01 para exportar.
+
+## Outros Problemas
+
+Se estiver enfrentando outra dificuldade, abra um chamado e, assim que possível, um membro da equipe de TI entrará em contato para ajudá-lo!

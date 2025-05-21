@@ -1,0 +1,52 @@
+---
+title: "Erro ao Transmitir Notas Fiscais"
+group: "Protheus"
+date: "21 de Fevereiro de 2024"
+description: "Nesta página, você aprenderá sobre a rejeição 029 - Falha no schema do XML, um erro comum ao transmitir notas fiscais para a SEFAZ. Descubra como identificar e corrigir o problema, passo a passo, utilizando o sistema."
+footerButton:
+  text: "Abrir Chamado"
+  onClickIdentifier: "openHeskTicket"
+---
+
+## Erro 029
+
+A rejeição 029 - "Falha no schema do XML" pode ocorrer ao transmitir notas fiscais para a SEFAZ.
+
+### Como corrigir:
+1. Clique no botão **Schema** no canto inferior da tela para visualizar o XML.
+2. Copie o conteúdo com `CTRL + A` e `CTRL + C`, cole num bloco de notas.
+3. Clique em **OK** no sistema.
+4. Ao ser perguntado sobre visualizar as possíveis causas, clique em **Sim**.
+5. Selecione a mensagem de erro e clique em **Possibilidade**.
+
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/erro029/1.png" alt="Print Tutorial" width={900} height={100} />
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/erro029/2.png" alt="Print Tutorial" width={450} height={100} />
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/erro029/3.png" alt="Print Tutorial" width={450} height={100} />
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/erro029/4.png" alt="Print Tutorial" width={450} height={100} />
+
+## Outros Erros
+
+- Erros com **NCM ou GTIN** → setor de compras  
+- Erros com **cadastro de cliente** → financeiro  
+- Erros de **impostos** → contabilidade
+
+Para identificar o produto com erro no XML, utilize o Bloco de Notas com `CTRL + F`, buscando pelo valor numérico (ex.: 45841), e veja a tag anterior com o código do produto.
+
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/outros-erros/1.png" alt="Print Tutorial" width={750} height={100} />
+<video src="/documentacao/protheus/erro-notas-fiscais/outros-erros/2.mp4" className="w-full max-w-[750px] h-auto" muted controls />
+
+## Outros Casos - Notas de Serviço
+
+Clique em **Histórico** para verificar o motivo da rejeição.
+
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/outros-casos.png" alt="Print Tutorial" width={1000} height={100} />
+
+## Resgatar o XML
+
+Use o botão **Schema** novamente.
+
+<DocImage src="/documentacao/protheus/erro-notas-fiscais/resgatar-xml.png" alt="Print Tutorial" width={1000} height={100} />
+
+## Outros Problemas
+
+Se estiver enfrentando outra dificuldade, abra um chamado e, assim que possível, um membro da equipe de TI entrará em contato para ajudá-lo!
