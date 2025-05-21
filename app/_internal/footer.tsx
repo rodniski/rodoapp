@@ -3,67 +3,95 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-
-// Definindo estrutura de dados para os links do footer
-interface FooterLink {
-  label: string;
-  href: string;
-  external?: boolean;
-}
-
-interface FooterSection {
-  title: string;
-  links: FooterLink[];
-}
-
-// Dados do footer
-const footerData: FooterSection[] = [
-  {
-    title: "Módulos",
-    links: [
-      { label: "Prenotas", href: "/central/prenota" },
-      { label: "Controle de Saídas", href: "/central/portaria" },
-      { label: "Documentação", href: "/central/documentacao" },
-    ],
-  },
-  {
-    title: "Links Externos",
-    links: [
-      {
-        label: "Assinatura",
-        href: "http://hesk.rodoparana.com.br/signaturegen",
-        external: true,
-      },
-      {
-        label: "Suporte",
-        href: "http://hesk.rodoparana.com.br",
-        external: true,
-      },
-      {
-        label: "Intranet",
-        href: "https://intranet.rodoparana.com.br/",
-        external: true,
-      },
-    ],
-  },
-  {
-    title: "Sites",
-    links: [
-      {
-        label: "Rodoparaná",
-        href: "https://rodoparana.com.br",
-        external: true,
-      },
-      {
-        label: "Grupo Timber",
-        href: "https://grupotimber.com.br",
-        external: true,
-      },
-    ],
-  },
-];
+/**
+ * Componente Footer
+ *
+ * @description
+ * Renderiza o rodapé da aplicação com seções de links internos e externos, incluindo acesso a módulos,
+ * ferramentas externas e sites institucionais. Utiliza animações com Framer Motion e estilização responsiva.
+ *
+ * @remarks
+ * - Links externos são abertos em nova aba com segurança (noopener noreferrer)
+ * - Organização em colunas com títulos e listas de links
+ * - Usa TailwindCSS para layout e responsividade
+ *
+ * @example
+ * ```tsx
+ * import { Footer } from '@/components/footer';
+ *
+ * export default function Layout() {
+ *   return (
+ *     <div>
+ *       <main>...</main>
+ *       <Footer />
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @returns {React.ReactElement} Elemento de rodapé com seções de navegação
+ */
 
 export function Footer() {
+  // Definindo estrutura de dados para os links do footer
+  interface FooterLink {
+    label: string;
+    href: string;
+    external?: boolean;
+  }
+
+  interface FooterSection {
+    title: string;
+    links: FooterLink[];
+  }
+
+  // Dados do footer
+  const footerData: FooterSection[] = [
+    {
+      title: "Módulos",
+      links: [
+        { label: "Prenotas", href: "/central/prenota" },
+        { label: "Controle de Saídas", href: "/central/portaria" },
+        { label: "Documentação", href: "/central/documentacao" },
+      ],
+    },
+    {
+      title: "Links Externos",
+      links: [
+        {
+          label: "Assinatura",
+          href: "http://hesk.rodoparana.com.br/signaturegen",
+          external: true,
+        },
+        {
+          label: "Suporte",
+          href: "http://hesk.rodoparana.com.br",
+          external: true,
+        },
+        {
+          label: "Intranet",
+          href: "https://intranet.rodoparana.com.br/",
+          external: true,
+        },
+      ],
+    },
+    {
+      title: "Sites",
+      links: [
+        {
+          label: "Rodoparaná",
+          href: "https://rodoparana.com.br",
+          external: true,
+        },
+        {
+          label: "Grupo Timber",
+          href: "https://grupotimber.com.br",
+          external: true,
+        },
+      ],
+    },
+  ];
+  
   return (
     <footer className="border-t w-full px-4 sm:px-14">
       <div className="container flex flex-col gap-8 py-8 md:flex-row md:py-12">

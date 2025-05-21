@@ -5,6 +5,35 @@ import { Button } from "ui";
 import { ExternalLink } from "lucide-react";
 import { ShimmerButton } from "ui";
 
+/**
+ * Componente CTA (Call To Action)
+ *
+ * @description
+ * Renderiza uma seção com título, descrição e botão animado que direciona o usuário
+ * para a plataforma HESK de abertura de chamados. Utiliza animações suaves com Framer Motion
+ * e estilização via TailwindCSS.
+ *
+ * @remarks
+ * - Acessível e responsivo
+ * - Usa animações ao entrar na viewport
+ * - Integração com a plataforma externa via link seguro
+ *
+ * @example
+ * ```tsx
+ * import { CTA } from '@/components/cta';
+ *
+ * export default function SuportePage() {
+ *   return (
+ *     <main>
+ *       <CTA />
+ *     </main>
+ *   );
+ * }
+ * ```
+ *
+ * @returns {React.ReactElement} Seção com chamada para ação animada
+ */
+
 export function CTA() {
   return (
     <section>

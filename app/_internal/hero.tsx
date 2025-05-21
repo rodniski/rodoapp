@@ -6,14 +6,41 @@ import { motion } from "motion/react";
 import { Button } from "ui";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { GridBackgroundDemo } from "ui";
+
+/**
+ * Componente Hero
+ *
+ * @description
+ * Renderiza a seção principal da página com um título chamativo, descrição e botões de ação.
+ * Inclui detecção de dispositivo móvel para ajustar o tamanho dos botões e uma animação indicativa
+ * de rolagem. O texto é animado para criar impacto visual na chegada do usuário.
+ *
+ * @remarks
+ * - Usa Framer Motion para animações suaves
+ * - Ajusta dinamicamente para mobile com useEffect
+ * - Mostra botões diferentes dependendo se o usuário está logado
+ * - Inclui indicador animado de scroll
+ *
+ * @example
+ * ```tsx
+ * import { Hero } from '@/components/hero';
+ *
+ * export default function HomePage() {
+ *   return <Hero />;
+ * }
+ * ```
+ *
+ * @returns {React.ReactElement} Seção inicial com título, descrição, botões e indicador de scroll
+ */
 
 export function Hero() {
-  const username = getCurrentUsername();
+  const [username, setUsername] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar dispositivo móvel
   useEffect(() => {
+    const nome = getCurrentUsername();
+    setUsername(nome || null); // trata string vazia ou null como não logado
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);
     };
@@ -24,7 +51,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden">
+    <section className="relative w-full overflow-hidden ">
       <div className=" mx-auto flex min-h-[90vh] w-full max-w-none flex-col items-center justify-center space-y-8 px-4 py-16 text-center sm:px-6 md:px-8 lg:px-10">
         {/* Título com efeito de texto animado */}
         <motion.div

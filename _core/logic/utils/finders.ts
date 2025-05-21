@@ -17,8 +17,6 @@ import { ComboboxItem } from "ui";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
-const DEFAULT_USERNAME = "USUARIO_DESCONHECIDO";
-
 /**
  * Obtém o username do usuário logado a partir do useAuthStore.
  * @returns Username ou "USUARIO_DESCONHECIDO" se não disponível.
@@ -26,10 +24,10 @@ const DEFAULT_USERNAME = "USUARIO_DESCONHECIDO";
 export function getCurrentUsername(): string {
   try {
     const username = useAuthStore.getState().user?.username;
-    return username?.trim() || DEFAULT_USERNAME;
+    return username?.trim() || "";
   } catch (error) {
     toast.error("[getCurrentUsername] Erro:", error || "");
-    return DEFAULT_USERNAME;
+    return "";
   }
 }
 

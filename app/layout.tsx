@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressContentEditableWarning suppressHydrationWarning>
       <body
-        className={`${font.className} antialiased min-h-screen bg-background flex flex-col`}
+        className={`${font.className} antialiased min-h-screen flex flex-col`}
       >
 
         <Providers>{children}</Providers>

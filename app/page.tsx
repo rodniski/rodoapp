@@ -1,12 +1,27 @@
 "use client";
 
-
 import { ScrollArea } from "ui";
-import { Hero, Features, CTA, Footer, Background } from "./_internal";
+import { Hero, Features, CTA, Footer, LPBackground } from "./_internal";
 import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 
-export default function Home() {
+/**
+ * Página principal do Hub Intranet
+ *
+ * @description
+ * Renderiza a estrutura principal da landing page com fundo animado, seções de destaque
+ * (Hero, Features, CTA) e rodapé. Utiliza efeitos visuais com `motion` e observação de
+ * elementos em viewport via `useInView`.
+ *
+ * @remarks
+ * - Inclui efeito visual de fundo com o componente LPBackground
+ * - As seções Features e CTA são animadas com entrada baseada em visibilidade
+ * - Usa ScrollArea para permitir rolagem suave ocupando a viewport inteira
+ *
+ * @returns {React.ReactElement} Página inicial com layout completo e animações de entrada
+ */
+
+export default function Home(): React.ReactElement {
   const featuresRef = useRef(null);
   const ctaRef = useRef(null);
 
@@ -25,7 +40,7 @@ export default function Home() {
     <ScrollArea className="relative h-screen w-screen overflow-hidden">
       {/* Background base */}
       <div className="absolute inset-0 z-0">
-        <Background />
+        <LPBackground />
       </div>
 
       {/* Efeitos de brilho que se estendem por toda a página */}

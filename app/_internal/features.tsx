@@ -4,28 +4,54 @@ import { motion } from "motion/react";
 import { GlowingEffect } from "ui";
 import { FileText, ClipboardList, BookOpen } from "lucide-react";
 
-const features = [
-  {
-    name: "Prenotas",
-    description:
-      "Cadastre pré-documentos de entrada do Protheus de forma rápida e eficiente, com ferramentas avançadas que otimizam seu fluxo de trabalho.",
-    icon: FileText,
-  },
-  {
-    name: "Controle de Saídas",
-    description:
-      "Gerencie a saída de pneus com total controle e eficiência, simplificando o processo de venda do início ao fim.",
-    icon: ClipboardList,
-  },
-  {
-    name: "Documentação",
-    description:
-      "Acesse de forma centralizada todos os processos e documentos da empresa, tornando a consulta e o aprendizado mais práticos e acessíveis.",
-    icon: BookOpen,
-  },
-];
+/**
+ * Componente Features
+ *
+ * @description
+ * Renderiza uma seção com três módulos integrados do sistema, cada um representado por
+ * um ícone, título e descrição. Os cards possuem animações com Framer Motion e efeitos
+ * visuais usando o componente GlowingEffect.
+ *
+ * @remarks
+ * - Os módulos exibidos são: Prenotas, Controle de Saídas e Documentação
+ * - Animações de entrada são ativadas ao entrar no viewport
+ * - Design responsivo com TailwindCSS
+ * - Elementos decorativos e interativos são encapsulados
+ *
+ * @example
+ * ```tsx
+ * import { Features } from '@/components/features';
+ *
+ * export default function HomePage() {
+ *   return <Features />;
+ * }
+ * ```
+ *
+ * @returns {React.ReactElement} Uma seção visual com os principais módulos integrados do sistema
+ */
 
 export function Features() {
+  const features = [
+    {
+      name: "Prenotas",
+      description:
+        "Cadastre pré-documentos de entrada do Protheus de forma rápida e eficiente, com ferramentas avançadas que otimizam seu fluxo de trabalho.",
+      icon: FileText,
+    },
+    {
+      name: "Controle de Saídas",
+      description:
+        "Gerencie a saída de pneus com total controle e eficiência, simplificando o processo de venda do início ao fim.",
+      icon: ClipboardList,
+    },
+    {
+      name: "Documentação",
+      description:
+        "Acesse de forma centralizada todos os processos e documentos da empresa, tornando a consulta e o aprendizado mais práticos e acessíveis.",
+      icon: BookOpen,
+    },
+  ];
+  
   return (
     <section className="z-10 container space-y-16 pt-12 pb-24 max-w-7xl mx-auto">
       <div className="mx-auto max-w-[58rem] text-center">
