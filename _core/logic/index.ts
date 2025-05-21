@@ -1,6 +1,4 @@
 export * from './config/apis';
-export * from './config/providers';
-export * from './config/theme-provider';
 export * from './hooks/use-debounce';
 export * from './hooks/use-mobile';
 export * from './hooks/use-outside-click';
